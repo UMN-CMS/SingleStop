@@ -349,9 +349,8 @@ else:
   preselection = ''
   files = open('samples/{}'.format(sampleFile)).read().split('\n')
   #files = glob.glob('/eos/uscms/store/user/dmahon/condor/RPVSingleStopMC/NANOAOD/NANOAOD-{}-*.root'.format(masses))
-  files = ['root://cmsxrootd.fnal.gov/' + x.replace('/eos/uscms','') for x in files][:-1][args.n - 1]
-  print(files)
+  files = [['root://cmsxrootd.fnal.gov/' + x.replace('/eos/uscms','') for x in files][:-1][args.n - 1]]
   p = PostProcessor(".", files, cut=preselection, branchsel=None, modules=[
-                  ExampleAnalysis(isSignal)], noOut=True, histFileName='{}/{}.root'.format(outputPath,args.sample), histDirName="plots",
+                  ExampleAnalysis(isSignal)], noOut=True, histFileName='{}/{}-{}.root'.format(outputPath,args.sample,args.n), histDirName="plots",
                   maxEntries=None)
   p.run() 
