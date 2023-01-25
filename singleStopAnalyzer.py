@@ -103,6 +103,9 @@ class ExampleAnalysis(Module):
         self.h_eta3          		= ROOT.TH1F('eta3',       	';#eta_{3}',     			80,	-8,	8	)
         self.h_eta4          		= ROOT.TH1F('eta4',       	';#eta_{4}',     			80,	-8,	8	)
         self.h_m3NoLead      		= ROOT.TH1F('m3NoLead',   	';m_{3j} (excl. leading) [GeV]',	150,	0,	3000	)
+        self.h_dEta12			= ROOT.TH1F('dEta12',           ';|#Delta#eta_{1,2}|',                  50,     0,     	5     	)
+        self.h_dPhi12			= ROOT.TH1F('dPhi12',           ';|#Delta#phi_{1,2}|',                  50,     0,      5     	)
+        self.h_dR12			= ROOT.TH1F('dR12',           	';#Delta R_{1,2}',                    	50,     0,      7     	)
 
         # Add histograms to analysis object
         for h in list(vars(self)):
@@ -294,6 +297,10 @@ class ExampleAnalysis(Module):
           self.h_m3NoLead.Fill(sumJet3NoLead.M())
         if len(jets) >= 3:
           self.h_m3.Fill(sumJet3.M())
+        if len(jets) >= 2:
+          self.h_dEta12.Fill(abs(jets[0].eta - jets[1].eta))
+          self.h_dPhi12.Fill(abs(jets[0].p4().DeltaPhi(jets[1].p4())))
+          self.h_dR12.Fill(abs(jets[0].p4().DeltaR(jets[1].p4())))
         if len(jets) >= 1:
           self.h_HT.Fill(HT)
           self.h_nb.Fill(nb)
