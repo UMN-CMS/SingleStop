@@ -311,6 +311,7 @@ class ExampleAnalysis(Module):
 parser = argparse.ArgumentParser(description='Single Stop Analyzer')
 parser.add_argument('--sample',type=str,default='signal',choices=['signal','TT','QCD'],help='Sample to run over')
 parser.add_argument('--tag',type=str,default='test',help='Tag for output label')
+parser.add_argument('-n',type=int,default=1,help='Sample index to run over for backgrounds')
 args = parser.parse_args()
 
 outputPath = 'output/Run3/{}'.format(args.tag)
@@ -329,8 +330,8 @@ if args.sample == 'signal':
   #"root://cms-xrd-global.cern.ch//store/mc/RunIISummer16NanoAOD/TTJets_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NANOAODSIM/PUMoriond17_05Feb2018_94X_mcRun2_asymptotic_v2-v1/40000/2CE738F9-C212-E811-BD0E-EC0D9A8222CE.root"
   #"file:/eos/uscms/store/user/dmahon/condor/RPVSingleStopMC/NANOAOD/NANOAOD-300_200-?.root"
   #]
-  #points = ['200_100','300_100','300_200','500_100','500_200','500_400','700_100','700_400','700_600','1000_100','1000_400','1000_900','1500_100','1500_600','1500_1400','2000_100','2000_900','2000_1900','700_200','1000_200','1500_200','1500_400','2000_200','2000_400']
-  points = ['2000_100']
+  points = ['200_100','300_100','300_200','500_100','500_200','500_400','700_100','700_400','700_600','1000_100','1000_400','1000_900','1500_100','1500_600','1500_1400','2000_100','2000_900','2000_1900','700_200','1000_200','1500_200','1500_400','2000_200','2000_400']
+  #points = ['2000_100']
   for masses in points:
     files = glob.glob('/eos/uscms/store/user/dmahon/condor/RPVSingleStopRun3MC/NANOAOD-ALL/NANOAOD-{}.root'.format(masses))
     #files = glob.glob('/eos/uscms/store/user/dmahon/condor/RPVSingleStopMC/NANOAOD/NANOAOD-{}-*.root'.format(masses))
@@ -348,8 +349,9 @@ else:
   preselection = ''
   files = open('samples/{}'.format(sampleFile)).read().split('\n')
   #files = glob.glob('/eos/uscms/store/user/dmahon/condor/RPVSingleStopMC/NANOAOD/NANOAOD-{}-*.root'.format(masses))
-  files = ['root://cmsxrootd.fnal.gov/' + x.replace('/eos/uscms','') for x in files][:2]#[:-1]
+  files = ['root://cmsxrootd.fnal.gov/' + x.replace('/eos/uscms','') for x in files][:-1][args.n - 1]
+  print(files)
   p = PostProcessor(".", files, cut=preselection, branchsel=None, modules=[
                   ExampleAnalysis(isSignal)], noOut=True, histFileName='{}/{}.root'.format(outputPath,args.sample), histDirName="plots",
-                  maxEntries=1000)
+                  maxEntries=None)
   p.run() 
