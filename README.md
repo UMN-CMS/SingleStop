@@ -1,14 +1,18 @@
 ## Setup nanoAOD-tools
 ```
-cd $CMSSW_BASE/src
-git clone https://github.com/cms-nanoAOD/nanoAOD-tools.git PhysicsTools/NanoAODTools
-cd PhysicsTools/NanoAODTools
+cmsrel CMSSW_10_6_19_patch2
+cd CMSSW_10_6_19_patch2/src
 cmsenv
+git clone https://github.com/cms-nanoAOD/nanoAOD-tools.git PhysicsTools/NanoAODTools
 scram b
+```
+## Setup grid
+```
+voms-proxy-init -voms cms
 ```
 ## Setup single stop repository
 ```
-cd python/postprocessing/
+cd PhysicsTools/NanoAODTools/python/postprocessing/
 git clone git@github.com:UMN-CMS/SingleStop.git
 ```
 ## Running the analyzer
