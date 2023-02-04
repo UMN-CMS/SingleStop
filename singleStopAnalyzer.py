@@ -122,28 +122,11 @@ class ExampleAnalysis(Module):
         # Reco jet cuts
         jets = filter(lambda x: x.pt > 30 and abs(x.eta) < 2.4,jets)
 
-        # Get only outgoing particles of the hardest subprocess
-        #gens = list(filter(lambda x: ((x.statusFlags >> 13) & 1) and (not((x.statusFlags >> 7)) & 1) and ((x.statusFlags >> 8) & 1), genParts)) 
-        gens = filter(lambda x: (((x.statusFlags >> 13) & 1) and ((x.statusFlags >> 8) & 1)) and not (((abs(x.pdgId) == 1) or (abs(x.pdgId) == 3)) and ((x.statusFlags >> 11) & 1)), genParts)
-        #gens = filter(lambda x: ((x.statusFlags >> 13) & 1),genParts)
-        #genAK4Jets = filter(lambda x: abs(x.pdgId) <= 5,gens)
-        #genAK4Jets = sorted(genAK4Jets, key=lambda x: x.pt, reverse=True)
+        # Require 4 jets with pT > 30 and |eta| < 2.4
+        if len(jets) < 4: return False
 
-        #print(len(genAK4Jets))
-        #tot = ROOT.TLorentzVector()
-        #for g in genAK4Jets:
-        #  #if g.pdgId == -5 and ((g.statusFlags >> 13) &1):
-        #  #  print('b from stop')
-        #  #  tot += g.p4()
-        #  #elif abs(g.pdgId) == 1000024 and not ((g.statusFlags >> 13) &1):
-        #  #  print('chi')
-        #  #  tot += g.p4()
-        #  #if g.genPartIdxMother >= 0 and genParts[g.genPartIdxMother].pdgId == -1000006 and g.pdgId != -1000006:
-        #  #  print(g.pdgId)
-        #  #  tot += g.p4()
-        #  tot += g.p4()
-        #print(tot.M())
-        #return True
+        # Get only outgoing particles of the hardest subprocess
+        gens = filter(lambda x: (((x.statusFlags >> 13) & 1) and ((x.statusFlags >> 8) & 1)) and not (((abs(x.pdgId) == 1) or (abs(x.pdgId) == 3)) and ((x.statusFlags >> 11) & 1)), genParts)
 
         if isSignal:
 
@@ -325,16 +308,16 @@ elif args.sample != 'signal': print('ERROR: Unexpected sample argument')
 if args.sample == 'signal':
 
   isSignal = 1
-  preselection = '' #"Jet_pt[0] > 250"
+  preselection = 'Jet_pt[3] > 30'
   #files = [
   #"root://cms-xrd-global.cern.ch//store/mc/RunIISummer16NanoAOD/TTJets_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NANOAODSIM/PUMoriond17_05Feb2018_94X_mcRun2_asymptotic_v2-v1/40000/2CE738F9-C212-E811-BD0E-EC0D9A8222CE.root"
   #"file:/eos/uscms/store/user/dmahon/condor/RPVSingleStopMC/NANOAOD/NANOAOD-300_200-?.root"
   #]
-  points = ['200_100','300_100','300_200','500_100','500_200','500_400','700_100','700_400','700_600','1000_100','1000_400','1000_900','1500_100','1500_600','1500_1400','2000_100','2000_900','2000_1900','700_200','1000_200','1500_200','1500_400','2000_200','2000_400']
-  #points = ['2000_100']
+  #points = ['200_100','300_100','300_200','500_100','500_200','500_400','700_100','700_400','700_600','1000_100','1000_400','1000_900','1500_100','1500_600','1500_1400','2000_100','2000_900','2000_1900']
+  #points = ['200_100','300_100','300_200','500_100','500_200','500_400','700_100','700_400','700_600','1000_100','1000_400','1000_900','1500_100','1500_600','1500_1400','2000_100','2000_900','2000_1900','700_200','1000_200','1500_200','1500_400','2000_200','2000_400']
+  points = ['1000_400','1000_900','1500_600','1500_1400','2000_900','2000_1900']
   for masses in points:
-    files = glob.glob('/eos/uscms/store/user/dmahon/condor/RPVSingleStopRun3MC/NANOAOD-ALL/NANOAOD-{}.root'.format(masses))
-    #files = glob.glob('/eos/uscms/store/user/dmahon/condor/RPVSingleStopMC/NANOAOD/NANOAOD-{}-*.root'.format(masses))
+    files = glob.glob('/eos/uscms/store/user/dmahon/condor/RPVSingleStopMC/NANOAOD-ALL/NANOAOD-{}.root'.format(masses))
     files = ['root://cmsxrootd.fnal.gov/' + x.replace('/eos/uscms','') for x in files]
     #files = ['file:/uscms_data/d3/dmahon/RPVSingleStopRun3Patched/NANOAOD/CMSSW_12_4_5/test_2000_100-1.root']
     #files = ['/uscms_data/d3/dmahon/RPVSingleStopRun3Patched/NANOAOD/files/NANOAOD-{}.root'.format(masses)]
@@ -346,7 +329,7 @@ if args.sample == 'signal':
 else:
 
   isSignal = 0
-  preselection = ''
+  preselection = 'Jet_pt[3] > 30'
   files = open('samples/{}'.format(sampleFile)).read().split('\n')
   #files = glob.glob('/eos/uscms/store/user/dmahon/condor/RPVSingleStopMC/NANOAOD/NANOAOD-{}-*.root'.format(masses))
   files = [['root://cmsxrootd.fnal.gov/' + x.replace('/eos/uscms','') for x in files][:-1][args.n - 1]]
