@@ -15,6 +15,11 @@ voms-proxy-init -voms cms
 cd PhysicsTools/NanoAODTools/python/postprocessing/
 git clone git@github.com:UMN-CMS/SingleStop.git
 ```
+## Set architecture
+This should be done every time you log in.
+```
+source setup.sh
+``` 
 ## Running the analyzer
 ```
 python singleStopAnalyzer.py --sample [signal/TT/QCD] --tag [OUTPUT TAG] -n [BKG FILE INDEX]
