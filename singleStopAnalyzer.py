@@ -13,9 +13,10 @@ ROOT.PyConfig.IgnoreCommandLineOptions = True
 
 class ExampleAnalysis(Module):
 
-    def __init__(self,isSignal):
+    def __init__(self,isSignal,MCCampaign):
         self.writeHistFile = True
         self.isSignal = isSignal
+        self.MCCampaign = MCCampaign
 
     def beginJob(self, histFile=None, histDirName=None):
         Module.beginJob(self, histFile, histDirName)
@@ -35,8 +36,8 @@ class ExampleAnalysis(Module):
         self.h_eta4Gen       		= ROOT.TH1F('eta4Gen',		';#eta_{4}^{gen}',			80,	-8,   	8	)
 
         # SUSY particle kinematics
-        self.h_pTStop              	= ROOT.TH1F('pTStop', 		';p_{T,#tilde{t}}  [GeV]',		150,	0,    	1500	)
-        self.h_pTStopPlus          	= ROOT.TH1F('pTStopPlus', 	';p_{T,#tilde{t}^{+2/3}}  [GeV]',	150,	0,    	1500	)
+        self.h_pTStop              	= ROOT.TH1F('pTStop', 		';p_{T,{#tilde{t}}  [GeV]',		150,	0,    	1500	)
+        self.h_pTStopPlus          	= ROOT.TH1F('pTStopPlus', 	';p_{T,{#tilde{t}^{+2/3}}  [GeV]',	150,	0,    	1500	)
         self.h_pTStopMinus         	= ROOT.TH1F('pTStopMinus', 	';p_{T,#tilde{t}^{-2/3}} [GeV]',	150,	0,    	1500	)
         self.h_pTChi               	= ROOT.TH1F('pTChi',		';p_{T,#chi^{#pm}}  [GeV]',		150,	0,    	1500	)
         self.h_pTChiPlus           	= ROOT.TH1F('pTChiPlus', 	';p_{T,#chi^{+}} [GeV]',		150,	0,    	1500	)
@@ -48,10 +49,10 @@ class ExampleAnalysis(Module):
         self.h_pTBChiPlus          	= ROOT.TH1F('pTBChiPlus', 	';p_{T,b from #chi^{+}} [GeV]',		150,	0, 	1500	)
         self.h_pTBChiMinus         	= ROOT.TH1F('pTBChiMinus', 	';p_{T,b from #chi^{-}} [GeV]',		150,	0, 	1500	) 
 
-        self.h_etaStop             	= ROOT.TH1F('etaStop', 		';#eta_{#tilde{t}}',			80,	-8,	8	)
-        self.h_etaStopPlus         	= ROOT.TH1F('etaStopPlus', 	';#eta_{#tilde{t}^{+2/3}}',		80,	-8,	8	)
-        self.h_etaStopMinus        	= ROOT.TH1F('etaStopMinus', 	';eta_{#tilde{t}^{-2/3}}',		80,	-8,	8	) 
-        self.h_etaChi              	= ROOT.TH1F('etaChi', 		';#eta_{#tilde{#chi^{#pm}}}',		80,	-8,	8	)
+        self.h_etaStop             	= ROOT.TH1F('etaStop', 		';#eta_{#tilde{t}',			80,	-8,	8	)
+        self.h_etaStopPlus         	= ROOT.TH1F('etaStopPlus', 	';#eta_{#tilde{t}^{+2/3}',		80,	-8,	8	)
+        self.h_etaStopMinus        	= ROOT.TH1F('etaStopMinus', 	';eta_{#tilde{t}^{-2/3}',		80,	-8,	8	) 
+        self.h_etaChi              	= ROOT.TH1F('etaChi', 		';#eta_{#tilde{#chi^{#pm}}',		80,	-8,	8	)
         self.h_etaChiPlus          	= ROOT.TH1F('etaChiPlus',	';#eta_{#chi^{+}}',			80,	-8,	8	)
         self.h_etaChiMinus         	= ROOT.TH1F('etaChiMinus',	';#eta_{#chi^{-}}',			80,	-8,	8	)
         self.h_etaBStop            	= ROOT.TH1F('etaBStop',		';eta_{b from #tilde{t}}',		80,	-8,	8	)       
@@ -90,7 +91,9 @@ class ExampleAnalysis(Module):
         
         self.h_HT 			= ROOT.TH1F('HT',	 	';H_{T} [GeV]',			  	150,	0,	3000	)
         self.h_nJets	  		= ROOT.TH1F('nJets',  	  	';N_{j}',  				20, 	0,	20  	)
-        self.h_nb  			= ROOT.TH1F('nb',  	  	';n_{b} (tight)',  			5,	0,	5  	)
+        self.h_nbLoose 			= ROOT.TH1F('nbLoose', 	  	';n_{b} (loose)',  			5,	0,	5  	)
+        self.h_nbMedium                 = ROOT.TH1F('nbMedium',         ';n_{b} (medium)',                      5,      0,      5       )
+        self.h_nbTight                  = ROOT.TH1F('nbTIght',          ';n_{b} (tight)',                       5,      0,      5       )
         self.h_mAll             	= ROOT.TH1F('mAll',       	';m_{#sum j} [GeV]',                   	150,	0,	3000	)
         self.h_m4   			= ROOT.TH1F('m4',   	  	';m_{4j} [GeV]',   			150,	0,	3000	)
         self.h_m3   			= ROOT.TH1F('m3',   	  	';m_{3j} [GeV]',   			150,	0,	3000	)
@@ -115,6 +118,12 @@ class ExampleAnalysis(Module):
 
         dRMatch = 0.1
 
+        # Set b tagging WPs
+        if MCCampaign == 'UL2016preVFP': 	bTagWPs = [0.0508,0.2598,0.6502]
+        elif MCCampaign == 'UL2016postVFP': 	bTagWPs = [0.0480,0.2489,0.6377]
+        elif MCCampaign == 'UL2017':     	bTagWPs = [0.0532,0.3040,0.7476]
+        elif MCCampaign == 'UL2018':     	bTagWPs = [0.0490,0.2783,0.7100]
+
         jets       = list(Collection(event,"Jet"))
         genParts   = list(Collection(event,"GenPart"))
         genAK4Jets = list(Collection(event,"GenJet"))
@@ -128,7 +137,7 @@ class ExampleAnalysis(Module):
         # Get only outgoing particles of the hardest subprocess
         gens = filter(lambda x: (((x.statusFlags >> 13) & 1) and ((x.statusFlags >> 8) & 1)) and not (((abs(x.pdgId) == 1) or (abs(x.pdgId) == 3)) and ((x.statusFlags >> 11) & 1)), genParts)
 
-        if isSignal:
+        if self.isSignal:
 
           # Triggers
           self.h_L1_HTT450er.Fill(event.L1_HTT450er)
@@ -255,11 +264,13 @@ class ExampleAnalysis(Module):
         self.h_nJets.Fill(len(jets))
 
         # 4 leading jet pTs
-        HT = 0; nb = 0
+        HT = 0; nbLoose = 0; nbMedium = 0; nbTight=0
         for i,j in enumerate(jets):
           sumJet += j.p4()
           HT += j.pt
-          if j.btagDeepB > 0.7665: nb += 1
+          if j.btagDeepFlavB > bTagWPs[0] : nbLoose += 1
+          if j.btagDeepFlavB > bTagWPs[1] : nbMedium += 1
+          if j.btagDeepFlavB > bTagWPs[2] : nbTight += 1
           if i < 4:           sumJet4 += j.p4()
           if i < 3:           sumJet3 += j.p4()
           if i > 0 and i < 4: sumJet3NoLead += j.p4()
@@ -286,7 +297,9 @@ class ExampleAnalysis(Module):
           self.h_dR12.Fill(abs(jets[0].p4().DeltaR(jets[1].p4())))
         if len(jets) >= 1:
           self.h_HT.Fill(HT)
-          self.h_nb.Fill(nb)
+          self.h_nbLoose.Fill(nbLoose)
+          self.h_nbMedium.Fill(nbMedium)
+          self.h_nbTight.Fill(nbTight)
           self.h_mAll.Fill(sumJet.M())
 
         return True
@@ -307,33 +320,40 @@ elif args.sample != 'signal': print('ERROR: Unexpected sample argument')
 
 if args.sample == 'signal':
 
-  isSignal = 1
   preselection = 'Jet_pt[3] > 30'
   #files = [
   #"root://cms-xrd-global.cern.ch//store/mc/RunIISummer16NanoAOD/TTJets_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NANOAODSIM/PUMoriond17_05Feb2018_94X_mcRun2_asymptotic_v2-v1/40000/2CE738F9-C212-E811-BD0E-EC0D9A8222CE.root"
   #"file:/eos/uscms/store/user/dmahon/condor/RPVSingleStopMC/NANOAOD/NANOAOD-300_200-?.root"
   #]
-  #points = ['200_100','300_100','300_200','500_100','500_200','500_400','700_100','700_400','700_600','1000_100','1000_400','1000_900','1500_100','1500_600','1500_1400','2000_100','2000_900','2000_1900']
   #points = ['200_100','300_100','300_200','500_100','500_200','500_400','700_100','700_400','700_600','1000_100','1000_400','1000_900','1500_100','1500_600','1500_1400','2000_100','2000_900','2000_1900','700_200','1000_200','1500_200','1500_400','2000_200','2000_400']
-  points = ['1000_400','1000_900','1500_600','1500_1400','2000_900','2000_1900']
+  points = ['2000_100']
   for masses in points:
-    files = glob.glob('/eos/uscms/store/user/dmahon/condor/RPVSingleStopMC/NANOAOD-ALL/NANOAOD-{}.root'.format(masses))
+    files = glob.glob('/eos/uscms/store/user/dmahon/condor/RPVSingleStopRun3MC/NANOAOD-ALL/NANOAOD-{}.root'.format(masses))
+    #files = glob.glob('/eos/uscms/store/user/dmahon/condor/RPVSingleStopMC/NANOAOD/NANOAOD-{}-*.root'.format(masses))
     files = ['root://cmsxrootd.fnal.gov/' + x.replace('/eos/uscms','') for x in files]
     #files = ['file:/uscms_data/d3/dmahon/RPVSingleStopRun3Patched/NANOAOD/CMSSW_12_4_5/test_2000_100-1.root']
     #files = ['/uscms_data/d3/dmahon/RPVSingleStopRun3Patched/NANOAOD/files/NANOAOD-{}.root'.format(masses)]
     p = PostProcessor(".", files, cut=preselection, branchsel=None, modules=[
-                    ExampleAnalysis(isSignal)], noOut=True, histFileName='{}/{}_{}.root'.format(outputPath,args.sample,masses), histDirName="plots",
+                    ExampleAnalysis(isSignal=1,MCCampaign='UL2018')], noOut=True, histFileName='{}/{}_{}.root'.format(outputPath,args.sample,masses), histDirName="plots",
                     maxEntries=None)
     p.run()
 
 else:
 
-  isSignal = 0
   preselection = 'Jet_pt[3] > 30'
   files = open('samples/{}'.format(sampleFile)).read().split('\n')
   #files = glob.glob('/eos/uscms/store/user/dmahon/condor/RPVSingleStopMC/NANOAOD/NANOAOD-{}-*.root'.format(masses))
   files = [['root://cmsxrootd.fnal.gov/' + x.replace('/eos/uscms','') for x in files][:-1][args.n - 1]]
+  if len(files) != 1: print('WARNING: Multiple files selected. All must be from the same MC campaign.')
+  if 'UL16' in files[0]: 
+    if 'preVFP' in files[0]:	MCCampaign = 'UL2016preVFP'
+    else: 			MCCampaign = 'UL2016postVFP'
+  elif 'UL17' in files[0]: 	MCCampaign = 'UL2017'
+  elif 'UL18' in files[0]:	MCCampaign = 'UL2018'
+  else: 
+    print('ERROR: Unable to determine MC campaign of {}'.format(files[0]))
+    sys.exit()
   p = PostProcessor(".", files, cut=preselection, branchsel=None, modules=[
-                  ExampleAnalysis(isSignal)], noOut=True, histFileName='{}/{}-{}.root'.format(outputPath,args.sample,args.n), histDirName="plots",
+                  ExampleAnalysis(isSignal=0,MCCampaign=MCCampaign)], noOut=True, histFileName='{}/{}-{}.root'.format(outputPath,args.sample,args.n), histDirName="plots",
                   maxEntries=None)
   p.run() 
