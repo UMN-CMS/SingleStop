@@ -1,6 +1,6 @@
 import itertools
 
-def matcher(jets, particles, dr_match=0.2, combo_count=6):
+def matcher(jets, particles, dr_match=0.2, combo_count=6, require_all_matches=False):
     def get4(obj):
         return obj.p4()
 
@@ -13,7 +13,7 @@ def matcher(jets, particles, dr_match=0.2, combo_count=6):
     for perm in itertools.permutations(range(len(jets_to_use))):
         this_perm = [jets[x] for x in perm]
         closeness = [DR(get4(particles[i]),get4(this_perm[i])) for i in range(len(jets_to_use))]
-        if any(x > dr_match for x in closeness):
+        if require_all_matched and any(x > dr_match for x in closeness):
             continue
         new_loss = sum(closeness)
 #        print("Permutation {} has loss {}".format(perm, new_loss))
