@@ -33,16 +33,17 @@ def orderedMatcher(jets, particles, dr_match=0.3):
     remaining_idxs = set(range(len(jets)))
 
     for i,p in enumerate(particles):
+        if not remaining_idxs:
+            matched.append(None)
+            continue
         smallest = min(remaining_idxs, key=lambda x : DR(get4(p),get4(jets.__getitem__(x))))
+        if DR(get4(p),get4(jets.__getitem__(smallest))) > dr_match:
+            matched.append(None)
+            continue
         remaining_idxs.remove(smallest)
         matched.append(smallest)
-        if not remaining_idxs:
-            break
 
     return matched
-
-
-
 
 def priorityOrderedMatcher(jets, particles, dr_match=0.3):
     def get4(obj):
