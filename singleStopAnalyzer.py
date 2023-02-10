@@ -9,7 +9,33 @@ import ROOT
 import glob
 import argparse
 from math import sqrt,fabs,copysign
+from match_algos import matcher
+
 ROOT.PyConfig.IgnoreCommandLineOptions = True
+DR_MATCH=0.2
+JET_COMBINATORICS_COUNT=6
+
+
+
+
+
+def leadJetFromStop(histo, jet, stop):
+    return stop.p4().DeltaR(jet.p4()) < DR_MATCH
+
+def doJetMatching(jets, particles):
+    best_permutation = matcher(jets, particles)
+    for i in range(len(particles)):
+        print("Particle {} matched with jet {} with distance {}".format(particles[i].pdgId , 
+            best_permitation[i], particles[i].p4().DeltaR(jets[best_permutation[i]].p4())
+            ))
+
+
+
+
+
+
+
+
 
 class ExampleAnalysis(Module):
 
@@ -82,6 +108,30 @@ class ExampleAnalysis(Module):
         self.h_jetMatch          	= ROOT.TH1F('jetMatch',		';Jet matched',				2,	0,	2   	)
         self.h_leadJetMatch      	= ROOT.TH1F('leadJetMatch',	';Correct lead jet matched',		2,	0,	2   	)
 
+        self.h_leadBFromStop              = ROOT.TH1F("leadBFromStop" , ";leadBFromStop", 2, 0, 2)
+        self.h_leadBFromChi              = ROOT.TH1F("leadBFromChi" , ";leadBFromChi", 2, 0, 2)
+        self.h_leadJetFromStop             = ROOT.TH1F("leadJetFromStop" , ";leadJetFromStop", 2, 0, 2)
+        self.h_leadGenJetFromStop             = ROOT.TH1F("leadGenJetFromStop" , ";leadGenJetFromStop", 2, 0, 2)
+
+        self.h_stopBGenJetMatchOrdinal     = ROOT.TH1F("stopBGenJetMatchOrdinal", ";stopBJetMatchOrdinal",            10,     0,      10      )
+        self.h_chiBGenJetMatchOrdinal      = ROOT.TH1F("chiBGenJetMatchOrdinal", ";chiBJetMatchOrdinal",            10,     0,      10      )
+        self.h_chiqOneGenJetMatchOrdinal      = ROOT.TH1F("chiqOneGenJetMatchOrdinal", ";chiqOneGenJetMatchOrdinal",            10,     0,      10      )
+        self.h_chiqAnyGenJetMatchOrdinal      = ROOT.TH1F("chiqAnyGenJetMatchOrdinal", ";chiqAnyGenJetMatchOrdinal",            10,     0,      10      )
+
+        self.h_stopBJetMatchOrdinal     = ROOT.TH1F("stopBJetMatchOrdinal", ";stopBJetMatchOrdinal",            10,     0,      10      )
+        self.h_chiBJetMatchOrdinal      = ROOT.TH1F("chiBJetMatchOrdinal", ";chiBJetMatchOrdinal",            10,     0,      10      )
+        self.h_chiqOneJetMatchOrdinal      = ROOT.TH1F("chiqOneJetMatchOrdinal", ";chiqOneJetMatchOrdinal",            10,     0,      10      )
+        self.h_chiqTwoJetMatchOrdinal      = ROOT.TH1F("chiqTwoJetMatchOrdinal", ";chiqTwoJetMatchOrdinal",            10,     0,      10      )
+        self.h_chiqAnyJetMatchOrdinal      = ROOT.TH1F("chiqAnyJetMatchOrdinal", ";chiqAnyJetMatchOrdinal",            10,     0,      10      )
+
+
+        self.h_numTopFourGenMatched      = ROOT.TH1F("numTopFourGenMatched", "numTopFourGenMatched",            4,     0,      4     )
+        self.h_numTopThreeGenMatched      = ROOT.TH1F("numTopThreeGenMatched", "numTopThreeGenMatched",            4,     0,      4     )
+
+        self.h_numTopFourRecoMatched      = ROOT.TH1F("numTopFourRecoMatched", "numTopFourRecoMatched",            4,     0,      4     )
+        self.h_numTopThreeRecoMatched      = ROOT.TH1F("numTopThreeRecoMatched", "numTopThreeRecoMatched",            4,     0,      4     )
+
+
         # Trigger
         self.h_L1_HTT450er	 	= ROOT.TH1F('L1_HTT450er',	';L1_HTT450er',				2,	0,	2	)
 
@@ -130,10 +180,10 @@ class ExampleAnalysis(Module):
         dRMatch = 0.1
 
         # Set b tagging WPs
-        if   self.MCCampaign == 'UL2016preVFP': 	bTagWPs = [0.0508,0.2598,0.6502]
+        if self.MCCampaign == 'UL2016preVFP': 	bTagWPs = [0.0508,0.2598,0.6502]
         elif self.MCCampaign == 'UL2016postVFP': 	bTagWPs = [0.0480,0.2489,0.6377]
-        elif self.MCCampaign == 'UL2017':     		bTagWPs = [0.0532,0.3040,0.7476]
-        elif self.MCCampaign == 'UL2018':     		bTagWPs = [0.0490,0.2783,0.7100]
+        elif self.MCCampaign == 'UL2017':     	bTagWPs = [0.0532,0.3040,0.7476]
+        elif self.MCCampaign == 'UL2018':     	bTagWPs = [0.0490,0.2783,0.7100]
 
         # Get event collections
         jets           = filter(lambda x: x.pt > 30 and abs(x.eta) < 2.4,list(Collection(event,"Jet")))
@@ -244,6 +294,15 @@ class ExampleAnalysis(Module):
           self.h_dEtaVsPTStopRatio.Fill(genChi.pt / (genStop.p4().M() - genChi.p4().M()),abs(genChi.eta - genBStop.eta))
           self.h_passDijet.Fill(1 if (dRChiMax < 1.1 and dEtaBChi < 1.1) else 0)
 
+
+
+
+
+
+          doJetMatching(genAK4Jets, genQuarks)
+
+
+
           #pT and eta of the gen AK4 jets
           for i,j in enumerate(genAK4Jets):
            if i == 0:
@@ -277,6 +336,7 @@ class ExampleAnalysis(Module):
             self.h_dEtaWJs.Fill(dEtaWJ)
             #if dEtaWJ > 1.1: passDijet = 0
             #self.h_passDijet.Fill(passDijet)
+
 
         #-----------------------------------------------------------------------
         # RECO
@@ -411,7 +471,6 @@ else:
   else: 
     print('ERROR: Unable to determine MC campaign of {}'.format(files[0]))
     sys.exit()
-  p = PostProcessor(".", files, cut=preselection, branchsel=None, modules=[
-                  ExampleAnalysis(isSignal=0,MCCampaign=MCCampaign)], noOut=True, histFileName='{}/{}-{}.root'.format(outputPath,args.sample,args.n), histDirName="plots",
-                  maxEntries=None)
+ 
+  p = PostProcessor(".", files, cut=preselection, branchsel=None, modules=[ ExampleAnalysis(isSignal=0,MCCampaign=MCCampaign)], noOut=True, histFileName='{}/{}-{}.root'.format(outputPath,args.sample,args.n), histDirName="plots", maxEntries=None)
   p.run() 
