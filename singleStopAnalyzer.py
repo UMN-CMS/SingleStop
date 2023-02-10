@@ -9,7 +9,10 @@ import ROOT
 import glob
 import argparse
 from math import sqrt,fabs,copysign
-from match_algos import matcher
+from match_algos import globalMatcher, orderedMatcher, priorityOrderedMatcher
+
+
+ROOT.gROOT.SetBatch(True)
 
 ROOT.PyConfig.IgnoreCommandLineOptions = True
 DR_MATCH=0.2
@@ -23,11 +26,21 @@ def leadJetFromStop(histo, jet, stop):
     return stop.p4().DeltaR(jet.p4()) < DR_MATCH
 
 def doJetMatching(jets, particles):
-    best_permutation = matcher(jets, particles)
-    for i in range(len(particles)):
+    #best_permutation = globalMatcher(jets, particles, require_all_matches=False)
+    #best_permutation = orderedMatcher(jets, particles)
+    best_permutation = priorityOrderedMatcher(jets, particles)
+    print("--------------------------------------------------")
+    print(best_permutation)
+    if not best_permutation:
+        return
+    for i in range(len(best_permutation)):
+        if not best_permutation[i]:
+            continue
         print("Particle {} matched with jet {} with distance {}".format(particles[i].pdgId , 
-            best_permitation[i], particles[i].p4().DeltaR(jets[best_permutation[i]].p4())
-            ))
+            best_permutation[i], particles[i].p4().DeltaR(jets[best_permutation[i]].p4())
+            )) 
+        pass
+    print("--------------------------------------------------")
 
 
 
@@ -248,8 +261,8 @@ class ExampleAnalysis(Module):
             genBStopMinus = genBStop
             genChiMinus = genChi
             genBChiMinus = genBChi
-            genQuarks = [genBStop,genBChi,genD,genS]
           else: print('WARNING: No stop found in event')
+          genQuarks = [genBStop,genBChi,genD,genS]
 
           #-----------------------------------------------------------------------
           # GEN
