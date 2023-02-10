@@ -36,8 +36,8 @@ class ExampleAnalysis(Module):
         self.h_eta4Gen       		= ROOT.TH1F('eta4Gen',		';#eta_{4}^{gen}',			80,	-8,   	8	)
 
         # SUSY particle kinematics
-        self.h_pTStop              	= ROOT.TH1F('pTStop', 		';p_{T,{#tilde{t}}  [GeV]',		150,	0,    	1500	)
-        self.h_pTStopPlus          	= ROOT.TH1F('pTStopPlus', 	';p_{T,{#tilde{t}^{+2/3}}  [GeV]',	150,	0,    	1500	)
+        self.h_pTStop              	= ROOT.TH1F('pTStop', 		';p_{T,#tilde{t}}}  [GeV]',		150,	0,    	1500	)
+        self.h_pTStopPlus          	= ROOT.TH1F('pTStopPlus', 	';p_{T,#tilde{t}^{+2/3}}  [GeV]',	150,	0,    	1500	)
         self.h_pTStopMinus         	= ROOT.TH1F('pTStopMinus', 	';p_{T,#tilde{t}^{-2/3}} [GeV]',	150,	0,    	1500	)
         self.h_pTChi               	= ROOT.TH1F('pTChi',		';p_{T,#chi^{#pm}}  [GeV]',		150,	0,    	1500	)
         self.h_pTChiPlus           	= ROOT.TH1F('pTChiPlus', 	';p_{T,#chi^{+}} [GeV]',		150,	0,    	1500	)
@@ -49,10 +49,10 @@ class ExampleAnalysis(Module):
         self.h_pTBChiPlus          	= ROOT.TH1F('pTBChiPlus', 	';p_{T,b from #chi^{+}} [GeV]',		150,	0, 	1500	)
         self.h_pTBChiMinus         	= ROOT.TH1F('pTBChiMinus', 	';p_{T,b from #chi^{-}} [GeV]',		150,	0, 	1500	) 
 
-        self.h_etaStop             	= ROOT.TH1F('etaStop', 		';#eta_{#tilde{t}',			80,	-8,	8	)
-        self.h_etaStopPlus         	= ROOT.TH1F('etaStopPlus', 	';#eta_{#tilde{t}^{+2/3}',		80,	-8,	8	)
-        self.h_etaStopMinus        	= ROOT.TH1F('etaStopMinus', 	';eta_{#tilde{t}^{-2/3}',		80,	-8,	8	) 
-        self.h_etaChi              	= ROOT.TH1F('etaChi', 		';#eta_{#tilde{#chi^{#pm}}',		80,	-8,	8	)
+        self.h_etaStop             	= ROOT.TH1F('etaStop', 		';#eta_{#tilde{t}}',			80,	-8,	8	)
+        self.h_etaStopPlus         	= ROOT.TH1F('etaStopPlus', 	';#eta_{#tilde{t}^{+2/3}}',		80,	-8,	8	)
+        self.h_etaStopMinus        	= ROOT.TH1F('etaStopMinus', 	';eta_{#tilde{t}^{-2/3}}',		80,	-8,	8	) 
+        self.h_etaChi              	= ROOT.TH1F('etaChi', 		';#eta_{#tilde{#chi^{#pm}}}',		80,	-8,	8	)
         self.h_etaChiPlus          	= ROOT.TH1F('etaChiPlus',	';#eta_{#chi^{+}}',			80,	-8,	8	)
         self.h_etaChiMinus         	= ROOT.TH1F('etaChiMinus',	';#eta_{#chi^{-}}',			80,	-8,	8	)
         self.h_etaBStop            	= ROOT.TH1F('etaBStop',		';eta_{b from #tilde{t}}',		80,	-8,	8	)       
@@ -91,9 +91,9 @@ class ExampleAnalysis(Module):
         
         self.h_HT 			= ROOT.TH1F('HT',	 	';H_{T} [GeV]',			  	150,	0,	3000	)
         self.h_nJets	  		= ROOT.TH1F('nJets',  	  	';N_{j}',  				20, 	0,	20  	)
-        self.h_nbLoose 			= ROOT.TH1F('nbLoose', 	  	';n_{b} (loose)',  			5,	0,	5  	)
-        self.h_nbMedium                 = ROOT.TH1F('nbMedium',         ';n_{b} (medium)',                      5,      0,      5       )
-        self.h_nbTight                  = ROOT.TH1F('nbTIght',          ';n_{b} (tight)',                       5,      0,      5       )
+        self.h_nbLoose 			= ROOT.TH1F('nbLoose', 	  	';n_{b} (loose)',  			7,	0,	7  	)
+        self.h_nbMedium                 = ROOT.TH1F('nbMedium',         ';n_{b} (medium)',                      7,      0,      7       )
+        self.h_nbTight                  = ROOT.TH1F('nbTIght',          ';n_{b} (tight)',                       7,      0,      7       )
         self.h_mAll             	= ROOT.TH1F('mAll',       	';m_{#sum j} [GeV]',                   	150,	0,	3000	)
         self.h_m4   			= ROOT.TH1F('m4',   	  	';m_{4j} [GeV]',   			150,	0,	3000	)
         self.h_m3   			= ROOT.TH1F('m3',   	  	';m_{3j} [GeV]',   			150,	0,	3000	)
@@ -119,10 +119,10 @@ class ExampleAnalysis(Module):
         dRMatch = 0.1
 
         # Set b tagging WPs
-        if MCCampaign == 'UL2016preVFP': 	bTagWPs = [0.0508,0.2598,0.6502]
-        elif MCCampaign == 'UL2016postVFP': 	bTagWPs = [0.0480,0.2489,0.6377]
-        elif MCCampaign == 'UL2017':     	bTagWPs = [0.0532,0.3040,0.7476]
-        elif MCCampaign == 'UL2018':     	bTagWPs = [0.0490,0.2783,0.7100]
+        if   self.MCCampaign == 'UL2016preVFP': 	bTagWPs = [0.0508,0.2598,0.6502]
+        elif self.MCCampaign == 'UL2016postVFP': 	bTagWPs = [0.0480,0.2489,0.6377]
+        elif self.MCCampaign == 'UL2017':     		bTagWPs = [0.0532,0.3040,0.7476]
+        elif self.MCCampaign == 'UL2018':     		bTagWPs = [0.0490,0.2783,0.7100]
 
         jets       = list(Collection(event,"Jet"))
         genParts   = list(Collection(event,"GenPart"))
@@ -326,9 +326,9 @@ if args.sample == 'signal':
   #"file:/eos/uscms/store/user/dmahon/condor/RPVSingleStopMC/NANOAOD/NANOAOD-300_200-?.root"
   #]
   #points = ['200_100','300_100','300_200','500_100','500_200','500_400','700_100','700_400','700_600','1000_100','1000_400','1000_900','1500_100','1500_600','1500_1400','2000_100','2000_900','2000_1900','700_200','1000_200','1500_200','1500_400','2000_200','2000_400']
-  points = ['2000_100']
+  points = ['1000_400','1000_900','1500_600','1500_1400','2000_900','2000_1900']
   for masses in points:
-    files = glob.glob('/eos/uscms/store/user/dmahon/condor/RPVSingleStopRun3MC/NANOAOD-ALL/NANOAOD-{}.root'.format(masses))
+    files = glob.glob('/eos/uscms/store/user/dmahon/condor/RPVSingleStopMC/NANOAOD-ALL/NANOAOD-{}.root'.format(masses))
     #files = glob.glob('/eos/uscms/store/user/dmahon/condor/RPVSingleStopMC/NANOAOD/NANOAOD-{}-*.root'.format(masses))
     files = ['root://cmsxrootd.fnal.gov/' + x.replace('/eos/uscms','') for x in files]
     #files = ['file:/uscms_data/d3/dmahon/RPVSingleStopRun3Patched/NANOAOD/CMSSW_12_4_5/test_2000_100-1.root']
