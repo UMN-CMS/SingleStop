@@ -10,6 +10,7 @@ import glob
 import argparse
 from math import sqrt,fabs,copysign
 from match_algos import globalMatcher, orderedMatcher, priorityOrderedMatcher
+from mass_reco import massRecoPtMin
 
 
 ROOT.gROOT.SetBatch(True)
@@ -42,14 +43,6 @@ def doJetMatching(jets, particles):
     #        )) 
     #    pass
     #print("--------------------------------------------------")
-
-
-
-
-
-
-
-
 
 class ExampleAnalysis(Module):
 
@@ -119,32 +112,34 @@ class ExampleAnalysis(Module):
         self.h_dEtaVsPTStopRatio 	= ROOT.TH2F('dEtaVsPTStopRatio',';p_{T,#tilde{t}} / #Delta m_{#tilde{t},#tilde{#chi^{#pm}}};|#Delta#eta_{b,#tilde{#chi^{#pm}}}|',40,0,2,80,0,8)
 
         # Matching
-        self.h_jetMatch          	= ROOT.TH1F('jetMatch',		';Jet matched',				2,	0,	2   	)
-        self.h_leadJetMatch      	= ROOT.TH1F('leadJetMatch',	';Correct lead jet matched',		2,	0,	2   	)
+        self.h_jetMatch          	= ROOT.TH1F('jetMatch',		';Jet matched',				3,	0,	3   	)
+        self.h_leadJetMatch      	= ROOT.TH1F('leadJetMatch',	';Correct lead jet matched',		3,	0,	3   	)
 
-        self.h_leadBFromStop              = ROOT.TH1F("leadBFromStop" , ";leadBFromStop", 2, 0, 2)
-        self.h_leadBFromChi              = ROOT.TH1F("leadBFromChi" , ";leadBFromChi", 2, 0, 2)
-        self.h_leadJetFromStop             = ROOT.TH1F("leadJetFromStop" , ";leadJetFromStop", 2, 0, 2)
-        self.h_leadGenJetFromStop             = ROOT.TH1F("leadGenJetFromStop" , ";leadGenJetFromStop", 2, 0, 2)
+        self.h_leadBFromStop              = ROOT.TH1F("leadBFromStop" , ";leadBFromStop", 3, 0, 3)
+        self.h_leadBFromChi              = ROOT.TH1F("leadBFromChi" , ";leadBFromChi", 3, 0, 3)
+        self.h_leadJetFromStop             = ROOT.TH1F("leadJetFromStop" , ";leadJetFromStop", 3, 0, 3)
+        self.h_leadGenJetFromStop             = ROOT.TH1F("leadGenJetFromStop" , ";leadGenJetFromStop", 3, 0, 3)
 
-        self.h_stopBGenJetMatchOrdinal     = ROOT.TH1F("stopBGenJetMatchOrdinal", ";stopBJetMatchOrdinal",            10,     0,      10      )
-        self.h_chiBGenJetMatchOrdinal      = ROOT.TH1F("chiBGenJetMatchOrdinal", ";chiBJetMatchOrdinal",            10,     0,      10      )
-        self.h_chiqOneGenJetMatchOrdinal      = ROOT.TH1F("chiqOneGenJetMatchOrdinal", ";chiqOneGenJetMatchOrdinal",            10,     0,      10      )
-        self.h_chiqTwoGenJetMatchOrdinal      = ROOT.TH1F("chiqTwoGenJetMatchOrdinal", ";chiqTwoGenJetMatchOrdinal",            10,     0,      10      )
-        self.h_chiqAnyGenJetMatchOrdinal      = ROOT.TH1F("chiqAnyGenJetMatchOrdinal", ";chiqAnyGenJetMatchOrdinal",            10,     0,      10      )
+        self.h_stopBGenJetMatchOrdinal     = ROOT.TH1F("stopBGenJetMatchOrdinal", ";stopBJetMatchOrdinal",            11,     0,      11      )
+        self.h_chiBGenJetMatchOrdinal      = ROOT.TH1F("chiBGenJetMatchOrdinal", ";chiBJetMatchOrdinal",            11,     0,      11      )
+        self.h_chiqOneGenJetMatchOrdinal      = ROOT.TH1F("chiqOneGenJetMatchOrdinal", ";chiqOneGenJetMatchOrdinal",            11,     0,      11      )
+        self.h_chiqTwoGenJetMatchOrdinal      = ROOT.TH1F("chiqTwoGenJetMatchOrdinal", ";chiqTwoGenJetMatchOrdinal",            11,     0,      11      )
+        self.h_chiqAnyGenJetMatchOrdinal      = ROOT.TH1F("chiqAnyGenJetMatchOrdinal", ";chiqAnyGenJetMatchOrdinal",            11,     0,      11      )
 
-        self.h_stopBJetMatchOrdinal     = ROOT.TH1F("stopBJetMatchOrdinal", ";stopBJetMatchOrdinal",            10,     0,      10      )
-        self.h_chiBJetMatchOrdinal      = ROOT.TH1F("chiBJetMatchOrdinal", ";chiBJetMatchOrdinal",            10,     0,      10      )
-        self.h_chiqOneJetMatchOrdinal      = ROOT.TH1F("chiqOneJetMatchOrdinal", ";chiqOneJetMatchOrdinal",            10,     0,      10      )
-        self.h_chiqTwoJetMatchOrdinal      = ROOT.TH1F("chiqTwoJetMatchOrdinal", ";chiqTwoJetMatchOrdinal",            10,     0,      10      )
-        self.h_chiqAnyJetMatchOrdinal      = ROOT.TH1F("chiqAnyJetMatchOrdinal", ";chiqAnyJetMatchOrdinal",            10,     0,      10      )
+        self.h_stopBJetMatchOrdinal     = ROOT.TH1F("stopBJetMatchOrdinal", ";stopBJetMatchOrdinal",            11,     0,      11      )
+        self.h_chiBJetMatchOrdinal      = ROOT.TH1F("chiBJetMatchOrdinal", ";chiBJetMatchOrdinal",            11,     0,      11      )
+        self.h_chiqOneJetMatchOrdinal      = ROOT.TH1F("chiqOneJetMatchOrdinal", ";chiqOneJetMatchOrdinal",            11,     0,      11      )
+        self.h_chiqTwoJetMatchOrdinal      = ROOT.TH1F("chiqTwoJetMatchOrdinal", ";chiqTwoJetMatchOrdinal",            11,     0,      11      )
+        self.h_chiqAnyJetMatchOrdinal      = ROOT.TH1F("chiqAnyJetMatchOrdinal", ";chiqAnyJetMatchOrdinal",            11,     0,      11      )
 
 
-        self.h_numTopFourGenMatched      = ROOT.TH1F("numTopFourGenMatched", "numTopFourGenMatched",            4,     0,      4     )
-        self.h_numTopThreeGenMatched      = ROOT.TH1F("numTopThreeGenMatched", "numTopThreeGenMatched",            4,     0,      4     )
+        self.h_numParticlesMatched      = ROOT.TH1F("numParticlesMatched", "numParticlesMatched",            5,     0,      5     )
+        self.h_numParticlesMatchedGen      = ROOT.TH1F("numParticlesMatchedGen", "numParticlesMatchedGen",            5,     0,      5     )
+        self.h_numTopFourGenMatched      = ROOT.TH1F("numTopFourGenMatched", "numTopFourGenMatched",            5,     0,      5     )
+        self.h_numTopThreeGenMatched      = ROOT.TH1F("numTopThreeGenMatched", "numTopThreeGenMatched",            5,     0,      5     )
 
-        self.h_numTopFourRecoMatched      = ROOT.TH1F("numTopFourRecoMatched", "numTopFourRecoMatched",            4,     0,      4     )
-        self.h_numTopThreeRecoMatched      = ROOT.TH1F("numTopThreeRecoMatched", "numTopThreeRecoMatched",            4,     0,      4     )
+        self.h_numTopFourRecoMatched      = ROOT.TH1F("numTopFourRecoMatched", "numTopFourRecoMatched",            5,     0,      5     )
+        self.h_numTopThreeRecoMatched      = ROOT.TH1F("numTopThreeRecoMatched", "numTopThreeRecoMatched",            5,     0,      5     )
 
 
         # Trigger
@@ -180,6 +175,8 @@ class ExampleAnalysis(Module):
         self.h_dR12			= ROOT.TH1F('dR12',           	';#Delta R_{1,2}',                    	35,     0,      7     	)
         self.h_m3Vsm4			= ROOT.TH2F('m3Vsm4',		';m_{4j} [GeV];m_{3j} [GeV]',		150,0,3000,150,0,3000   )
         self.h_m3NoLeadVsm4		= ROOT.TH2F('m3NoLeadVsm4',     ';m_{4j} [GeV];m_{3j} (excl. leading) [GeV]',150,0,3000,150,0,3000)
+
+        self.h_massRecoMinPt			= ROOT.TH1F('massRecoMinPt',           	'massRecoMinPt',                    	600,     0,      3000     	)
 
         # Add histograms to analysis object
         for h in list(vars(self)):
@@ -306,8 +303,8 @@ class ExampleAnalysis(Module):
           #print(gen_matched)
 
           if gen_matched:
-              self.h_leadBFromStop.Fill(1 if genBStop > genBChi else 0)
-              self.h_leadBFromChi.Fill(1 if genBStop < genBChi else 0)
+              self.h_leadBFromStop.Fill(1 if genBStop.pt > genBChi.pt else 0)
+              self.h_leadBFromChi.Fill(1 if genBStop.pt < genBChi.pt else 0)
 
               self.h_leadGenJetFromStop.Fill(1 if any(gen_matched) else 0)
 
@@ -322,6 +319,7 @@ class ExampleAnalysis(Module):
 
               self.h_numTopFourGenMatched.Fill(sum(x < 4 for x in gen_matched))
               self.h_numTopThreeGenMatched.Fill(sum(x < 3 for x in gen_matched))
+              self.h_numParticlesMatchedGen.Fill(sum(x for x in gen_matched if x is not None))
 
 
 
@@ -420,6 +418,10 @@ class ExampleAnalysis(Module):
           self.h_HT.Fill(HT)
           self.h_mAll.Fill(sumJet.M())
 
+        reco_mass_minpt = massRecoPtMin(jets, None, to_consider=6)
+
+        self.h_massRecoMinPt.Fill(reco_mass_minpt)
+
         reco_matched = orderedMatcher(jets, genQuarks)
         if reco_matched:
             self.h_leadJetFromStop.Fill(1 if any(reco_matched) else 0)
@@ -434,6 +436,7 @@ class ExampleAnalysis(Module):
 
             self.h_numTopFourRecoMatched.Fill(sum(x < 4 for x in reco_matched))
             self.h_numTopThreeRecoMatched.Fill(sum(x < 3 for x in reco_matched))
+            self.h_numParticlesMatched.Fill(sum(x for x in reco_matched if x is not None))
 
         return True
 
@@ -482,7 +485,7 @@ if args.sample == 'signal':
     #files = ['/uscms_data/d3/dmahon/RPVSingleStopRun3Patched/NANOAOD/files/NANOAOD-{}.root'.format(masses)]
     p = PostProcessor(".", files, cut=preselection, branchsel=None, modules=[
                     ExampleAnalysis(isSignal=1,MCCampaign='UL2018')], noOut=True, histFileName='{}/{}_{}.root'.format(outputPath,args.sample,masses), histDirName="plots",
-                    maxEntries=None)
+                    maxEntries=None,longTermCache=True, prefetch=True)
     p.run()
 
 else:

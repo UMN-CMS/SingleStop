@@ -12,7 +12,7 @@ def globalMatcher(jets, particles, dr_match=0.3, combo_count=8, require_all_matc
     njets = len(jets_to_use)
     loss = None 
     best_match = None
-    for perm in itertools.permutations(range(njets)):
+    for perm in itertools.permutations(range(njets), mum_to_test):
         #this_perm = [jets[x] for x in perm]
         closeness = [DR(get4(particles[i]),get4(jets[perm[i]]))**2 for i in range(num_to_test)]
         if require_all_matches and any(x > dr_match for x in closeness):
@@ -21,7 +21,7 @@ def globalMatcher(jets, particles, dr_match=0.3, combo_count=8, require_all_matc
 #       print("Permutation {} has loss {}".format(perm, new_loss))
         if loss is None  or new_loss < loss:
             loss = new_loss
-            best_match = perm[:num_to_test]
+            best_match = perm
     return best_match
 
 def orderedMatcher(jets, particles, dr_match=0.3):
