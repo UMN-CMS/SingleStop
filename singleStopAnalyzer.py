@@ -305,7 +305,7 @@ class ExampleAnalysis(Module):
         return True
 
 parser = argparse.ArgumentParser(description='Single Stop Analyzer')
-parser.add_argument('--sample',type=str,default='signal',choices=['signal','TT','QCD'],help='Sample to run over')
+parser.add_argument('--sample',type=str,default='signal',choices=['signal','TT','TT2018','QCD','QCD2018'],help='Sample to run over')
 parser.add_argument('--tag',type=str,default='test',help='Tag for output label')
 parser.add_argument('-n',type=int,default=1,help='Sample index to run over for backgrounds')
 args = parser.parse_args()
@@ -315,7 +315,9 @@ if not os.path.exists(outputPath):
   os.makedirs(outputPath)
 
 if args.sample == 'TT': sampleFile = 'TTToHadronic.txt'
+elif args.sample == 'TT2018': sampleFile = 'TTToHadronic2018.txt'
 elif args.sample == 'QCD': sampleFile = 'QCDBEnriched.txt'
+elif args.sample == 'QCD2018': sampleFile = 'QCDBEnriched2018.txt'
 elif args.sample != 'signal': print('ERROR: Unexpected sample argument')
 
 if args.sample == 'signal':
