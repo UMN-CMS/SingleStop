@@ -14,8 +14,8 @@ from mass_reco import massRecoPtMin
 
 
 ROOT.gROOT.SetBatch(True)
-
 ROOT.PyConfig.IgnoreCommandLineOptions = True
+
 DR_MATCH=0.2
 JET_COMBINATORICS_COUNT=6
 
@@ -23,8 +23,6 @@ JET_COMBINATORICS_COUNT=6
 
 
 
-def leadJetFromStop(histo, jet, stop):
-    return stop.p4().DeltaR(jet.p4()) < DR_MATCH
 
 def doJetMatching(jets, particles):
     #best_permutation = globalMatcher(jets, particles, require_all_matches=False)
@@ -176,7 +174,7 @@ class ExampleAnalysis(Module):
         self.h_m3Vsm4			= ROOT.TH2F('m3Vsm4',		';m_{4j} [GeV];m_{3j} [GeV]',		150,0,3000,150,0,3000   )
         self.h_m3NoLeadVsm4		= ROOT.TH2F('m3NoLeadVsm4',     ';m_{4j} [GeV];m_{3j} (excl. leading) [GeV]',150,0,3000,150,0,3000)
 
-        self.h_massRecoMinPt			= ROOT.TH1F('massRecoMinPt',           	'massRecoMinPt',                    	600,     0,      3000     	)
+        self.h_massRecoMinPt			= ROOT.TH1F('massRecoMinPt',           	'massRecoMinPt',                    	300,     0,      3000     	)
 
         # Add histograms to analysis object
         for h in list(vars(self)):
@@ -317,15 +315,9 @@ class ExampleAnalysis(Module):
               if gen_matched[3] is not None:
                   self.h_chiqTwoGenJetMatchOrdinal.Fill(gen_matched[3])
 
-              self.h_numTopFourGenMatched.Fill(sum(x < 4 for x in gen_matched))
-              self.h_numTopThreeGenMatched.Fill(sum(x < 3 for x in gen_matched))
+              self.h_numTopFourGenMatched.Fill(sum(x < 4 for x in gen_matched if x is not None))
+              self.h_numTopThreeGenMatched.Fill(sum(x < 3 for x in gen_matched if x is not None))
               self.h_numParticlesMatchedGen.Fill(sum(x for x in gen_matched if x is not None))
-
-
-
-
-
-
 
           #pT and eta of the gen AK4 jets
           for i,j in enumerate(genAK4Jets):
@@ -434,8 +426,8 @@ class ExampleAnalysis(Module):
             if reco_matched[3] is not None:
                 self.h_chiqTwoJetMatchOrdinal.Fill(reco_matched[3])
 
-            self.h_numTopFourRecoMatched.Fill(sum(x < 4 for x in reco_matched))
-            self.h_numTopThreeRecoMatched.Fill(sum(x < 3 for x in reco_matched))
+            self.h_numTopFourRecoMatched.Fill(sum(x < 4 for x in reco_matched if x is not None))
+            self.h_numTopThreeRecoMatched.Fill(sum(x < 3 for x in reco_matched if x is not None))
             self.h_numParticlesMatched.Fill(sum(x for x in reco_matched if x is not None))
 
         return True
