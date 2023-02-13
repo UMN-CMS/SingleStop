@@ -310,7 +310,7 @@ parser.add_argument('--tag',type=str,default='test',help='Tag for output label')
 parser.add_argument('-n',type=int,default=1,help='Sample index to run over for backgrounds')
 args = parser.parse_args()
 
-outputPath = 'output/Run3/{}'.format(args.tag)
+outputPath = 'output/{}'.format(args.tag)
 if not os.path.exists(outputPath):
   os.makedirs(outputPath)
 
