@@ -1,8 +1,28 @@
 #!/bin/bash
+
+if [ -z "$1" ]
+  then
+    echo "ERROR: No sample argument supplied. Usage: ./doSubmit.sh [SAMPLE]"
+    exit 1
+fi
+
+sample=$1
+
+case $sample in
+  "QCD") sampleFile="QCDBEnriched.txt";;
+  "QCD2018") sampleFile="QCDBEnriched2018.txt";;
+  "TT") sampleFile="TTToHadronic.txt";;
+  "TT2018") sampleFile="TTToHadronic2018.txt";;
+  *) echo "ERROR: Invalid sample argument.";exit 1;;
+esac
+
 rm -rf job out err log samples
 mkdir -p job out err log samples
 
-cp ../samples/TTToHadronic.txt ../samples/QCDBEnriched.txt samples
+cp ../samples/"$sampleFile" samples
+cp ../singleStopAnalyzer.py .
+
+sed -i "2,4s/PhysicsTools.NanoAODTools.postprocessing.//g" singleStopAnalyzer.py
 
 i=1
 while read file; do
@@ -24,7 +44,7 @@ cd CMSSW_10_6_19_patch2/src/
 eval \`scramv1 runtime -sh\`
 echo \$CMSSW_BASE "is the CMSSW we created on the local worker node"
 cd \${_CONDOR_SCRATCH_DIR}
-python singleStopAnalyzer.py --sample QCD -n $i
+python singleStopAnalyzer.py --sample $sample -n $i
 echo "Running pwd:"
 pwd
 echo "Running ls -alrth:"
@@ -32,7 +52,7 @@ ls -alrth
 EOT
 
 i=$((i+1))
-done <samples/QCDBEnriched.txt
+done <samples/"$sampleFile"
 
 submitfilename=job/submit.sub
 cat << EOT >> $submitfilename
