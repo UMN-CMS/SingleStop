@@ -131,13 +131,16 @@ class ExampleAnalysis(Module):
         self.h_chiqAnyJetMatchOrdinal      = ROOT.TH1F("chiqAnyJetMatchOrdinal", ";chiqAnyJetMatchOrdinal",            11,     0,      11      )
 
 
-        self.h_numParticlesMatched      = ROOT.TH1F("numParticlesMatched", "numParticlesMatched",            5,     0,      5     )
-        self.h_numParticlesMatchedGen      = ROOT.TH1F("numParticlesMatchedGen", "numParticlesMatchedGen",            5,     0,      5     )
-        self.h_numTopFourGenMatched      = ROOT.TH1F("numTopFourGenMatched", "numTopFourGenMatched",            5,     0,      5     )
-        self.h_numTopThreeGenMatched      = ROOT.TH1F("numTopThreeGenMatched", "numTopThreeGenMatched",            5,     0,      5     )
+        self.h_numParticlesMatched      = ROOT.TH1F("numParticlesMatched", ";numParticlesMatched",            5,     0,      5     )
+        self.h_numParticlesMatchedGen      = ROOT.TH1F("numParticlesMatchedGen", ";numParticlesMatchedGen",            5,     0,      5     )
+        self.h_numTopFourGenMatched      = ROOT.TH1F("numTopFourGenMatched", ";numTopFourGenMatched",            5,     0,      5     )
+        self.h_numTopThreeGenMatched      = ROOT.TH1F("numTopThreeGenMatched", ";numTopThreeGenMatched",            5,     0,      5     )
 
-        self.h_numTopFourRecoMatched      = ROOT.TH1F("numTopFourRecoMatched", "numTopFourRecoMatched",            5,     0,      5     )
-        self.h_numTopThreeRecoMatched      = ROOT.TH1F("numTopThreeRecoMatched", "numTopThreeRecoMatched",            5,     0,      5     )
+        self.h_numTopFourRecoMatched      = ROOT.TH1F("numTopFourRecoMatched", ";numTopFourRecoMatched",            5,     0,      5     )
+        self.h_numTopThreeRecoMatched      = ROOT.TH1F("numTopThreeRecoMatched", ";numTopThreeRecoMatched",            5,     0,      5     )
+
+        self.h_missedMatchedGen = ROOT.TH1F("numMissedMatchedGen", ";numMissedMatchedGen", 5,0,5)
+        self.h_missedMatched = ROOT.TH1F("numMissedMatched", ";numMissedMatched", 5,0,5)
 
 
         # Trigger
@@ -304,27 +307,31 @@ class ExampleAnalysis(Module):
           self.h_dEtaVsPTStopRatio.Fill(genChi.pt / (genStop.p4().M() - genChi.p4().M()),abs(genChi.eta - genBStop.eta))
           self.h_passDijet.Fill(1 if (dRChiMax < 1.1 and dEtaBChi < 1.1) else 0)
 
-          gen_matched = orderedMatcher(genAK4Jets, genQuarks)
+          all_gen_matched = orderedMatcher(genAK4Jets, genQuarks)
+          gen_matched = [x[0] for x in all_gen_matched]
+          secondary_gen_matched = [x[1] for x in all_gen_matched]
+
           #print(gen_matched)
 
           if gen_matched:
               self.h_leadBFromStop.Fill(1 if genBStop.pt > genBChi.pt else 0)
               self.h_leadBFromChi.Fill(1 if genBStop.pt < genBChi.pt else 0)
 
-              self.h_leadGenJetFromStop.Fill(1 if any(gen_matched) else 0)
+              self.h_leadGenJetFromStop.Fill(1 if 0 in gen_matched else 0)
 
-              if gen_matched[0] is not None:
+              if gen_matched[0] is not None and gen_matched[0] >= 0:
                   self.h_stopBGenJetMatchOrdinal.Fill(gen_matched[0])
-              if gen_matched[1] is not None:
+              if gen_matched[1] is not None and gen_matched[1] >= 0:
                   self.h_chiBGenJetMatchOrdinal.Fill(gen_matched[1])
-              if gen_matched[2] is not None:
+              if gen_matched[2] is not None and gen_matched[2] >= 0:
                   self.h_chiqOneGenJetMatchOrdinal.Fill(gen_matched[2])
-              if gen_matched[3] is not None:
+              if gen_matched[3] is not None and gen_matched[3] >= 0:
                   self.h_chiqTwoGenJetMatchOrdinal.Fill(gen_matched[3])
 
               self.h_numTopFourGenMatched.Fill(sum(x < 4 for x in gen_matched if x is not None))
               self.h_numTopThreeGenMatched.Fill(sum(x < 3 for x in gen_matched if x is not None))
-              self.h_numParticlesMatchedGen.Fill(sum(x for x in gen_matched if x is not None))
+              self.h_numParticlesMatchedGen.Fill(sum(1 for x in gen_matched if x is not None))
+              self.h_missedMatchedGen.Fill(sum(1 for x in secondary_gen_matched if x is not None))
 
           #pT and eta of the gen AK4 jets
           for i,j in enumerate(genAK4Jets):
@@ -429,22 +436,23 @@ class ExampleAnalysis(Module):
 
         self.h_massRecoMinPt.Fill(reco_mass_minpt)
 
-        reco_matched = orderedMatcher(jets, genQuarks)
+        all_reco_matched = orderedMatcher(jets, genQuarks)
+        reco_matched = [x[0] for x in all_reco_matched]
+        secondary_reco_match = [x[1] for x in all_reco_matched]
         if reco_matched:
-            self.h_leadJetFromStop.Fill(1 if any(reco_matched) else 0)
-            if reco_matched[0] is not None:
+            self.h_leadJetFromStop.Fill(1 if 0 in reco_matched else 0)
+            if reco_matched[0] is not None and reco_matched[0] >= 0:
                 self.h_stopBJetMatchOrdinal.Fill(reco_matched[0])
-            if reco_matched[1] is not None:
+            if reco_matched[1] is not None and reco_matched[1] >= 0:
                 self.h_chiBJetMatchOrdinal.Fill(reco_matched[1])
-            if reco_matched[2] is not None:
+            if reco_matched[2] is not None and reco_matched[2] >= 0:
                 self.h_chiqOneJetMatchOrdinal.Fill(reco_matched[2])
-            if reco_matched[3] is not None:
+            if reco_matched[3] is not None and reco_matched[3] >= 0:
                 self.h_chiqTwoJetMatchOrdinal.Fill(reco_matched[3])
-
-            self.h_numTopFourRecoMatched.Fill(sum(x < 4 for x in reco_matched if x is not None))
+            self.h_numTopFourRecoMatched.Fill(sum(x < 4 for x in reco_matched if x is not None ))
             self.h_numTopThreeRecoMatched.Fill(sum(x < 3 for x in reco_matched if x is not None))
-            self.h_numParticlesMatched.Fill(sum(x for x in reco_matched if x is not None))
-
+            self.h_numParticlesMatched.Fill(sum(1 for x in reco_matched if x is not None))
+            self.h_missedMatched.Fill(sum(1 for x in secondary_reco_match if x is not None))
         return True
 
 parser = argparse.ArgumentParser(description='Single Stop Analyzer')
