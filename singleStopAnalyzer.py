@@ -124,18 +124,25 @@ class ExampleAnalysis(Module):
         elif self.MCCampaign == 'UL2017':     		bTagWPs = [0.0532,0.3040,0.7476]
         elif self.MCCampaign == 'UL2018':     		bTagWPs = [0.0490,0.2783,0.7100]
 
-        jets       = list(Collection(event,"Jet"))
-        genParts   = list(Collection(event,"GenPart"))
-        genAK4Jets = list(Collection(event,"GenJet"))
-
-        # Reco jet cuts
-        jets = filter(lambda x: x.pt > 30 and abs(x.eta) < 2.4,jets)
-
-        # Require 4 jets with pT > 30 and |eta| < 2.4
-        if len(jets) < 4: return False
+        jets           = filter(lambda x: x.pt > 30 and abs(x.eta) < 2.4,list(Collection(event,"Jet")))
+        looseBs        = filter(lambda x: x.btagDeepFlavB > bTagWPs[0],jets)
+        mediumBs       = filter(lambda x: x.btagDeepFlavB > bTagWPs[1],jets)
+        tightBs        = filter(lambda x: x.btagDeepFlavB > bTagWPs[2],jets)
+        genParts       = list(Collection(event,"GenPart"))
+        genAK4Jets     = list(Collection(event,"GenJet"))
+        goodElectrons  = filter(lambda x: x.cutBased == 4 and x.miniPFRelIso_all < 0.1 and x.pt > 30 and abs(x.eta) < 2.4,list(Collection(event,"Electron")))
+        goodMuons      = filter(lambda x: x.mediumId and x.miniPFRelIso_all < 0.2 and x.pt > 30 and abs(x.eta) < 2.4,list(Collection(event,"Muon")))
 
         # Get only outgoing particles of the hardest subprocess
         gens = filter(lambda x: (((x.statusFlags >> 13) & 1) and ((x.statusFlags >> 8) & 1)) and not (((abs(x.pdgId) == 1) or (abs(x.pdgId) == 3)) and ((x.statusFlags >> 11) & 1)), genParts)
+
+        # Cuts
+        if len(jets) < 4: return False
+        if jets[0].pt < 200: return False
+        if not (event.HLT_PFHT1050 or event.HLT_AK8PFJet360_TrimMass30): return False
+        if len(goodElectrons) != 0: return False
+        if len(goodMuons) != 0 : return False
+        if len(mediumBs) < 1: return False
 
         if self.isSignal:
 
@@ -268,9 +275,6 @@ class ExampleAnalysis(Module):
         for i,j in enumerate(jets):
           sumJet += j.p4()
           HT += j.pt
-          if j.btagDeepFlavB > bTagWPs[0] : nbLoose += 1
-          if j.btagDeepFlavB > bTagWPs[1] : nbMedium += 1
-          if j.btagDeepFlavB > bTagWPs[2] : nbTight += 1
           if i < 4:           sumJet4 += j.p4()
           if i < 3:           sumJet3 += j.p4()
           if i > 0 and i < 4: sumJet3NoLead += j.p4()
@@ -297,9 +301,9 @@ class ExampleAnalysis(Module):
           self.h_dR12.Fill(abs(jets[0].p4().DeltaR(jets[1].p4())))
         if len(jets) >= 1:
           self.h_HT.Fill(HT)
-          self.h_nbLoose.Fill(nbLoose)
-          self.h_nbMedium.Fill(nbMedium)
-          self.h_nbTight.Fill(nbTight)
+          self.h_nbLoose.Fill(len(looseBs))
+          self.h_nbMedium.Fill(len(mediumBs))
+          self.h_nbTight.Fill(len(tightBs))
           self.h_mAll.Fill(sumJet.M())
 
         return True
@@ -320,9 +324,14 @@ elif args.sample == 'QCD': sampleFile = 'QCDBEnriched.txt'
 elif args.sample == 'QCD2018': sampleFile = 'QCDBEnriched2018.txt'
 elif args.sample != 'signal': print('ERROR: Unexpected sample argument')
 
+preselection = (
+		'(Jet_pt[3] > 30) &&'
+		'(Jet_pt[0] > 200) &&'
+		'(HLT_PFHT1050 || HLT_AK8PFJet360_TrimMass30)'
+               )
+
 if args.sample == 'signal':
 
-  preselection = 'Jet_pt[3] > 30'
   #files = [
   #"root://cms-xrd-global.cern.ch//store/mc/RunIISummer16NanoAOD/TTJets_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NANOAODSIM/PUMoriond17_05Feb2018_94X_mcRun2_asymptotic_v2-v1/40000/2CE738F9-C212-E811-BD0E-EC0D9A8222CE.root"
   #"file:/eos/uscms/store/user/dmahon/condor/RPVSingleStopMC/NANOAOD/NANOAOD-300_200-?.root"
@@ -341,7 +350,6 @@ if args.sample == 'signal':
 
 else:
 
-  preselection = 'Jet_pt[3] > 30'
   files = open('samples/{}'.format(sampleFile)).read().split('\n')
   #files = glob.glob('/eos/uscms/store/user/dmahon/condor/RPVSingleStopMC/NANOAOD/NANOAOD-{}-*.root'.format(masses))
   files = [['root://cmsxrootd.fnal.gov/' + x.replace('/eos/uscms','') for x in files][:-1][args.n - 1]]
