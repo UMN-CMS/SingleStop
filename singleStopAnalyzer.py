@@ -93,7 +93,7 @@ class ExampleAnalysis(Module):
         self.h_nJets	  		= ROOT.TH1F('nJets',  	  	';N_{j}',  				20, 	0,	20  	)
         self.h_nbLoose 			= ROOT.TH1F('nbLoose', 	  	';n_{b} (loose)',  			7,	0,	7  	)
         self.h_nbMedium                 = ROOT.TH1F('nbMedium',         ';n_{b} (medium)',                      7,      0,      7       )
-        self.h_nbTight                  = ROOT.TH1F('nbTIght',          ';n_{b} (tight)',                       7,      0,      7       )
+        self.h_nbTight                  = ROOT.TH1F('nbTight',          ';n_{b} (tight)',                       7,      0,      7       )
         self.h_mAll             	= ROOT.TH1F('mAll',       	';m_{#sum j} [GeV]',                   	150,	0,	3000	)
         self.h_m4   			= ROOT.TH1F('m4',   	  	';m_{4j} [GeV]',   			150,	0,	3000	)
         self.h_m3   			= ROOT.TH1F('m3',   	  	';m_{3j} [GeV]',   			150,	0,	3000	)
@@ -327,8 +327,7 @@ if args.sample == 'signal':
   #"root://cms-xrd-global.cern.ch//store/mc/RunIISummer16NanoAOD/TTJets_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NANOAODSIM/PUMoriond17_05Feb2018_94X_mcRun2_asymptotic_v2-v1/40000/2CE738F9-C212-E811-BD0E-EC0D9A8222CE.root"
   #"file:/eos/uscms/store/user/dmahon/condor/RPVSingleStopMC/NANOAOD/NANOAOD-300_200-?.root"
   #]
-  #points = ['200_100','300_100','300_200','500_100','500_200','500_400','700_100','700_400','700_600','1000_100','1000_400','1000_900','1500_100','1500_600','1500_1400','2000_100','2000_900','2000_1900','700_200','1000_200','1500_200','1500_400','2000_200','2000_400']
-  points = ['1000_400','1000_900','1500_600','1500_1400','2000_900','2000_1900']
+  points = ['1000_400','1000_900','1500_600','1500_1400','2000_900','2000_1900','1000_600','1500_400','2000_400','2000_1400','1500_900','2000_600']
   for masses in points:
     files = glob.glob('/eos/uscms/store/user/dmahon/condor/RPVSingleStopMC/NANOAOD-ALL/NANOAOD-{}.root'.format(masses))
     #files = glob.glob('/eos/uscms/store/user/dmahon/condor/RPVSingleStopMC/NANOAOD/NANOAOD-{}-*.root'.format(masses))
