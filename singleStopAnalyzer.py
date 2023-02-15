@@ -137,7 +137,7 @@ class ExampleAnalysis(Module):
         gens = filter(lambda x: (((x.statusFlags >> 13) & 1) and ((x.statusFlags >> 8) & 1)) and not (((abs(x.pdgId) == 1) or (abs(x.pdgId) == 3)) and ((x.statusFlags >> 11) & 1)), genParts)
 
         # Cuts
-        if len(jets) < 4: return False
+        if len(jets) < 4 or len(jets) > 8: return False
         if jets[0].pt < 200: return False
         if not (event.HLT_PFHT1050 or event.HLT_AK8PFJet360_TrimMass30): return False
         if len(goodElectrons) != 0: return False
