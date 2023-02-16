@@ -9,38 +9,16 @@ import ROOT
 import glob
 import argparse
 from math import sqrt,fabs,copysign
-from match_algos import globalMatcher, orderedMatcher, priorityOrderedMatcher
+from match_algos import orderedMatcher
 from mass_reco import massRecoPtMin
+import itertools
 
 
 ROOT.gROOT.SetBatch(True)
 ROOT.PyConfig.IgnoreCommandLineOptions = True
 
-DR_MATCH=0.2
-JET_COMBINATORICS_COUNT=6
-
-
-
-
-
-
 def doJetMatching(jets, particles):
-    #best_permutation = globalMatcher(jets, particles, require_all_matches=False)
     best_permutation = orderedMatcher(jets, particles)
-    #return best_permutation
-    #best_permutation = priorityOrderedMatcher(jets, particles)
-    #print("--------------------------------------------------")
-    #print(best_permutation)
-    #if not best_permutation:
-    #    return
-    #for i in range(len(best_permutation)):
-    #    if best_permutation[i] is None:
-    #        continue
-    #    print("Particle {} matched with jet {} with distance {}".format(particles[i].pdgId , 
-    #        best_permutation[i], particles[i].p4().DeltaR(jets[best_permutation[i]].p4())
-    #        )) 
-    #    pass
-    #print("--------------------------------------------------")
 
 class ExampleAnalysis(Module):
 
@@ -48,6 +26,21 @@ class ExampleAnalysis(Module):
         self.writeHistFile = True
         self.isSignal = isSignal
         self.MCCampaign = MCCampaign
+
+    def _createHist(self,name, fmt, *args):
+        setattr(self, "h_{}".format(name), ROOT.TH1F(name, ";{}".format(fmt), *args))
+
+    def _createManySameHist(self,names, *args):
+        for pair in names:
+            if type(pair) == tuple:
+                name = pair[0]
+                fmt = pair[1] 
+            else:
+                name = pair
+                fmt=pair
+            self._createHist(name, fmt, *args)
+            
+        
 
     def beginJob(self, histFile=None, histDirName=None):
         Module.beginJob(self, histFile, histDirName)
@@ -110,37 +103,22 @@ class ExampleAnalysis(Module):
         self.h_dEtaVsPTStopRatio 	= ROOT.TH2F('dEtaVsPTStopRatio',';p_{T,#tilde{t}} / #Delta m_{#tilde{t},#tilde{#chi^{#pm}}};|#Delta#eta_{b,#tilde{#chi^{#pm}}}|',40,0,2,80,0,8)
 
         # Matching
-        self.h_jetMatch          	= ROOT.TH1F('jetMatch',		';Jet matched',				3,	0,	3   	)
-        self.h_leadJetMatch      	= ROOT.TH1F('leadJetMatch',	';Correct lead jet matched',		3,	0,	3   	)
+        self._createManySameHist([('jetMatch','Jet matched'), ('leadJetMatch','Correct lead jet matched'),
+                                  ("leadBFromStop", "leadBFromStop"), ("leadBFromChi" , "leadBFromChi")] ,3,0,3)
 
-        self.h_leadBFromStop              = ROOT.TH1F("leadBFromStop" , ";leadBFromStop", 3, 0, 3)
-        self.h_leadBFromChi              = ROOT.TH1F("leadBFromChi" , ";leadBFromChi", 3, 0, 3)
-        self.h_leadJetFromStop             = ROOT.TH1F("leadJetFromStop" , ";leadJetFromStop", 3, 0, 3)
-        self.h_leadGenJetFromStop             = ROOT.TH1F("leadGenJetFromStop" , ";leadGenJetFromStop", 3, 0, 3)
+        binary_names =[ ("leadJetFromStop" , "leadJetFromStop"), ("twoLeadJetFromStop", "twoLeadJetFromStop")]
+        num_names =[("numParticlesMatched", "numParticlesMatched"), ("numTopFourMatched", "numTopFourMatched"), ("numTopThreeMatched", "numTopThreeMatched"),
+                                  ("numMissedMatched", "numMissedMatched") , ("numLeadingJetsFromChi", "numLeadingJetsFromChi")]
+        match_names = [("stopBJetMatchOrdinal", "stopBJetMatchOrdinal"), ("chiBJetMatchOrdinal", "chiBJetMatchOrdinal"), ("chiqOneJetMatchOrdinal", "chiqOneJetMatchOrdinal"),
+                                  ("chiqTwoJetMatchOrdinal", "chiqTwoJetMatchOrdinal"), ("chiqAnyJetMatchOrdinal", "chiqAnyJetMatchOrdinal")]
+        for prefix in ("".join(x) for x in itertools.product(["", "all_four_"], ["gen_", "reco_"])):
+            self._createManySameHist([(prefix + x[0], x[1]) for x in match_names], 11,0,11)
+            self._createManySameHist([(prefix + x[0], x[1]) for x in num_names], 5,0,5)
+            self._createManySameHist([(prefix + x[0], x[1]) for x in binary_names], 3,0,3)
 
-        self.h_stopBGenJetMatchOrdinal     = ROOT.TH1F("stopBGenJetMatchOrdinal", ";stopBJetMatchOrdinal",            11,     0,      11      )
-        self.h_chiBGenJetMatchOrdinal      = ROOT.TH1F("chiBGenJetMatchOrdinal", ";chiBJetMatchOrdinal",            11,     0,      11      )
-        self.h_chiqOneGenJetMatchOrdinal      = ROOT.TH1F("chiqOneGenJetMatchOrdinal", ";chiqOneGenJetMatchOrdinal",            11,     0,      11      )
-        self.h_chiqTwoGenJetMatchOrdinal      = ROOT.TH1F("chiqTwoGenJetMatchOrdinal", ";chiqTwoGenJetMatchOrdinal",            11,     0,      11      )
-        self.h_chiqAnyGenJetMatchOrdinal      = ROOT.TH1F("chiqAnyGenJetMatchOrdinal", ";chiqAnyGenJetMatchOrdinal",            11,     0,      11      )
+        match_names = [("stopBJetMatchOrdinal", "stopBJetMatchOrdinal"), ("chiBJetMatchOrdinal", "chiBJetMatchOrdinal"), ("chiqOneJetMatchOrdinal", "chiqOneJetMatchOrdinal"),
+                                  ("chiqTwoJetMatchOrdinal", "chiqTwoJetMatchOrdinal"), ("chiqAnyJetMatchOrdinal", "chiqAnyJetMatchOrdinal")]
 
-        self.h_stopBJetMatchOrdinal     = ROOT.TH1F("stopBJetMatchOrdinal", ";stopBJetMatchOrdinal",            11,     0,      11      )
-        self.h_chiBJetMatchOrdinal      = ROOT.TH1F("chiBJetMatchOrdinal", ";chiBJetMatchOrdinal",            11,     0,      11      )
-        self.h_chiqOneJetMatchOrdinal      = ROOT.TH1F("chiqOneJetMatchOrdinal", ";chiqOneJetMatchOrdinal",            11,     0,      11      )
-        self.h_chiqTwoJetMatchOrdinal      = ROOT.TH1F("chiqTwoJetMatchOrdinal", ";chiqTwoJetMatchOrdinal",            11,     0,      11      )
-        self.h_chiqAnyJetMatchOrdinal      = ROOT.TH1F("chiqAnyJetMatchOrdinal", ";chiqAnyJetMatchOrdinal",            11,     0,      11      )
-
-
-        self.h_numParticlesMatched      = ROOT.TH1F("numParticlesMatched", ";numParticlesMatched",            5,     0,      5     )
-        self.h_numParticlesMatchedGen      = ROOT.TH1F("numParticlesMatchedGen", ";numParticlesMatchedGen",            5,     0,      5     )
-        self.h_numTopFourGenMatched      = ROOT.TH1F("numTopFourGenMatched", ";numTopFourGenMatched",            5,     0,      5     )
-        self.h_numTopThreeGenMatched      = ROOT.TH1F("numTopThreeGenMatched", ";numTopThreeGenMatched",            5,     0,      5     )
-
-        self.h_numTopFourRecoMatched      = ROOT.TH1F("numTopFourRecoMatched", ";numTopFourRecoMatched",            5,     0,      5     )
-        self.h_numTopThreeRecoMatched      = ROOT.TH1F("numTopThreeRecoMatched", ";numTopThreeRecoMatched",            5,     0,      5     )
-
-        self.h_missedMatchedGen = ROOT.TH1F("numMissedMatchedGen", ";numMissedMatchedGen", 5,0,5)
-        self.h_missedMatched = ROOT.TH1F("numMissedMatched", ";numMissedMatched", 5,0,5)
 
 
         # Trigger
@@ -183,10 +161,39 @@ class ExampleAnalysis(Module):
         for h in list(vars(self)):
           if h[0:2] == 'h_':  self.addObject(getattr(self,h))
 
+    def fillJetMatchHistos(self, prefix, match_info):
+        primary_match = [x[0] for x in match_info]
+        secondary_match = [x[1] for x in match_info]
+        num_matched = sum(1 for x in primary_match if x is not None)
+        both_lead_jets_stop = int(1 in primary_match and 0 in primary_match)
+        getattr(self, "h_" + prefix + "leadJetFromStop").Fill(1 if 0 in primary_match else 0)
+        getattr(self, "h_" + prefix + "twoLeadJetFromStop").Fill(both_lead_jets_stop)
+        if primary_match[0] is not None and primary_match[0] >= 0:
+               getattr(self, "h_" + prefix + "stopBJetMatchOrdinal").Fill(primary_match[0])
+        if primary_match[1] is not None and primary_match[1] >= 0:
+               getattr(self, "h_" + prefix + "chiBJetMatchOrdinal").Fill(primary_match[1])
+        if primary_match[2] is not None and primary_match[2] >= 0:
+               getattr(self, "h_" + prefix + "chiqOneJetMatchOrdinal").Fill(primary_match[2])
+        if primary_match[3] is not None and primary_match[3] >= 0:
+               getattr(self, "h_" + prefix + "chiqTwoJetMatchOrdinal").Fill(primary_match[3])
+        getattr(self, "h_" + prefix + "numTopFourMatched").Fill(sum(x < 4 for x in primary_match if x is not None ))
+        getattr(self, "h_" + prefix + "numTopThreeMatched").Fill(sum(x < 3 for x in primary_match if x is not None))
+        getattr(self, "h_" + prefix + "numParticlesMatched").Fill(num_matched)
+        getattr(self, "h_" + prefix + "numMissedMatched").Fill(sum(1 for x in secondary_match if x is not None))
+        if both_lead_jets_stop:
+            getattr(self, "h_" + prefix + "numLeadingJetsFromChi").Fill(
+                sum(1 for x in primary_match[1:] if x is not None and x < 1 ))
+
+    def fillJetMatchReco(self, prefix, match_info, jets):
+        primary_match = [x[0] for x in match_info]
+        secondary_match = [x[1] for x in match_info]
+
+
+            
+
+
+
     def analyze(self, event):
-
-        dRMatch = 0.1
-
         # Set b tagging WPs
         if self.MCCampaign == 'UL2016preVFP': 	bTagWPs = [0.0508,0.2598,0.6502]
         elif self.MCCampaign == 'UL2016postVFP': 	bTagWPs = [0.0480,0.2489,0.6377]
@@ -299,32 +306,15 @@ class ExampleAnalysis(Module):
           self.h_dEtaVsPTStop.Fill(genChi.pt,abs(genChi.eta - genBStop.eta))
           self.h_dEtaVsPTStopRatio.Fill(genChi.pt / (genStop.p4().M() - genChi.p4().M()),abs(genChi.eta - genBStop.eta))
           self.h_passDijet.Fill(1 if (dRChiMax < 1.1 and dEtaBChi < 1.1) else 0)
+          self.h_leadBFromStop.Fill(1 if genBStop.pt > genBChi.pt else 0)
+          self.h_leadBFromChi.Fill(1 if genBStop.pt < genBChi.pt else 0)
 
-          all_gen_matched = orderedMatcher(genAK4Jets, genQuarks)
-          gen_matched = [x[0] for x in all_gen_matched]
-          secondary_gen_matched = [x[1] for x in all_gen_matched]
-
-          #print(gen_matched)
-
+          gen_matched = orderedMatcher(genAK4Jets, genQuarks)
           if gen_matched:
-              self.h_leadBFromStop.Fill(1 if genBStop.pt > genBChi.pt else 0)
-              self.h_leadBFromChi.Fill(1 if genBStop.pt < genBChi.pt else 0)
-
-              self.h_leadGenJetFromStop.Fill(1 if 0 in gen_matched else 0)
-
-              if gen_matched[0] is not None and gen_matched[0] >= 0:
-                  self.h_stopBGenJetMatchOrdinal.Fill(gen_matched[0])
-              if gen_matched[1] is not None and gen_matched[1] >= 0:
-                  self.h_chiBGenJetMatchOrdinal.Fill(gen_matched[1])
-              if gen_matched[2] is not None and gen_matched[2] >= 0:
-                  self.h_chiqOneGenJetMatchOrdinal.Fill(gen_matched[2])
-              if gen_matched[3] is not None and gen_matched[3] >= 0:
-                  self.h_chiqTwoGenJetMatchOrdinal.Fill(gen_matched[3])
-
-              self.h_numTopFourGenMatched.Fill(sum(x < 4 for x in gen_matched if x is not None))
-              self.h_numTopThreeGenMatched.Fill(sum(x < 3 for x in gen_matched if x is not None))
-              self.h_numParticlesMatchedGen.Fill(sum(1 for x in gen_matched if x is not None))
-              self.h_missedMatchedGen.Fill(sum(1 for x in secondary_gen_matched if x is not None))
+              self.fillJetMatchHistos("gen_", gen_matched)
+              num_matched = sum(1 for x in gen_matched if x[0] is not None)
+              if num_matched == 4:
+                  self.fillJetMatchHistos("all_four_gen_", gen_matched)
 
           #pT and eta of the gen AK4 jets
           for i,j in enumerate(genAK4Jets):
@@ -421,23 +411,13 @@ class ExampleAnalysis(Module):
 
         self.h_massRecoMinPt.Fill(reco_mass_minpt)
 
-        all_reco_matched = orderedMatcher(jets, genQuarks)
-        reco_matched = [x[0] for x in all_reco_matched]
-        secondary_reco_match = [x[1] for x in all_reco_matched]
+        reco_matched = orderedMatcher(jets, genQuarks)
         if reco_matched:
-            self.h_leadJetFromStop.Fill(1 if 0 in reco_matched else 0)
-            if reco_matched[0] is not None and reco_matched[0] >= 0:
-                self.h_stopBJetMatchOrdinal.Fill(reco_matched[0])
-            if reco_matched[1] is not None and reco_matched[1] >= 0:
-                self.h_chiBJetMatchOrdinal.Fill(reco_matched[1])
-            if reco_matched[2] is not None and reco_matched[2] >= 0:
-                self.h_chiqOneJetMatchOrdinal.Fill(reco_matched[2])
-            if reco_matched[3] is not None and reco_matched[3] >= 0:
-                self.h_chiqTwoJetMatchOrdinal.Fill(reco_matched[3])
-            self.h_numTopFourRecoMatched.Fill(sum(x < 4 for x in reco_matched if x is not None ))
-            self.h_numTopThreeRecoMatched.Fill(sum(x < 3 for x in reco_matched if x is not None))
-            self.h_numParticlesMatched.Fill(sum(1 for x in reco_matched if x is not None))
-            self.h_missedMatched.Fill(sum(1 for x in secondary_reco_match if x is not None))
+            self.fillJetMatchHistos("reco_", reco_matched)
+            num_matched = sum(1 for x in reco_matched if x[0] is not None)
+            if num_matched == 4:
+                self.fillJetMatchHistos("all_four_reco_", reco_matched)
+                
         return True
 
 parser = argparse.ArgumentParser(description='Single Stop Analyzer')
