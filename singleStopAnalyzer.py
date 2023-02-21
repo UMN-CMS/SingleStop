@@ -120,7 +120,7 @@ class ExampleAnalysis(Module):
         self._createManySameHist([('jetMatch','Jet matched'), ('leadJetMatch','Correct lead jet matched'),
                                   ("leadBFromStop", "leadBFromStop"), ("leadBFromChi" , "leadBFromChi")] ,3,0,3)
 
-        binary_names =[ ("leadJetFromStop" , "leadJetFromStop"), ("twoLeadJetFromStop", "twoLeadJetFromStop")]
+        binary_names =[ ("leadJetFromStop" , "leadJetFromStop"), ("twoLeadJetFromStop", "twoLeadJetFromStop"), ("twoLeadJetsFromChi","twoLeadJetsFromChi")]
         num_names =[("numParticlesMatched", "numParticlesMatched"), ("numTopFourMatched", "numTopFourMatched"), ("numTopThreeMatched", "numTopThreeMatched"),
                                   ("numMissedMatched", "numMissedMatched") , ("numLeadingJetsFromChi", "numLeadingJetsFromChi")]
         match_names = [("stopBJetMatchOrdinal", "stopBJetMatchOrdinal"), ("chiBJetMatchOrdinal", "chiBJetMatchOrdinal"), ("chiqOneJetMatchOrdinal", "chiqOneJetMatchOrdinal"),
@@ -188,7 +188,7 @@ class ExampleAnalysis(Module):
         primary_match = [x[0] for x in match_info]
         secondary_match = [x[1] for x in match_info]
         num_matched = sum(1 for x in primary_match if x is not None)
-        both_lead_jets_stop = int(1 in primary_match and 0 in primary_match)
+        both_lead_jets_stop = 1 in primary_match and 0 in primary_match
         getattr(self, "h_" + prefix + "leadJetFromStop").Fill(1 if 0 in primary_match else 0)
         getattr(self, "h_" + prefix + "twoLeadJetFromStop").Fill(both_lead_jets_stop)
         if primary_match[0] is not None and primary_match[0] >= 0:
@@ -208,7 +208,7 @@ class ExampleAnalysis(Module):
             sum(1 for x in secondary_match if x is not None))
         if both_lead_jets_stop:
             getattr(self, "h_" + prefix + "numLeadingJetsFromChi").Fill(
-                sum(1 for x in primary_match[1:] if x is not None and x < 1 ))
+                sum(1 for x in primary_match[1:] if x is not None and x < 2 ))
 
         getattr(self, "h_" + prefix + "matchMassReconstruction").Fill(
             sum((jets[i].p4() for i,_ in match_info if i is not None), ROOT.TLorentzVector()).M())
@@ -223,11 +223,11 @@ class ExampleAnalysis(Module):
         if btag1 is not None:
             self.leadingTagBJetOrdinality.Fill(btag1)
         if btag2 is not None:
-            self.subleadingTagBJetOrdinality.Fill(btag1)
+            self.subleadingTagBJetOrdinality.Fill(btag2)
         self.leadingJetIsBTagged.Fill(1 if jets[0].btagDeepFlavB > bwp else 0)
         self.subleadingJetIsBTagged.Fill(1 if jets[2].btagDeepFlavB > bwp else 0)
         if btag1 is not None:
-            leading_b_match = next((i for i,j in enumerate(match_info) if j==btag1), None)
+            leading_b_match = next((i for i,j in enumerate(match_info) if j[0]==btag1), None)
             if leading_b_match is not None:
                 self.leadingBJetParticleMatch.Fill(leading_b_match)
 
