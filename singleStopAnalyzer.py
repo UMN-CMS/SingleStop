@@ -65,14 +65,14 @@ class ExampleAnalysis(Module):
         self.h_dEtaBChi         	= ROOT.TH1F('dEtaBChi',		';|#Delta#eta_{b,#chi^{#pm}}|',		50,	0,	5.0   	)
         self.h_dPhiBChi         	= ROOT.TH1F('dPhiBChi',		';|#Delta#phi_{b,#chi^{#pm}}|',		50,	0,	5.0   	)
         self.h_nJetsChiMerged   	= ROOT.TH1F('nJetsChiMerged',	';N_{j} matched with #chi^{#pm}',	4,	0,	4   	)
-        self.h_dRBB             	= ROOT.TH1F('dRBB',		';#DeltaR_{b,b}',			50,	0,	7    	)
+        self.h_dRBB             	= ROOT.TH1F('dRBB',		';#DeltaR_{b,b}',			35,	0,	7    	)
         self.h_dEtaBB           	= ROOT.TH1F('dEtaBB',		';|#Delta#eta_{b,b}|',			50,	0,	5.0   	)
         self.h_dPhiBB           	= ROOT.TH1F('dPhiBB',		';|#Delta#phi_{b,b}|',			50,	0,	5.0   	)
         self.h_passDijet        	= ROOT.TH1F('passDijet',	';Pass Dijet Search Requirements',	2,	0,	2	)
         self.h_dEtaWJs			= ROOT.TH1F('dEtaWJs',		';|#Delta#eta_{j,j}| (wide jets)',	50,	0,	5.0	)
         self.h_mWJs			= ROOT.TH1F('mWJs',		';m_jj (wide jets) [GeV]',		150,    0,      3000    )	
-        self.h_dRChiMax         	= ROOT.TH1F('dRChiMax',		';#Delta R_{#chi^{#pm},max}',		50,	0,	8   	)
-        self.h_dRBChi         		= ROOT.TH1F('dRBChi',		';#Delta R_{b,#chi^{#pm}}',		50,	0,	7  	)
+        self.h_dRChiMax         	= ROOT.TH1F('dRChiMax',		';#Delta R_{#chi^{#pm},max}',		40,	0,	8   	)
+        self.h_dRBChi         		= ROOT.TH1F('dRBChi',		';#Delta R_{b,#chi^{#pm}}',		35,	0,	7  	)
 
         self.h_pTBVsChi		 	= ROOT.TH2F('pTBVsChi',		';p_{T,#tilde{#chi^{#pm}}} [GeV];p_{T,b} [GeV]',		75,	0,	1500,	75,	0,	1500	)
         self.h_dEtaVsPTStop      	= ROOT.TH2F('dEtaVsPTStop',	';p_{T,#tilde{t}} [GeV];|#Delta#eta_{b,#tilde{#chi^{#pm}}}|',	75,	0,	1500,	80,	0,	8	)
@@ -90,10 +90,14 @@ class ExampleAnalysis(Module):
         #-----------------------------------------------------------------------
         
         self.h_HT 			= ROOT.TH1F('HT',	 	';H_{T} [GeV]',			  	150,	0,	3000	)
+        self.h_MET                      = ROOT.TH1F('MET',              ';p^{miss}_{T} [GeV]',                  50,     0,      1000    )
         self.h_nJets	  		= ROOT.TH1F('nJets',  	  	';N_{j}',  				20, 	0,	20  	)
         self.h_nbLoose 			= ROOT.TH1F('nbLoose', 	  	';n_{b} (loose)',  			7,	0,	7  	)
         self.h_nbMedium                 = ROOT.TH1F('nbMedium',         ';n_{b} (medium)',                      7,      0,      7       )
         self.h_nbTight                  = ROOT.TH1F('nbTight',          ';n_{b} (tight)',                       7,      0,      7       )
+        self.h_ntLoose                  = ROOT.TH1F('ntLoose',          ';n_{t} (loose)',                       7,      0,      7       )
+        self.h_ntMedium                 = ROOT.TH1F('ntMedium',         ';n_{t} (medium)',                      7,      0,      7       )
+        self.h_ntTight                  = ROOT.TH1F('ntTight',          ';n_{t} (tight)',                       7,      0,      7       )
         self.h_mAll             	= ROOT.TH1F('mAll',       	';m_{#sum j} [GeV]',                   	150,	0,	3000	)
         self.h_m4   			= ROOT.TH1F('m4',   	  	';m_{4j} [GeV]',   			150,	0,	3000	)
         self.h_m3   			= ROOT.TH1F('m3',   	  	';m_{3j} [GeV]',   			150,	0,	3000	)
@@ -108,7 +112,7 @@ class ExampleAnalysis(Module):
         self.h_m3NoLead      		= ROOT.TH1F('m3NoLead',   	';m_{3j} (excl. leading) [GeV]',	150,	0,	3000	)
         self.h_dEta12			= ROOT.TH1F('dEta12',           ';|#Delta#eta_{1,2}|',                  50,     0,     	5     	)
         self.h_dPhi12			= ROOT.TH1F('dPhi12',           ';|#Delta#phi_{1,2}|',                  50,     0,      5     	)
-        self.h_dR12			= ROOT.TH1F('dR12',           	';#Delta R_{1,2}',                    	50,     0,      7     	)
+        self.h_dR12			= ROOT.TH1F('dR12',           	';#Delta R_{1,2}',                    	35,     0,      7     	)
         self.h_m3Vsm4			= ROOT.TH2F('m3Vsm4',		';m_{4j} [GeV];m_{3j} [GeV]',		150,0,3000,150,0,3000   )
         self.h_m3NoLeadVsm4		= ROOT.TH2F('m3NoLeadVsm4',     ';m_{4j} [GeV];m_{3j} (excl. leading) [GeV]',150,0,3000,150,0,3000)
 
@@ -126,7 +130,12 @@ class ExampleAnalysis(Module):
         elif self.MCCampaign == 'UL2017':     		bTagWPs = [0.0532,0.3040,0.7476]
         elif self.MCCampaign == 'UL2018':     		bTagWPs = [0.0490,0.2783,0.7100]
 
+        # Get event collections
         jets           = filter(lambda x: x.pt > 30 and abs(x.eta) < 2.4,list(Collection(event,"Jet")))
+        fatJets        = list(Collection(event,"FatJet"))
+        looseTs        = filter(lambda x: x.particleNet_TvsQCD > 0.58,fatJets)
+        mediumTs       = filter(lambda x: x.particleNet_TvsQCD > 0.80,fatJets)
+        tightTs        = filter(lambda x: x.particleNet_TvsQCD > 0.97,fatJets)
         looseBs        = filter(lambda x: x.btagDeepFlavB > bTagWPs[0],jets)
         mediumBs       = filter(lambda x: x.btagDeepFlavB > bTagWPs[1],jets)
         tightBs        = filter(lambda x: x.btagDeepFlavB > bTagWPs[2],jets)
@@ -139,12 +148,14 @@ class ExampleAnalysis(Module):
         gens = filter(lambda x: (((x.statusFlags >> 13) & 1) and ((x.statusFlags >> 8) & 1)) and not (((abs(x.pdgId) == 1) or (abs(x.pdgId) == 3)) and ((x.statusFlags >> 11) & 1)), genParts)
 
         # Cuts
-        if len(jets) < 4 or len(jets) > 8: return False
-        if jets[0].pt < 200: return False
+        if len(jets) < 4 or len(jets) > 5: return False
+        if not jets[0].pt > 300: return False
         if not (event.HLT_PFHT1050 or event.HLT_AK8PFJet360_TrimMass30): return False
         if len(goodElectrons) != 0: return False
         if len(goodMuons) != 0 : return False
         if len(mediumBs) < 1: return False
+        if not 2 < abs(jets[0].p4().DeltaR(jets[1].p4())) < 4: return False
+        if len(tightTs) != 0: return False
 
         if self.isSignal:
 
@@ -271,6 +282,15 @@ class ExampleAnalysis(Module):
 
         # n jets
         self.h_nJets.Fill(len(jets))
+        self.h_ntLoose.Fill(len(looseTs))
+        self.h_ntMedium.Fill(len(mediumTs))
+        self.h_ntTight.Fill(len(tightTs))
+        self.h_nbLoose.Fill(len(looseBs))
+        self.h_nbMedium.Fill(len(mediumBs))
+        self.h_nbTight.Fill(len(tightBs))
+
+        # Event characteristics
+        self.h_MET.Fill(event.MET_pt)
 
         # 4 leading jet pTs
         HT = 0; nbLoose = 0; nbMedium = 0; nbTight=0
@@ -305,9 +325,6 @@ class ExampleAnalysis(Module):
           self.h_dR12.Fill(abs(jets[0].p4().DeltaR(jets[1].p4())))
         if len(jets) >= 1:
           self.h_HT.Fill(HT)
-          self.h_nbLoose.Fill(len(looseBs))
-          self.h_nbMedium.Fill(len(mediumBs))
-          self.h_nbTight.Fill(len(tightBs))
           self.h_mAll.Fill(sumJet.M())
 
         return True
@@ -316,6 +333,7 @@ parser = argparse.ArgumentParser(description='Single Stop Analyzer')
 parser.add_argument('--sample',type=str,default='signal',choices=['signal','TT','TT2018','QCD','QCD2018'],help='Sample to run over')
 parser.add_argument('--tag',type=str,default='test',help='Tag for output label')
 parser.add_argument('-n',type=int,default=1,help='Sample index to run over for backgrounds')
+parser.add_argument('--points',type=str,default='all',help='Signal point(s) to run over, comma separated in MSTOP_MCHI format; `"all`" to run over all available points')
 args = parser.parse_args()
 
 outputPath = 'output/{}'.format(args.tag)
@@ -330,17 +348,24 @@ elif args.sample != 'signal': print('ERROR: Unexpected sample argument')
 
 preselection = (
 		'(Jet_pt[3] > 30) &&'
-		'(Jet_pt[0] > 200) &&'
+		'(Jet_pt[0] > 300) &&'
 		'(HLT_PFHT1050 || HLT_AK8PFJet360_TrimMass30)'
                )
 
 if args.sample == 'signal':
 
-  #files = [
-  #"root://cms-xrd-global.cern.ch//store/mc/RunIISummer16NanoAOD/TTJets_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NANOAODSIM/PUMoriond17_05Feb2018_94X_mcRun2_asymptotic_v2-v1/40000/2CE738F9-C212-E811-BD0E-EC0D9A8222CE.root"
-  #"file:/eos/uscms/store/user/dmahon/condor/RPVSingleStopMC/NANOAOD/NANOAOD-300_200-?.root"
-  #]
-  points = ['1000_400','1000_900','1500_600','1500_1400','2000_900','2000_1900','1000_600','1500_400','2000_400','2000_1400','1500_900','2000_600']
+  allPoints = ['1000_400','1000_900','1500_600','1500_1400','2000_900','2000_1900','1000_600','1500_400','2000_400','2000_1400','1500_900','2000_600']
+  if args.points == 'all': 
+    print('Running over all available signal points...')
+    points = allPoints
+  elif '_' in args.points: 
+    points = args.points.split(',')
+    if False in [x in allPoints for x in points]: 
+      print('ERROR: Invalid --points argument provided. Available signal points: {}'.format(allPoints))
+      sys.exit()
+  else: 
+    print('ERROR: Invalid --points arguement format provided')
+    sys.exit()
   for masses in points:
     files = glob.glob('/eos/uscms/store/user/dmahon/condor/RPVSingleStopMC/NANOAOD-ALL/NANOAOD-{}.root'.format(masses))
     #files = glob.glob('/eos/uscms/store/user/dmahon/condor/RPVSingleStopMC/NANOAOD/NANOAOD-{}-*.root'.format(masses))
