@@ -10,7 +10,7 @@ def orderedMatcher(jets, particles, dr_match=0.3):
     remaining_idxs = set(range(len(jets)))
     used_idxs = set()
     for i,p in enumerate(particles):
-        diff=lambda x : DR(get4(p),get4(jets.__getitem__(x)))
+        diff=lambda x : DR(get4(p),get4(jets[x]))
         if remaining_idxs: smallest = min(remaining_idxs, key=diff)
         if remaining_idxs and diff(smallest) < dr_match:
             remaining_idxs.remove(smallest)

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
-from PhysicsTools.NanoAODTools.postprocessing.framework.eventloop import Module
-from PhysicsTools.NanoAODTools.postprocessing.framework.datamodel import Collection
-from PhysicsTools.NanoAODTools.postprocessing.framework.postprocessor import PostProcessor
+from framework.eventloop import Module
+from framework.datamodel import Collection
+from framework.postprocessor import PostProcessor
 from importlib import import_module
 import os
 import sys
@@ -120,24 +120,31 @@ class ExampleAnalysis(Module):
         self._createManySameHist([('jetMatch','Jet matched'), ('leadJetMatch','Correct lead jet matched'),
                                   ("leadBFromStop", "leadBFromStop"), ("leadBFromChi" , "leadBFromChi")] ,3,0,3)
 
-        binary_names =[ ("leadJetFromStop" , "leadJetFromStop"), ("twoLeadJetFromStop", "twoLeadJetFromStop"), ("twoLeadJetsFromChi","twoLeadJetsFromChi")]
+        binary_names =[ ("leadJetFromStop" , "leadJetFromStop"), ("twoLeadJetFromStop", "twoLeadJetFromStop"), ("twoLeadJetsFromChi","twoLeadJetsFromChi")
+                       ]
         num_names =[("numParticlesMatched", "numParticlesMatched"), ("numTopFourMatched", "numTopFourMatched"), ("numTopThreeMatched", "numTopThreeMatched"),
                                   ("numMissedMatched", "numMissedMatched") , ("numLeadingJetsFromChi", "numLeadingJetsFromChi")]
         match_names = [("stopBJetMatchOrdinal", "stopBJetMatchOrdinal"), ("chiBJetMatchOrdinal", "chiBJetMatchOrdinal"), ("chiqOneJetMatchOrdinal", "chiqOneJetMatchOrdinal"),
                                   ("chiqTwoJetMatchOrdinal", "chiqTwoJetMatchOrdinal"), ("chiqAnyJetMatchOrdinal", "chiqAnyJetMatchOrdinal")]
+        jet_match_ratio = [("jet1MatchOverGen", "jet1MatchOverGen"), ("jet2MatchOverGen", "jet2MatchOverGen"),
+                           ("jet3MatchOverGen", "jet3MatchOverGen"), ("jet0MatchOverGen", "jet0MatchOverGen")]
+        mass_reco_hists = [
+            ("matchMassReconstruction", "matchMassReconstruction"),
+            ("matchTop3MassReconstruction", "matchTop3MassReconstruction"),
+            ("matchSubTop3MassReconstruction", "matchSubTop3MassReconstruction"),
+                           ]
         for prefix in ("".join(x) for x in itertools.product(["", "all_four_"], ["gen_", "reco_"])):
             self._createManySameHist([(prefix + x[0], x[1]) for x in match_names], 11,0,11)
             self._createManySameHist([(prefix + x[0], x[1]) for x in num_names], 5,0,5)
             self._createManySameHist([(prefix + x[0], x[1]) for x in binary_names], 3,0,3)
-            self._createManySameHist([(prefix + x[0], x[1]) for x in [("matchMassReconstruction", "matchMassReconstruction")]], 150,0,3000)
+            self._createManySameHist([(prefix + x[0], x[1]) for x in jet_match_ratio], 100,0,5)
+            self._createManySameHist([(prefix + x[0], x[1]) for x in mass_reco_hists ], 150,0,3000)
 
 
-        self._createHist("leadingTagBJetOrdinality", "leadingTagBJetOrdinality", 7,0,7)
-        self._createHist("subleadingTagBJetOrdinality", "subleadingTagBJetOrdinality", 7,0,7)
-        self._createHist("leadingJetIsBTagged", "leadingJetIsBTagged", 3,0,3)
-        self._createHist("subleadingJetIsBTagged", "subleadingJetIsBTagged", 3,0,3)
-        self._createHist("leadingBJetParticleMatch", "leadingBJetParticleMatch", 6,0,6) #If the leading B jet matched to a gen particle, which one
 
+
+        self.h_leadingBJetPt             	= ROOT.TH1F('leadingBJetPt', 		';p_{T,leading jet}  [GeV]',	150,	0,    	1500	)
+        self.h_subleadingBJetPt             	= ROOT.TH1F('subleadingBJetPt', 		';p_{T,subleading jet}  [GeV]',	150,	0,    	1500	)
 
         # Trigger
         self.h_L1_HTT450er	 	= ROOT.TH1F('L1_HTT450er',	';L1_HTT450er',				2,	0,	2	)
@@ -180,11 +187,24 @@ class ExampleAnalysis(Module):
 
         self.h_massRecoMinPt			= ROOT.TH1F('massRecoMinPt',           	'massRecoMinPt',                    	300,     0,      3000     	)
 
+        for prefix in ["", "all_four_"]:
+            self._createHist(prefix + "leadingTagBJetOrdinality", "leadingTagBJetOrdinality", 7,0,7)
+            self._createHist(prefix + "subleadingTagBJetOrdinality", "subleadingTagBJetOrdinality", 7,0,7)
+            self._createHist(prefix + "leadingBJetParticleMatch", "leadingBJetParticleMatch", 6,0,6) #If the leading B jet matched to a gen particle, which one
+
+            self._createHist(prefix + "topBJetdR", "topBJetdR", 35,0,7)
+            self._createHist(prefix + "etaTop4NoBTag", "etaTop4NoBTag", 100,-5,5)
+
+            for i in range(0,4):
+                self._createHist(prefix+"jet"+str(i)+"IsBTagged","jet"+str(i)+"IsBTagged", 3,0,3)
+            
+        
+
         # Add histograms to analysis object
         for h in list(vars(self)):
           if h[0:2] == 'h_':  self.addObject(getattr(self,h))
 
-    def fillJetMatchHistos(self, prefix, match_info,jets):
+    def fillJetMatchHistos(self, prefix, match_info,quarks, jets):
         primary_match = [x[0] for x in match_info]
         secondary_match = [x[1] for x in match_info]
         num_matched = sum(1 for x in primary_match if x is not None)
@@ -199,37 +219,64 @@ class ExampleAnalysis(Module):
                getattr(self, "h_" + prefix + "chiqOneJetMatchOrdinal").Fill(primary_match[2])
         if primary_match[3] is not None and primary_match[3] >= 0:
                getattr(self, "h_" + prefix + "chiqTwoJetMatchOrdinal").Fill(primary_match[3])
-        getattr(self, "h_" + prefix + "numTopFourMatched").Fill(
-            sum(x < 4 for x in primary_match if x is not None ))
-        getattr(self, "h_" + prefix + "numTopThreeMatched").Fill(
-            sum(x < 3 for x in primary_match if x is not None))
+        getattr(self, "h_" + prefix + "numTopFourMatched").Fill(sum(x < 4 for x in primary_match if x is not None ))
+        getattr(self, "h_" + prefix + "numTopThreeMatched").Fill(sum(x < 3 for x in primary_match if x is not None))
         getattr(self, "h_" + prefix + "numParticlesMatched").Fill(num_matched)
-        getattr(self, "h_" + prefix + "numMissedMatched").Fill(
-            sum(1 for x in secondary_match if x is not None))
+        getattr(self, "h_" + prefix + "numMissedMatched").Fill(sum(1 for x in secondary_match if x is not None))
         if both_lead_jets_stop:
             getattr(self, "h_" + prefix + "numLeadingJetsFromChi").Fill(
                 sum(1 for x in primary_match[1:] if x is not None and x < 2 ))
-
+        for i in range(0,4):
+            if match_info[i][0] is not None:
+                getattr(self,"h_" + prefix + "jet" + str(i) + "MatchOverGen").Fill(jets[match_info[i][0]].p4().Pt()/quarks[i].p4().Pt())
         getattr(self, "h_" + prefix + "matchMassReconstruction").Fill(
             sum((jets[i].p4() for i,_ in match_info if i is not None), ROOT.TLorentzVector()).M())
+        matched_jets_idx = [i for i,_ in match_info if i is not None]
+        ms = sorted(matched_jets_idx)
+        getattr(self, "h_" + prefix + "matchTop3MassReconstruction").Fill(
+            sum((jets[i].p4() for i in ms), ROOT.TLorentzVector()).M())
+        getattr(self, "h_" + prefix + "matchSubTop3MassReconstruction").Fill(
+            sum((jets[i].p4() for i in ms[1:]), ROOT.TLorentzVector()).M())
 
 
-    def fillJetMatchReco(self, prefix, match_info, jets, bwp):
+        
+
+
+
+    def fillJetMatchReco(self, prefix, match_info, jets, jet_btags_passes, btag_ranked):
         primary_match = [x[0] for x in match_info]
         secondary_match = [x[1] for x in match_info]
-        highest_b_idxs = heapq.nlargest(2, (i for i in range(len(jets)) if jets[i].btagDeepFlavB > bwp), key=lambda x: jets[x].p4().Pt())
+        highest_b_idxs = btag_ranked
+        jets_b_tagged=jet_btags_passes
         btag1 = highest_b_idxs[0] if len(highest_b_idxs) > 0 else None
         btag2 = highest_b_idxs[1] if len(highest_b_idxs) > 1 else None
-        if btag1 is not None:
-            self.leadingTagBJetOrdinality.Fill(btag1)
-        if btag2 is not None:
-            self.subleadingTagBJetOrdinality.Fill(btag2)
-        self.leadingJetIsBTagged.Fill(1 if jets[0].btagDeepFlavB > bwp else 0)
-        self.subleadingJetIsBTagged.Fill(1 if jets[2].btagDeepFlavB > bwp else 0)
+
         if btag1 is not None:
             leading_b_match = next((i for i,j in enumerate(match_info) if j[0]==btag1), None)
             if leading_b_match is not None:
-                self.leadingBJetParticleMatch.Fill(leading_b_match)
+                getattr(self,"h_" + prefix +  "leadingBJetParticleMatch").Fill(leading_b_match)
+            
+
+
+    def fillJetReco(self, jets, jet_btags_passes, btag_ranked):
+        highest_b_idxs = btag_ranked
+        jets_b_tagged=jet_btags_passes
+
+        btag1 = highest_b_idxs[0] if len(highest_b_idxs) > 0 else None
+        btag2 = highest_b_idxs[1] if len(highest_b_idxs) > 1 else None
+        if btag1 is not None:
+            getattr(self,"h_leadingBJetPt").Fill(jets[btag1].p4().Pt())
+            getattr(self, "h_leadingTagBJetOrdinality").Fill(btag1)
+
+        if btag2 is not None:
+            getattr(self,"h_subleadingBJetPt").Fill(jets[btag2].p4().Pt())
+            getattr(self,"h_etaTop4NoBTag").Fill(
+                sum(jets[i].p4().Pt() for i in range(0,min(4,len(jets))) if i != btag1))
+            getattr(self,"h_topBJetdR").Fill(jets[btag1].p4().DeltaR(jets[btag2].p4()))
+            getattr(self,"h_subleadingTagBJetOrdinality").Fill(btag2)
+        for i in range(0,4):
+            getattr(self,"h_jet"+str(i)+"IsBTagged").Fill(1 if jets_b_tagged[i] else 0)
+        
 
 
     def analyze(self, event):
@@ -349,13 +396,13 @@ class ExampleAnalysis(Module):
           self.h_passDijet.Fill(1 if (dRChiMax < 1.1 and dEtaBChi < 1.1) else 0)
           self.h_leadBFromStop.Fill(1 if genBStop.pt > genBChi.pt else 0)
           self.h_leadBFromChi.Fill(1 if genBStop.pt < genBChi.pt else 0)
-
-          gen_matched = orderedMatcher(genAK4Jets, genQuarks)
-          if gen_matched:
-              self.fillJetMatchHistos("gen_", gen_matched, genAK4Jets)
-              num_matched = sum(1 for x in gen_matched if x[0] is not None)
-              if num_matched == 4:
-                  self.fillJetMatchHistos("all_four_gen_", gen_matched, genAK4Jets)
+          if self.isSignal:
+              gen_matched = orderedMatcher(genAK4Jets, genQuarks)
+              if gen_matched:
+                  self.fillJetMatchHistos("gen_", gen_matched, genQuarks, genAK4Jets)
+                  num_matched = sum(1 for x in gen_matched if x[0] is not None)
+                  if num_matched == 4:
+                      self.fillJetMatchHistos("all_four_gen_", gen_matched, genQuarks, genAK4Jets)
 
           #pT and eta of the gen AK4 jets
           for i,j in enumerate(genAK4Jets):
@@ -457,18 +504,20 @@ class ExampleAnalysis(Module):
           self.h_mAll.Fill(sumJet.M())
 
         reco_mass_minpt = massRecoPtMin(jets, None, to_consider=6)
-
         self.h_massRecoMinPt.Fill(reco_mass_minpt)
+        jets_b_tagged = [jets[i].btagDeepFlavB > bTagWPs[1] for i in range(len(jets))]
+        highest_b_idxs = heapq.nlargest(2, (i for i in range(len(jets)) if jets_b_tagged[i]), key=lambda x: jets[x].p4().Pt())
+        self.fillJetReco(jets, jets_b_tagged, highest_b_idxs)
 
-        reco_matched = orderedMatcher(jets, genQuarks)
-        if reco_matched:
-            self.fillJetMatchHistos("reco_", reco_matched, jets)
-            self.fillJetMatchReco("reco_", reco_matched, jets, bTagWPs[1])
-            num_matched = sum(1 for x in reco_matched if x[0] is not None)
-            if num_matched == 4:
-                self.fillJetMatchHistos("all_four_reco_", reco_matched, jets)
-                self.fillJetMatchReco("all_four_reco_",
-                                      reco_matched, jets, bTagWPs[1])
+        if self.isSignal:
+            reco_matched = orderedMatcher(jets, genQuarks)
+            if reco_matched:
+                self.fillJetMatchHistos("reco_", reco_matched, genQuarks, jets)
+                self.fillJetMatchReco("", reco_matched, jets, jets_b_tagged, highest_b_idxs)
+                num_matched = sum(1 for x in reco_matched if x[0] is not None)
+                if num_matched == 4:
+                    self.fillJetMatchHistos("all_four_reco_", reco_matched, genQuarks, jets)
+                    self.fillJetMatchReco("all_four_", reco_matched, jets, jets_b_tagged, highest_b_idxs)
                 
         return True
 
@@ -530,6 +579,7 @@ else:
   files = open('samples/{}'.format(sampleFile)).read().split('\n')
   #files = glob.glob('/eos/uscms/store/user/dmahon/condor/RPVSingleStopMC/NANOAOD/NANOAOD-{}-*.root'.format(masses))
   files = [['root://cmsxrootd.fnal.gov/' + x.replace('/eos/uscms','') for x in files][:-1][args.n - 1]]
+  print(files)
   if len(files) != 1: print('WARNING: Multiple files selected. All must be from the same MC campaign.')
   if 'UL16' in files[0]: 
     if 'preVFP' in files[0]:	MCCampaign = 'UL2016preVFP'
@@ -541,3 +591,4 @@ else:
     sys.exit()
  
   p = PostProcessor(".", files, cut=preselection, branchsel=None, modules=[ ExampleAnalysis(isSignal=0,MCCampaign=MCCampaign)], noOut=True, histFileName='{}/{}-{}.root'.format(outputPath,args.sample,args.n), histDirName="plots", maxEntries=None)
+  p.run()
