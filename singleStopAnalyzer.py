@@ -91,6 +91,10 @@ class ExampleAnalysis(Module):
         
         self.h_HT 			= ROOT.TH1F('HT',	 	';H_{T} [GeV]',			  	150,	0,	3000	)
         self.h_MET                      = ROOT.TH1F('MET',              ';p^{miss}_{T} [GeV]',                  50,     0,      1000    )
+        self.h_dPhiMET1                 = ROOT.TH1F('dPhiMET1',         ';|#Delta#phi_{p^{miss}_{T},1}|',       50,     0,      5       )
+        self.h_dPhiMET2                 = ROOT.TH1F('dPhiMET2',         ';|#Delta#phi_{p^{miss}_{T},1}|',       50,     0,      5       )
+        self.h_dPhiMET3                 = ROOT.TH1F('dPhiMET3',         ';|#Delta#phi_{p^{miss}_{T},1}|',       50,     0,      5       )
+        self.h_dPhiMET4                 = ROOT.TH1F('dPhiMET4',         ';|#Delta#phi_{p^{miss}_{T},1}|',       50,     0,      5       )
         self.h_nJets	  		= ROOT.TH1F('nJets',  	  	';N_{j}',  				20, 	0,	20  	)
         self.h_nbLoose 			= ROOT.TH1F('nbLoose', 	  	';n_{b} (loose)',  			7,	0,	7  	)
         self.h_nbMedium                 = ROOT.TH1F('nbMedium',         ';n_{b} (medium)',                      7,      0,      7       )
@@ -101,6 +105,8 @@ class ExampleAnalysis(Module):
         self.h_mAll             	= ROOT.TH1F('mAll',       	';m_{#sum j} [GeV]',                   	150,	0,	3000	)
         self.h_m4   			= ROOT.TH1F('m4',   	  	';m_{4j} [GeV]',   			150,	0,	3000	)
         self.h_m3   			= ROOT.TH1F('m3',   	  	';m_{3j} [GeV]',   			150,	0,	3000	)
+        self.h_m3NoLead                 = ROOT.TH1F('m3NoLead',         ';m_{3j} (excl. leading) [GeV]',        150,    0,      3000    )
+        self.h_m3NoLeadOrSub            = ROOT.TH1F('m3NoLeadOrSub',    ';m_{3j} (excl. lead and sub) [GeV]',   150,    0,      3000    )
         self.h_pT1          		= ROOT.TH1F('pT1',           	';p_{T,1} [GeV]',                    	150,	0,	1500 	)
         self.h_pT2          		= ROOT.TH1F('pT2',           	';p_{T,2} [GeV]',                    	150,	0,	1500 	)
         self.h_pT3          		= ROOT.TH1F('pT3',           	';p_{T,3} [GeV]',                    	150,	0,	1500 	)
@@ -109,7 +115,6 @@ class ExampleAnalysis(Module):
         self.h_eta2          		= ROOT.TH1F('eta2',       	';#eta_{2}',     			80,	-8,	8	)
         self.h_eta3          		= ROOT.TH1F('eta3',       	';#eta_{3}',     			80,	-8,	8	)
         self.h_eta4          		= ROOT.TH1F('eta4',       	';#eta_{4}',     			80,	-8,	8	)
-        self.h_m3NoLead      		= ROOT.TH1F('m3NoLead',   	';m_{3j} (excl. leading) [GeV]',	150,	0,	3000	)
         self.h_dEta12			= ROOT.TH1F('dEta12',           ';|#Delta#eta_{1,2}|',                  50,     0,     	5     	)
         self.h_dPhi12			= ROOT.TH1F('dPhi12',           ';|#Delta#phi_{1,2}|',                  50,     0,      5     	)
         self.h_dR12			= ROOT.TH1F('dR12',           	';#Delta R_{1,2}',                    	35,     0,      7     	)
@@ -143,6 +148,8 @@ class ExampleAnalysis(Module):
         genAK4Jets     = list(Collection(event,"GenJet"))
         goodElectrons  = filter(lambda x: x.cutBased == 4 and x.miniPFRelIso_all < 0.1 and x.pt > 30 and abs(x.eta) < 2.4,list(Collection(event,"Electron")))
         goodMuons      = filter(lambda x: x.mediumId and x.miniPFRelIso_all < 0.2 and x.pt > 30 and abs(x.eta) < 2.4,list(Collection(event,"Muon")))
+        MET            = ROOT.TVector2()
+        MET.SetMagPhi(event.MET_pt,event.MET_phi)
 
         # Get only outgoing particles of the hardest subprocess
         gens = filter(lambda x: (((x.statusFlags >> 13) & 1) and ((x.statusFlags >> 8) & 1)) and not (((abs(x.pdgId) == 1) or (abs(x.pdgId) == 3)) and ((x.statusFlags >> 11) & 1)), genParts)
@@ -275,10 +282,11 @@ class ExampleAnalysis(Module):
         # RECO
         #-----------------------------------------------------------------------
 
-        sumJet          = ROOT.TLorentzVector()
-        sumJet4         = ROOT.TLorentzVector()
-        sumJet3         = ROOT.TLorentzVector()
-        sumJet3NoLead   = ROOT.TLorentzVector()
+        sumJet             = ROOT.TLorentzVector()
+        sumJet4            = ROOT.TLorentzVector()
+        sumJet3            = ROOT.TLorentzVector()
+        sumJet3NoLead      = ROOT.TLorentzVector()
+        sumJet3NoLeadOrSub = ROOT.TLorentzVector()
 
         # n jets
         self.h_nJets.Fill(len(jets))
@@ -290,7 +298,7 @@ class ExampleAnalysis(Module):
         self.h_nbTight.Fill(len(tightBs))
 
         # Event characteristics
-        self.h_MET.Fill(event.MET_pt)
+        self.h_MET.Fill(MET.Mod())
 
         # 4 leading jet pTs
         HT = 0; nbLoose = 0; nbMedium = 0; nbTight=0
@@ -300,18 +308,25 @@ class ExampleAnalysis(Module):
           if i < 4:           sumJet4 += j.p4()
           if i < 3:           sumJet3 += j.p4()
           if i > 0 and i < 4: sumJet3NoLead += j.p4()
+          if i > 1 and i < 5: sumJet3NoLeadOrSub += j.p4()
           if i == 0:
            self.h_pT1.Fill(j.pt)
            self.h_eta1.Fill(j.eta)
+           self.h_dPhiMET1.Fill(abs(j.p4().EtaPhiVector().DeltaPhi(MET)))
           if i == 1:
            self.h_pT2.Fill(j.pt)
            self.h_eta2.Fill(j.eta)
+           self.h_dPhiMET2.Fill(abs(j.p4().EtaPhiVector().DeltaPhi(MET)))
           if i == 2:
            self.h_pT3.Fill(j.pt)
            self.h_eta3.Fill(j.eta)
+           self.h_dPhiMET3.Fill(abs(j.p4().EtaPhiVector().DeltaPhi(MET)))
           if i == 3:
            self.h_pT4.Fill(j.pt)
            self.h_eta4.Fill(j.eta)
+           self.h_dPhiMET4.Fill(abs(j.p4().EtaPhiVector().DeltaPhi(MET)))
+        if len(jets) >= 5:
+          self.h_m3NoLeadOrSub.Fill(sumJet3NoLeadOrSub.M())
         if len(jets) >= 4:
           self.h_m4.Fill(sumJet4.M())
           self.h_m3NoLead.Fill(sumJet3NoLead.M())
@@ -330,7 +345,7 @@ class ExampleAnalysis(Module):
         return True
 
 parser = argparse.ArgumentParser(description='Single Stop Analyzer')
-parser.add_argument('--sample',type=str,default='signal',choices=['signal','TT','TT2018','QCD','QCD2018'],help='Sample to run over')
+parser.add_argument('--sample',type=str,default='signal',choices=['signal','TT','TT2018','QCD','QCD2018','ZQQ2018','ST2018','WQQ2018','ZNuNu2018','Diboson2018'],help='Sample to run over')
 parser.add_argument('--tag',type=str,default='test',help='Tag for output label')
 parser.add_argument('-n',type=int,default=1,help='Sample index to run over for backgrounds')
 parser.add_argument('--points',type=str,default='all',help='Signal point(s) to run over, comma separated in MSTOP_MCHI format; `"all`" to run over all available points')
@@ -340,10 +355,15 @@ outputPath = 'output/{}'.format(args.tag)
 if not os.path.exists(outputPath):
   os.makedirs(outputPath)
 
-if args.sample == 'TT': sampleFile = 'TTToHadronic.txt'
-elif args.sample == 'TT2018': sampleFile = 'TTToHadronic2018.txt'
-elif args.sample == 'QCD': sampleFile = 'QCDBEnriched.txt'
-elif args.sample == 'QCD2018': sampleFile = 'QCDBEnriched2018.txt'
+if   args.sample == 'TT':          sampleFile = 'TTToHadronic.txt'
+elif args.sample == 'TT2018':      sampleFile = 'TTToHadronic2018.txt'
+elif args.sample == 'QCD':         sampleFile = 'QCDBEnriched.txt'
+elif args.sample == 'QCD2018':     sampleFile = 'QCDBEnriched2018.txt'
+elif args.sample == 'ZQQ2018':     sampleFile = 'ZJetsToQQ2018.txt'
+elif args.sample == 'ST2018':      sampleFile = 'STHadronic2018.txt'
+elif args.sample == 'WQQ2018':     sampleFile = 'WJetsToQQ2018.txt'
+elif args.sample == 'ZNuNu2018':   sampleFile = 'ZJetsToNuNu2018.txt'
+elif args.sample == 'Diboson2018': sampleFile = 'Diboson2018.txt'
 elif args.sample != 'signal': print('ERROR: Unexpected sample argument')
 
 preselection = (

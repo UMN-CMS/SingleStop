@@ -13,6 +13,11 @@ case $sample in
   "QCD2018") sampleFile="QCDBEnriched2018.txt";;
   "TT") sampleFile="TTToHadronic.txt";;
   "TT2018") sampleFile="TTToHadronic2018.txt";;
+  "ZQQ2018") sampleFile="ZJetsToQQ2018.txt";;
+  "ST2018") sampleFile="STHadronic2018.txt";;
+  "WQQ2018") sampleFile="WJetsToQQ2018.txt";;
+  "ZNuNu2018") sampleFile="ZJetsToNuNu2018.txt";;
+  "Diboson2018") sampleFile="Diboson2018.txt";;
   *) echo "ERROR: Invalid sample argument.";exit 1;;
 esac
 
@@ -37,6 +42,7 @@ echo "Running on: \`uname -a\`" #Condor job is running on this node
 echo "System software: \`cat /etc/redhat-release\`" #Operating System on that node
 source /cvmfs/cms.cern.ch/cmsset_default.sh
 export SCRAM_ARCH=slc7_amd64_gcc820
+export XRD_STREAMTIMEOUT=600
 scramv1 project CMSSW CMSSW_10_6_19_patch2
 echo "Running ls -alrth:"
 ls -alrth
