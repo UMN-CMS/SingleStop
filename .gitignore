@@ -3,3 +3,5 @@ __pycached__/
 *.orig
 output/
 plots/
+condor/
+!condor/doSubmit.sh
