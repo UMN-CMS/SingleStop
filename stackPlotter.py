@@ -8,9 +8,7 @@ colors = [2, 3, 4]
 ROOT.gStyle.SetPalette(ROOT.kOcean)
 
 file1 = ROOT.TFile.Open('root-test-files/signal_1500_600.root', "READ")
-param_list = []
-for key in file1.GetListOfKeys():
-	param_list.append(key.ReadObj().GetName())
+param_list = [key.GetName() for key in file1.GetListOfKeys()]
 ROOT.TFile.Close(file1)
 
 for param in param_list:
