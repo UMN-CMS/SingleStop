@@ -21,6 +21,8 @@ mkdir -p job out err log samples
 
 cp ../samples/"$sampleFile" samples
 cp ../singleStopAnalyzer.py .
+cp ../match_algos.py .
+cp ../mass_reco.py .
 
 sed -i "2,4s/PhysicsTools.NanoAODTools.postprocessing.//g" singleStopAnalyzer.py
 
@@ -60,7 +62,7 @@ Executable	= job/submit_\$(ijobname).sh
 Output		= out/submit_\$(ijobname).out
 Error		= err/submit_\$(ijobname).err
 Log		= log/submit_\$(ijobname).log
-transfer_input_files = samples,framework,singleStopAnalyzer.py
+transfer_input_files = samples,framework,singleStopAnalyzer.py,match_algos.py,mass_reco.py
 transfer_output_files = output
 should_transfer_files = YES
 when_to_transfer_output = ON_EXIT
