@@ -63,3 +63,14 @@ cd [CONDOR LABEL]
 ```
 The outputs from condor will be send to `output/test/` within the new directory you made, labelled with the sample and indexed by line number in the corresponsing sample file within `../samples`. 
 Note: `doSubmit.sh` will simply copy over the `singleStopAnalyzer.py` script from the parent directory, as well as the relevant file list from `samples`. 
+### Scaling MC
+The analyzer does not apply any MC weights, i.e. all histograms are filled with a weight of 1.
+The `scaleMC.py` script can be run over the output of the analyzer to scale all histograms to the full Run 2 luminosity (any 2018-only samples are automatically scaled to the full Run 2 luminosity).
+This script also calls `hadd` to combine all outputs, e.g. all those from condor jobs in the `--input` directory. 
+The output will be a single ROOT file labelled with the sample name.
+```
+python scaleMC.py --input [PATH TO ANALYZER ROOT OUTPUTS] --output [OUTPUT DIRECTORY] --sample [SAMPLE]
+```
+`[SAMPLE]` is the same as that used by the analyzer. 
+Use `--help` to see all options.
+Note: `scaleMC.py` extracts all histograms from the `TDirectory` named `plots` and write them directly to the output ROOT file without the `plots` directory.

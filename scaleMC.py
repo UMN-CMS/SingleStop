@@ -84,7 +84,7 @@ if 'QCD' in sample:
     for key,value in SFs.items():
       if key[0] == 3: SFs[key] *= lumiTarget / lumiSample
   
-  with open('../samples/{}'.format(sampleFile)) as f:
+  with open('samples/{}'.format(sampleFile)) as f:
     for i,line in enumerate(f):
      
       period = -1
@@ -210,7 +210,7 @@ if sample == 'ZQQ2018':
     for key,value in SFs.items():
       if key[0] == 3: SFs[key] *= lumiTarget / lumiSample
   
-  with open('../samples/{}'.format(sampleFile)) as f:
+  with open('samples/{}'.format(sampleFile)) as f:
     for i,line in enumerate(f):
      
       period = -1
@@ -274,7 +274,7 @@ if sample == 'ZNuNu2018':
     for key,value in SFs.items():
       if key[0] == 3: SFs[key] *= lumiTarget / lumiSample
   
-  with open('../samples/{}'.format(sampleFile)) as f:
+  with open('samples/{}'.format(sampleFile)) as f:
     for i,line in enumerate(f):
      
       period = -1
@@ -338,7 +338,7 @@ if sample == 'WQQ2018':
     for key,value in SFs.items():
       if key[0] == 3: SFs[key] *= lumiTarget / lumiSample
   
-  with open('../samples/{}'.format(sampleFile)) as f:
+  with open('samples/{}'.format(sampleFile)) as f:
     for i,line in enumerate(f):
      
       period = -1
@@ -398,7 +398,7 @@ if sample == 'Diboson2018':
     for key,value in SFs.items():
       if key[0] == 3: SFs[key] *= lumiTarget / lumiSample
   
-  with open('../samples/{}'.format(sampleFile)) as f:
+  with open('samples/{}'.format(sampleFile)) as f:
     for i,line in enumerate(f):
      
       period = -1
@@ -459,7 +459,7 @@ if sample == 'ST2018':
     for key,value in SFs.items():
       if key[0] == 3: SFs[key] *= lumiTarget / lumiSample
   
-  with open('../samples/{}'.format(sampleFile)) as f:
+  with open('samples/{}'.format(sampleFile)) as f:
     for i,line in enumerate(f):
      
       period = -1
