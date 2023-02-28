@@ -3,17 +3,26 @@ import os, argparse, math, ROOT
 path = 'root-test-files'
 files = ['QCD.root', 'TT.root', 'signal_1500_600.root']
 colors = [2, 3, 4]
-h_stack = ROOT.THStack()
+
 
 ROOT.gStyle.SetPalette(ROOT.kOcean)
 
-for i, f in enumerate(files):
-	filepath = '{}/{}'.format(path, f)
-	newfile = ROOT.TFile.Open(filepath, "READ")
-	h_pT1Gen = newfile.Get('pT1Gen')
-	#ROOT.gStyle.SetPalette(3)	
-	h_stack.Add(h_pT1Gen)	
+file1 = ROOT.TFile.Open('root-test-files/signal_1500_600.root', "READ")
+param_list = []
+for key in file1.GetListOfKeys():
+	param_list.append(key.ReadObj().GetName())
+ROOT.TFile.Close(file1)
 
-c1 = ROOT.TCanvas()
-h_stack.Draw('HIST')
-c1.SaveAs('plots/test-stack.png')
+for param in param_list:
+	h_stack = ROOT.THStack()
+	for i, f in enumerate(files):
+		filepath = '{}/{}'.format(path, f)
+		newfile = ROOT.TFile.Open(filepath, "READ")	
+		h_new = newfile.Get(param)
+		ROOT.TFile.Close(newfile)
+		#ROOT.gStyle.SetPalette(3)	
+		h_stack.Add(h_new)	
+
+	c1 = ROOT.TCanvas()
+	h_stack.Draw('HIST')
+	c1.SaveAs('plots/{}.png'.format(param))
