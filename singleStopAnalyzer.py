@@ -270,12 +270,12 @@ class ExampleAnalysis(Module):
 
         if btag2 is not None:
             getattr(self,"h_subleadingBJetPt").Fill(jets[btag2].p4().Pt())
-            getattr(self,"h_etaTop4NoBTag").Fill(
-                sum(jets[i].p4().Pt() for i in range(0,min(4,len(jets))) if i != btag1))
             getattr(self,"h_topBJetdR").Fill(jets[btag1].p4().DeltaR(jets[btag2].p4()))
             getattr(self,"h_subleadingTagBJetOrdinality").Fill(btag2)
         for i in range(0,4):
             getattr(self,"h_jet"+str(i)+"IsBTagged").Fill(1 if jets_b_tagged[i] else 0)
+        getattr(self,"h_etaTop4NoBTag").Fill(
+                sum(jets[i].p4().Pt() for i in range(0,min(4,len(jets))) if i != btag1))
         
 
 
@@ -506,7 +506,7 @@ class ExampleAnalysis(Module):
         reco_mass_minpt = massRecoPtMin(jets, None, to_consider=6)
         self.h_massRecoMinPt.Fill(reco_mass_minpt)
         jets_b_tagged = [jets[i].btagDeepFlavB > bTagWPs[1] for i in range(len(jets))]
-        highest_b_idxs = heapq.nlargest(2, (i for i in range(len(jets)) if jets_b_tagged[i]), key=lambda x: jets[x].p4().Pt())
+        highest_b_idxs = heapq.nlargest(2, [i for i in range(len(jets)) if jets_b_tagged[i]], key=lambda x: jets[x].p4().Pt())
         self.fillJetReco(jets, jets_b_tagged, highest_b_idxs)
 
         if self.isSignal:

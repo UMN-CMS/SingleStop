@@ -21,10 +21,10 @@ case $sample in
   *) echo "ERROR: Invalid sample argument.";exit 1;;
 esac
 
-rm -rf job out err log samples
-mkdir -p job out err log samples
+rm -rf "job/$sample" "out/$sample" "err/$sample" "log/$sample" samples/$sample/samples
+mkdir -p "job/$sample" "out/$sample" "err/$sample" "log/$sample" samples/$sample/samples
 
-cp ../samples/"$sampleFile" samples
+cp ../samples/"$sampleFile" samples/$sample/samples
 cp ../singleStopAnalyzer.py .
 cp ../match_algos.py .
 cp ../mass_reco.py .
@@ -35,7 +35,7 @@ i=1
 while read file; do
 #if (($i > 2)); then continue; fi
 
-jobfilename=job/submit_${i}.sh
+jobfilename=job/"$sample"/submit_${i}.sh
 
 cat << EOT >> ${jobfilename} 
 #!/bin/bash
@@ -60,15 +60,15 @@ ls -alrth
 EOT
 
 i=$((i+1))
-done <samples/"$sampleFile"
+done <samples/$sample/samples/"$sampleFile"
 
-submitfilename=job/submit.sub
+submitfilename=job/"$sample"/submit.sub
 cat << EOT >> $submitfilename
-Executable	= job/submit_\$(ijobname).sh
-Output		= out/submit_\$(ijobname).out
-Error		= err/submit_\$(ijobname).err
-Log		= log/submit_\$(ijobname).log
-transfer_input_files = samples,framework,singleStopAnalyzer.py,match_algos.py,mass_reco.py
+Executable	= job/$sample/submit_\$(ijobname).sh
+Output		= out/$sample/submit_\$(ijobname).out
+Error		= err/$sample/submit_\$(ijobname).err
+Log		= log/$sample/submit_\$(ijobname).log
+transfer_input_files = samples/$sample/samples,framework,singleStopAnalyzer.py,match_algos.py,mass_reco.py
 transfer_output_files = output
 should_transfer_files = YES
 when_to_transfer_output = ON_EXIT
