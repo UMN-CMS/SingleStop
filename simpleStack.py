@@ -15,4 +15,5 @@ for i, f in enumerate(files):
 	#h_pT1Gen.SetLineColor(colors[i])
 	h_stack.Add(h_pT1Gen)
 h_stack.Draw('HIST')
+ROOT.gPad.SetLogy()
 c1.SaveAs('plots/pT1Gen-stack.png')
