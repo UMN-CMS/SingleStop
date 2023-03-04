@@ -12,7 +12,7 @@ param_list = [key.GetName() for key in file1.GetListOfKeys()]
 ROOT.TFile.Close(file1)
 
 for param in param_list:
-	h_stack = ROOT.THStack("stack", param)
+	h_stack = ROOT.THStack(param, "{};{};Events".format(param, param))
 	print(param)
 	for i, f in enumerate(files):
 		filepath = '{}/{}'.format(path, f)
@@ -26,5 +26,6 @@ for param in param_list:
 	if not h_new or not h_new.InheritsFrom('TH1'):
 		continue
 	c1 = ROOT.TCanvas()
+	ROOT.gPad.SetLogy()
 	h_stack.Draw('HIST')
 	c1.SaveAs('plots/{}.png'.format(param))
