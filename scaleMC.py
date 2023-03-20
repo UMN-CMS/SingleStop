@@ -3,7 +3,7 @@
 import os, sys, ROOT, argparse
 
 parser = argparse.ArgumentParser(description='MC Scaler')
-parser.add_argument('--sample',type=str,required=True,choices=['signal','TT2018','QCD','QCD2018','ZQQ2018','ST2018','WQQ2018','ZNuNu2018','Diboson2018'],help='Sample to scale')
+parser.add_argument('--sample',type=str,required=True,choices=['signal','TT2018','QCD2018','ZQQ2018','ST2018','WQQ2018','ZNuNu2018','Diboson2018'],help='Sample to scale')
 parser.add_argument('--input',type=str,required=True,help='Path to input files')
 parser.add_argument('--output',type=str,required=True,help='Path to output scaled file')
 args = parser.parse_args()
@@ -22,7 +22,7 @@ except OSError: pass
 
 if   args.sample == 'TT':          sampleFile = 'TTToHadronic.txt'
 elif args.sample == 'TT2018':      sampleFile = 'TTToHadronic2018.txt'
-elif args.sample == 'QCD':         sampleFile = 'QCDBEnriched.txt'
+#elif args.sample == 'QCD':         sampleFile = 'QCDBEnriched.txt'
 elif args.sample == 'QCD2018':     sampleFile = 'QCDBEnriched2018.txt'
 elif args.sample == 'ZQQ2018':     sampleFile = 'ZJetsToQQ2018.txt'
 elif args.sample == 'ST2018':      sampleFile = 'STHadronic2018.txt'
@@ -73,7 +73,7 @@ if 'QCD' in sample:
         (3,700) : 59.8 * 3.000e+02 * 1E3 / 1844165,
         (3,1000): 59.8 * 4.755e+01 * 1E3 / 1330829,
         (3,1500): 59.8 * 4.030e+00 * 1E3 / 1431254,
-        (3,2000): 59.8 * 6.984e-01 * 1E3 / 1470453,
+        (3,2000): 59.8 * 6.984e-01 * 1E3 / 1357334,
   }
   
   if scale2018toRun2:
@@ -133,9 +133,9 @@ if 'QCD' in sample:
 
 if sample == 'TT2018':
 
-  lumiTarget = 137.62
-  lumiSample = 334206000 / (831.8 * 0.457) * 1E-3
-  
+  lumiTarget = 137.62 if scale2018toRun2 else 59.8
+  lumiSample = 331506194 / (831.8 * 0.457) * 1E-3
+
   SF = lumiTarget / lumiSample
   
   os.system('hadd -f {}/{}-temp.root {}/{}*.root'.format(outputDir,sample,inputDir,sample))
@@ -444,11 +444,11 @@ if sample == 'ST2018':
 
   SFs = {
   	# 2018
-        (3,'s-channel'):         59.8 * 11.03 * 0.457 * 1E3 / 16259000,
-        (3,'t-channel_antitop'): 59.8 * 80.95         * 1E3 / 95627000,
-        (3,'t-channel_top'):     59.8 * 136.02        * 1E3 / 178336000,
-        (3,'tW_antitop'):        59.8 * 35.85         * 1E3 / 7749000,
-        (3,'tW_top'):            59.8 * 35.85         * 1E3 / 7956000,
+        (3,'s-channel'):         59.8 * 11.03 * 0.457 * 1E3 / 10592646,
+        (3,'t-channel_antitop'): 59.8 * 80.95         * 1E3 / 90022642,
+        (3,'t-channel_top'):     59.8 * 136.02        * 1E3 / 167111718,
+        (3,'tW_antitop'):        59.8 * 35.85         * 1E3 / 7748690,
+        (3,'tW_top'):            59.8 * 35.85         * 1E3 / 7955614,
   }
   
   if scale2018toRun2:
