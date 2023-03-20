@@ -132,6 +132,7 @@ class ExampleAnalysis(Module):
             ("matchMassReconstruction", "matchMassReconstruction"),
             ("matchTop3MassReconstruction", "matchTop3MassReconstruction"),
             ("matchSubTop3MassReconstruction", "matchSubTop3MassReconstruction"),
+            ("perfectCharginoMassReconstruction", "perfectCharginoMassReconstruction"),
                            ]
         for prefix in ("".join(x) for x in itertools.product(["", "all_four_"], ["gen_", "reco_"])):
             self._createManySameHist([(prefix + x[0], x[1]) for x in match_names], 11,0,11)
@@ -144,7 +145,9 @@ class ExampleAnalysis(Module):
 
 
         self.h_leadingBJetPt             	= ROOT.TH1F('leadingBJetPt', 		';p_{T,leading jet}  [GeV]',	150,	0,    	1500	)
+        self.h_loose_leadingBJetPt             	= ROOT.TH1F('leadingBJetPt', 		';p_{T,leading jet}  [GeV]',	150,	0,    	1500	)
         self.h_subleadingBJetPt             	= ROOT.TH1F('subleadingBJetPt', 		';p_{T,subleading jet}  [GeV]',	150,	0,    	1500	)
+        self.h_loose_subleadingBJetPt             	= ROOT.TH1F('subleadingBJetPt', 		';p_{T,subleading jet}  [GeV]',	150,	0,    	1500	)
 
         # Trigger
         self.h_L1_HTT450er	 	= ROOT.TH1F('L1_HTT450er',	';L1_HTT450er',				2,	0,	2	)
@@ -185,13 +188,16 @@ class ExampleAnalysis(Module):
         self.h_m3Vsm4			= ROOT.TH2F('m3Vsm4',		';m_{4j} [GeV];m_{3j} [GeV]',		150,0,3000,150,0,3000   )
         self.h_m3NoLeadVsm4		= ROOT.TH2F('m3NoLeadVsm4',     ';m_{4j} [GeV];m_{3j} (excl. leading) [GeV]',150,0,3000,150,0,3000)
 
+
         self.h_massRecoMinPt			= ROOT.TH1F('massRecoMinPt',           	'massRecoMinPt',                    	300,     0,      3000     	)
 
-        for prefix in ["", "all_four_"]:
+        for prefix in ["", "all_four_", "loose_"]:
             self._createHist(prefix + "leadingTagBJetOrdinality", "leadingTagBJetOrdinality", 7,0,7)
             self._createHist(prefix + "subleadingTagBJetOrdinality", "subleadingTagBJetOrdinality", 7,0,7)
             self._createHist(prefix + "leadingBJetParticleMatch", "leadingBJetParticleMatch", 6,0,6) #If the leading B jet matched to a gen particle, which one
 
+        for prefix in ["", "loose_"]:
+            self._createHist(prefix + "topBJetdR", "topBJetdR", 35,0,7)
             self._createHist(prefix + "topBJetdR", "topBJetdR", 35,0,7)
             self._createHist(prefix + "etaTop4NoBTag", "etaTop4NoBTag", 100,-5,5)
 
@@ -231,16 +237,17 @@ class ExampleAnalysis(Module):
                 getattr(self,"h_" + prefix + "jet" + str(i) + "MatchOverGen").Fill(jets[match_info[i][0]].p4().Pt()/quarks[i].p4().Pt())
         getattr(self, "h_" + prefix + "matchMassReconstruction").Fill(
             sum((jets[i].p4() for i,_ in match_info if i is not None), ROOT.TLorentzVector()).M())
+
+        getattr(self, "h_" + prefix + "perfectCharginoMassReconstruction").Fill(
+                sum((jets[i].p4() for i,_ in match_info[1:] if i is not None), ROOT.TLorentzVector()).M())
+
         matched_jets_idx = [i for i,_ in match_info if i is not None]
         ms = sorted(matched_jets_idx)
-        getattr(self, "h_" + prefix + "matchTop3MassReconstruction").Fill(
-            sum((jets[i].p4() for i in ms), ROOT.TLorentzVector()).M())
-        getattr(self, "h_" + prefix + "matchSubTop3MassReconstruction").Fill(
+        if len(ms) >= 3:
+            getattr(self, "h_" + prefix + "matchTop3MassReconstruction").Fill(
+            sum((jets[i].p4() for i in ms), ROOT.TLorentzVector()).M()) 
+            getattr(self, "h_" + prefix + "matchSubTop3MassReconstruction").Fill(
             sum((jets[i].p4() for i in ms[1:]), ROOT.TLorentzVector()).M())
-
-
-        
-
 
 
     def fillJetMatchReco(self, prefix, match_info, jets, jet_btags_passes, btag_ranked):
@@ -258,23 +265,23 @@ class ExampleAnalysis(Module):
             
 
 
-    def fillJetReco(self, jets, jet_btags_passes, btag_ranked):
+    def fillJetReco(self,jets, jet_btags_passes, btag_ranked,prefix=""):
         highest_b_idxs = btag_ranked
         jets_b_tagged=jet_btags_passes
 
         btag1 = highest_b_idxs[0] if len(highest_b_idxs) > 0 else None
         btag2 = highest_b_idxs[1] if len(highest_b_idxs) > 1 else None
         if btag1 is not None:
-            getattr(self,"h_leadingBJetPt").Fill(jets[btag1].p4().Pt())
-            getattr(self, "h_leadingTagBJetOrdinality").Fill(btag1)
+            getattr(self,"h_{}leadingBJetPt".format(prefix)).Fill(jets[btag1].p4().Pt())
+            getattr(self, "h_{}leadingTagBJetOrdinality".format(prefix)).Fill(btag1)
 
         if btag2 is not None:
-            getattr(self,"h_subleadingBJetPt").Fill(jets[btag2].p4().Pt())
-            getattr(self,"h_topBJetdR").Fill(jets[btag1].p4().DeltaR(jets[btag2].p4()))
-            getattr(self,"h_subleadingTagBJetOrdinality").Fill(btag2)
+            getattr(self,"h_{}subleadingBJetPt".format(prefix)).Fill(jets[btag2].p4().Pt())
+            getattr(self,"h_{}topBJetdR".format(prefix)).Fill(jets[btag1].p4().DeltaR(jets[btag2].p4()))
+            getattr(self,"h_{}subleadingTagBJetOrdinality".format(prefix)).Fill(btag2)
         for i in range(0,4):
-            getattr(self,"h_jet"+str(i)+"IsBTagged").Fill(1 if jets_b_tagged[i] else 0)
-        getattr(self,"h_etaTop4NoBTag").Fill(
+            getattr(self,("h_{}jet"+str(i)+"IsBTagged").format(prefix)).Fill(1 if jets_b_tagged[i] else 0)
+        getattr(self,"h_{}etaTop4NoBTag".format(prefix)).Fill(
                 sum(jets[i].p4().Pt() for i in range(0,min(4,len(jets))) if i != btag1))
         
 
@@ -314,6 +321,7 @@ class ExampleAnalysis(Module):
         if len(mediumBs) < 1: return False
         if not 2 < abs(jets[0].p4().DeltaR(jets[1].p4())) < 4: return False
         if len(tightTs) != 0: return False
+        if jets[0].btagDeepFlavB < bTagWPs[1]: return False
 
         if self.isSignal:
 
@@ -509,6 +517,10 @@ class ExampleAnalysis(Module):
         highest_b_idxs = heapq.nlargest(2, [i for i in range(len(jets)) if jets_b_tagged[i]], key=lambda x: jets[x].p4().Pt())
         self.fillJetReco(jets, jets_b_tagged, highest_b_idxs)
 
+        loose_jets_b_tagged = [jets[i].btagDeepFlavB > bTagWPs[0] for i in range(len(jets))]
+        loose_highest_b_idxs = heapq.nlargest(2, [i for i in range(len(jets)) if loose_jets_b_tagged[i]], key=lambda x: jets[x].p4().Pt())
+        self.fillJetReco(jets, loose_jets_b_tagged, loose_highest_b_idxs,prefix="loose_")
+
         if self.isSignal:
             reco_matched = orderedMatcher(jets, genQuarks)
             if reco_matched:
@@ -571,7 +583,7 @@ if args.sample == 'signal':
     #files = ['/uscms_data/d3/dmahon/RPVSingleStopRun3Patched/NANOAOD/files/NANOAOD-{}.root'.format(masses)]
     p = PostProcessor(".", files, cut=preselection, branchsel=None, modules=[
                     ExampleAnalysis(isSignal=1,MCCampaign='UL2018')], noOut=True, histFileName='{}/{}_{}.root'.format(outputPath,args.sample,masses), histDirName="plots",
-                    maxEntries=None,longTermCache=True, prefetch=True)
+                    maxEntries=None,longTermCache=False, prefetch=False)
     p.run()
 
 else:
