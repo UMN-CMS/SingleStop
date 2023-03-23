@@ -289,7 +289,7 @@ if sample == 'ZNuNu2018':
       if   '100To200' in line:   HT = 100	
       elif '200To400' in line:   HT = 200    
       elif '400To600' in line:   HT = 400
-      elif '600To800' in line:   HT = 400 
+      elif '600To800' in line:   HT = 600 
       elif '800To1200' in line:  HT = 800    
       elif '1200To2500' in line: HT = 1200
       elif '2500ToInf' in line:  HT = 2500
