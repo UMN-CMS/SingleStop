@@ -11,13 +11,15 @@ import argparse
 from math import sqrt,fabs,copysign
 from numpy import mean,std
 ROOT.PyConfig.IgnoreCommandLineOptions = True
+import time
 
 class ExampleAnalysis(Module):
 
-    def __init__(self,isSignal,MCCampaign):
+    def __init__(self,isSignal,MCCampaign,isSkimmed):
         self.writeHistFile = True
         self.isSignal = isSignal
         self.MCCampaign = MCCampaign
+        self.isSkimmed = isSkimmed
 
     def beginJob(self, histFile=None, histDirName=None):
         Module.beginJob(self, histFile, histDirName)
@@ -35,28 +37,28 @@ class ExampleAnalysis(Module):
         self.h_nJLHE                    = ROOT.TH1D('nJLHE',            ';N_{j} (LHE)',                         7,      0,      7       )
 
         # Jet kinematics
-        self.h_pT1Gen          		= ROOT.TH1F('pT1Gen',		';p_{T,1}^{gen} [GeV]',			150,	0, 	1500 	)
-        self.h_pT2Gen          		= ROOT.TH1F('pT2Gen',		';p_{T,2}^{gen} [GeV]',			150,	0,     	1500 	)
-        self.h_pT3Gen            	= ROOT.TH1F('pT3GEn',		';p_{T,3}^{gen} [GeV]',			150,	0,     	1500 	)
-        self.h_pT4Gen            	= ROOT.TH1F('pT4Gen',		';p_{T,4}^{gen} [GeV]',			150,	0,     	1500 	)
+        self.h_pT1Gen          		= ROOT.TH1F('pT1Gen',		';p_{T,1}^{gen} [GeV]',			75,	0, 	1500 	)
+        self.h_pT2Gen          		= ROOT.TH1F('pT2Gen',		';p_{T,2}^{gen} [GeV]',			75,	0,     	1500 	)
+        self.h_pT3Gen            	= ROOT.TH1F('pT3GEn',		';p_{T,3}^{gen} [GeV]',			75,	0,     	1500 	)
+        self.h_pT4Gen            	= ROOT.TH1F('pT4Gen',		';p_{T,4}^{gen} [GeV]',			75,	0,     	1500 	)
         self.h_eta1Gen     	       	= ROOT.TH1F('eta1Gen',		';#eta_{1}^{gen}',			80,	-8,	8	)
         self.h_eta2Gen  	       	= ROOT.TH1F('eta2Gen',		';#eta_{2}^{gen}',			80,	-8,    	8	)
         self.h_eta3Gen		       	= ROOT.TH1F('eta3Gen',		';#eta_{3}^{gen}',			80,	-8,   	8	)
         self.h_eta4Gen       		= ROOT.TH1F('eta4Gen',		';#eta_{4}^{gen}',			80,	-8,   	8	)
 
         # SUSY particle kinematics
-        self.h_pTStop              	= ROOT.TH1F('pTStop', 		';p_{T,#tilde{t}}}  [GeV]',		150,	0,    	1500	)
-        self.h_pTStopPlus          	= ROOT.TH1F('pTStopPlus', 	';p_{T,#tilde{t}^{+2/3}}  [GeV]',	150,	0,    	1500	)
-        self.h_pTStopMinus         	= ROOT.TH1F('pTStopMinus', 	';p_{T,#tilde{t}^{-2/3}} [GeV]',	150,	0,    	1500	)
-        self.h_pTChi               	= ROOT.TH1F('pTChi',		';p_{T,#tilde{#chi}^{#pm}}  [GeV]',     150,	0,    	1500	)
-        self.h_pTChiPlus           	= ROOT.TH1F('pTChiPlus', 	';p_{T,#chi^{+}} [GeV]',		150,	0,    	1500	)
-        self.h_pTChiMinus          	= ROOT.TH1F('pTChiMinus', 	';p_{T,#chi^{-}} [GeV]',		150,	0,    	1500	)
-        self.h_pTBStop             	= ROOT.TH1F('pTBStop', 		';p_{T,b from #tilde{t}}  [GeV]',	150,	0,    	1500	)
-        self.h_pTBStopPlus         	= ROOT.TH1F('pTBStopPlus', 	';p_{T,b from #tilde{t}^{+2/3}} [GeV]',	150,	0, 	1500	)
-        self.h_pTBStopMinus    	   	= ROOT.TH1F('pTBStopMinus', 	';p_{T,b from #tilde{t}^{-2/3}} [GeV]',	150,	0, 	1500	)
-        self.h_pTBChi              	= ROOT.TH1F('pTBChi', 		';p_{T,b from #tilde{#chi}^{#pm}}  [GeV]',150,	0, 	1500	)
-        self.h_pTBChiPlus          	= ROOT.TH1F('pTBChiPlus', 	';p_{T,b from #chi^{+}} [GeV]',		150,	0, 	1500	)
-        self.h_pTBChiMinus         	= ROOT.TH1F('pTBChiMinus', 	';p_{T,b from #chi^{-}} [GeV]',		150,	0, 	1500	) 
+        self.h_pTStop              	= ROOT.TH1F('pTStop', 		';p_{T,#tilde{t}}}  [GeV]',		75,	0,    	1500	)
+        self.h_pTStopPlus          	= ROOT.TH1F('pTStopPlus', 	';p_{T,#tilde{t}^{+2/3}}  [GeV]',	75,	0,    	1500	)
+        self.h_pTStopMinus         	= ROOT.TH1F('pTStopMinus', 	';p_{T,#tilde{t}^{-2/3}} [GeV]',	75,	0,    	1500	)
+        self.h_pTChi               	= ROOT.TH1F('pTChi',		';p_{T,#tilde{#chi}^{#pm}}  [GeV]',     75,	0,    	1500	)
+        self.h_pTChiPlus           	= ROOT.TH1F('pTChiPlus', 	';p_{T,#chi^{+}} [GeV]',		75,	0,    	1500	)
+        self.h_pTChiMinus          	= ROOT.TH1F('pTChiMinus', 	';p_{T,#chi^{-}} [GeV]',		75,	0,    	1500	)
+        self.h_pTBStop             	= ROOT.TH1F('pTBStop', 		';p_{T,b from #tilde{t}}  [GeV]',	75,	0,    	1500	)
+        self.h_pTBStopPlus         	= ROOT.TH1F('pTBStopPlus', 	';p_{T,b from #tilde{t}^{+2/3}} [GeV]',	75,	0, 	1500	)
+        self.h_pTBStopMinus    	   	= ROOT.TH1F('pTBStopMinus', 	';p_{T,b from #tilde{t}^{-2/3}} [GeV]',	75,	0, 	1500	)
+        self.h_pTBChi              	= ROOT.TH1F('pTBChi', 		';p_{T,b from #tilde{#chi}^{#pm}}  [GeV]',75,	0, 	1500	)
+        self.h_pTBChiPlus          	= ROOT.TH1F('pTBChiPlus', 	';p_{T,b from #chi^{+}} [GeV]',		75,	0, 	1500	)
+        self.h_pTBChiMinus         	= ROOT.TH1F('pTBChiMinus', 	';p_{T,b from #chi^{-}} [GeV]',		75,	0, 	1500	) 
 
         self.h_etaStop             	= ROOT.TH1F('etaStop', 		';#eta_{#tilde{t}}',			80,	-8,	8	)
         self.h_etaStopPlus         	= ROOT.TH1F('etaStopPlus', 	';#eta_{#tilde{t}^{+2/3}}',		80,	-8,	8	)
@@ -87,10 +89,6 @@ class ExampleAnalysis(Module):
         self.h_dEtaVsPTStop      	= ROOT.TH2F('dEtaVsPTStop',	';p_{T,#tilde{t}} [GeV];|#Delta#eta_{b,#tilde{#chi}^{#pm}}|',	75,	0,	1500,	80,	0,	8	)
         self.h_dEtaVsPTStopRatio 	= ROOT.TH2F('dEtaVsPTStopRatio',';p_{T,#tilde{t}} / #Delta m_{#tilde{t},#tilde{#chi}^{#pm}};|#Delta#eta_{b,#tilde{#chi}^{#pm}}|',40,0,2,80,0,8)
 
-        # Matching
-        self.h_jetMatch          	= ROOT.TH1D('jetMatch',		';Jet matched',				2,	0,	2   	)
-        self.h_leadJetMatch      	= ROOT.TH1D('leadJetMatch',	';Correct lead jet matched',		2,	0,	2   	)
-
         # Trigger
         self.h_L1_HTT450er	 	= ROOT.TH1D('L1_HTT450er',	';L1_HTT450er',				2,	0,	2	)
 
@@ -98,7 +96,7 @@ class ExampleAnalysis(Module):
         # RECO
         #-----------------------------------------------------------------------
         
-        self.h_HT 			= ROOT.TH1F('HT',	 	';H_{T} [GeV]',			  	150,	0,	3000	)
+        self.h_HT 			= ROOT.TH1F('HT',	 	';H_{T} [GeV]',			  	60,	0,	3000	)
         self.h_MET                      = ROOT.TH1F('MET',              ';p^{miss}_{T} [GeV]',                  50,     0,      1000    )
         self.h_dPhiMET1                 = ROOT.TH1F('dPhiMET1',         ';|#Delta#phi_{p^{miss}_{T},1}|',       50,     0,      5       )
         self.h_dPhiMET2                 = ROOT.TH1F('dPhiMET2',         ';|#Delta#phi_{p^{miss}_{T},1}|',       50,     0,      5       )
@@ -122,19 +120,19 @@ class ExampleAnalysis(Module):
         self.h_nWDeepWP2                = ROOT.TH1D('nWDeepWP2',        ';n_{W} (DeepJet WP 2)',                7,      0,      7       )
         self.h_nWDeepWP3                = ROOT.TH1D('nWDeepWP3',        ';n_{W} (DeepJet WP 3)',                7,      0,      7       )
         self.h_nWDeepWP4                = ROOT.TH1D('nWDeepWP4',        ';n_{W} (DeepJet WP 4)',                7,      0,      7       )
-        self.h_mAll             	= ROOT.TH1F('mAll',       	';m_{#sum j} [GeV]',                   	150,	0,	3000	)
-        self.h_m4   			= ROOT.TH1F('m4',   	  	';m_{4j} [GeV]',   			150,	0,	3000	)
-        self.h_m3   			= ROOT.TH1F('m3',   	  	';m_{3j} [GeV]',   			150,	0,	3000	)
-        self.h_m3NoLead                 = ROOT.TH1F('m3NoLead',         ';m_{3j} (excl. leading) [GeV]',        150,    0,      3000    )
-        self.h_m3NoLeadOrSub            = ROOT.TH1F('m3NoLeadOrSub',    ';m_{3j} (excl. lead and sub) [GeV]',   150,    0,      3000    )
-        self.h_pT1          		= ROOT.TH1F('pT1',           	';p_{T,1} [GeV]',                    	150,	0,	1500 	)
-        self.h_pT2          		= ROOT.TH1F('pT2',           	';p_{T,2} [GeV]',                    	150,	0,	1500 	)
-        self.h_pT3          		= ROOT.TH1F('pT3',           	';p_{T,3} [GeV]',                    	150,	0,	1500 	)
-        self.h_pT4          		= ROOT.TH1F('pT4',           	';p_{T,4} [GeV]',                    	150,	0,	1500 	)
-        self.h_pTb1                     = ROOT.TH1F('pTb1',             ';p_{T,b_{1}} (loose) [GeV]',           150,    0,      1500    )
-        self.h_pTb2                     = ROOT.TH1F('pTb2',             ';p_{T,b_{2}} (loose) [GeV]',           150,    0,      1500    )
-        self.h_pTb3                     = ROOT.TH1F('pTb3',             ';p_{T,b_{3}} (loose) [GeV]',           150,    0,      1500    )
-        self.h_pTb4                     = ROOT.TH1F('pTb4',             ';p_{T,b_{4}} (loose) [GeV]',           150,    0,      1500    )
+        self.h_mAll             	= ROOT.TH1F('mAll',       	';m_{#sum j} [GeV]',                   	60,	0,	3000	)
+        self.h_m4   			= ROOT.TH1F('m4',   	  	';m_{4j} [GeV]',   			60,	0,	3000	)
+        self.h_m3   			= ROOT.TH1F('m3',   	  	';m_{3j} [GeV]',   			60,	0,	3000	)
+        self.h_m3NoLead                 = ROOT.TH1F('m3NoLead',         ';m_{3j} (excl. leading) [GeV]',        60,     0,      3000    )
+        self.h_m3NoLeadOrSub            = ROOT.TH1F('m3NoLeadOrSub',    ';m_{3j} (excl. lead and sub) [GeV]',   60,     0,      3000    )
+        self.h_pT1          		= ROOT.TH1F('pT1',           	';p_{T,1} [GeV]',                    	75,	0,	1500 	)
+        self.h_pT2          		= ROOT.TH1F('pT2',           	';p_{T,2} [GeV]',                    	75,	0,	1500 	)
+        self.h_pT3          		= ROOT.TH1F('pT3',           	';p_{T,3} [GeV]',                    	75,	0,	1500 	)
+        self.h_pT4          		= ROOT.TH1F('pT4',           	';p_{T,4} [GeV]',                    	75,	0,	1500 	)
+        self.h_pTb1                     = ROOT.TH1F('pTb1',             ';p_{T,b_{1}} (loose) [GeV]',           75,     0,      1500    )
+        self.h_pTb2                     = ROOT.TH1F('pTb2',             ';p_{T,b_{2}} (loose) [GeV]',           75,     0,      1500    )
+        self.h_pTb3                     = ROOT.TH1F('pTb3',             ';p_{T,b_{3}} (loose) [GeV]',           75,     0,      1500    )
+        self.h_pTb4                     = ROOT.TH1F('pTb4',             ';p_{T,b_{4}} (loose) [GeV]',           75,     0,      1500    )
         self.h_eta1          		= ROOT.TH1F('eta1',       	';#eta_{1}',     			80,	-8,	8	)
         self.h_eta2          		= ROOT.TH1F('eta2',       	';#eta_{2}',     			80,	-8,	8	)
         self.h_eta3          		= ROOT.TH1F('eta3',       	';#eta_{3}',     			80,	-8,	8	)
@@ -146,35 +144,37 @@ class ExampleAnalysis(Module):
         self.h_pT4Frac                  = ROOT.TH1F('pT4Frac',          ';p_{T,4} / H_{T}',                     20,     0,      1       )
         self.h_pT5Frac                  = ROOT.TH1F('pT5Frac',          ';p_{T,5} / H_{T}',                     20,     0,      1       )
 
-        self.h_pT1ETFracComp           = ROOT.TH1F('pT1ETFracComp',   ';p_{T,1} / E_{T,#tilde{#chi}^{#pm}} (compressed)',  30,     0,      1.5       )
-        self.h_pT2ETFracComp           = ROOT.TH1F('pT2ETFracComp',   ';p_{T,2} / E_{T,#tilde{#chi}^{#pm}} (compressed)',  30,     0,      1.5       )
-        self.h_pT3ETFracComp           = ROOT.TH1F('pT3ETFracComp',   ';p_{T,3} / E_{T,#tilde{#chi}^{#pm}} (compressed)',  30,     0,      1.5       )
-        self.h_pT4ETFracComp           = ROOT.TH1F('pT4ETFracComp',   ';p_{T,4} / E_{T,#tilde{#chi}^{#pm}} (compressed)',  30,     0,      1.5       )
-        self.h_pT5ETFracComp           = ROOT.TH1F('pT5ETFracComp',   ';p_{T,5} / E_{T,#tilde{#chi}^{#pm}} (compressed)',  30,     0,      1.5       )
+        self.h_pT1ETFracComp           = ROOT.TH1F('pT1ETFracComp',   ';p_{T,1} / E_{T,#tilde{#chi}^{#pm}} (compressed)',    40,     0,      2       )
+        self.h_pT2ETFracComp           = ROOT.TH1F('pT2ETFracComp',   ';p_{T,2} / E_{T,#tilde{#chi}^{#pm}} (compressed)',    40,     0,      2       )
+        self.h_pT3ETFracComp           = ROOT.TH1F('pT3ETFracComp',   ';p_{T,3} / E_{T,#tilde{#chi}^{#pm}} (compressed)',    40,     0,      2       )
+        self.h_pT4ETFracComp           = ROOT.TH1F('pT4ETFracComp',   ';p_{T,4} / E_{T,#tilde{#chi}^{#pm}} (compressed)',    40,     0,      2       )
+        self.h_pT5ETFracComp           = ROOT.TH1F('pT5ETFracComp',   ';p_{T,5} / E_{T,#tilde{#chi}^{#pm}} (compressed)',    40,     0,      2       )
 
-        self.h_pT1ETFracUncomp         = ROOT.TH1F('pT1ETFracUncomp', ';p_{T,1} / E_{T,#tilde{#chi}^{#pm}} (uncompressed)',30,     0,      1.5       )
-        self.h_pT2ETFracUncomp         = ROOT.TH1F('pT2ETFracUncomp', ';p_{T,2} / E_{T,#tilde{#chi}^{#pm}} (uncompressed)',30,     0,      1.5       )
-        self.h_pT3ETFracUncomp         = ROOT.TH1F('pT3ETFracUncomp', ';p_{T,3} / E_{T,#tilde{#chi}^{#pm}} (uncompressed)',30,     0,      1.5       )
-        self.h_pT4ETFracUncomp         = ROOT.TH1F('pT4ETFracUncomp', ';p_{T,4} / E_{T,#tilde{#chi}^{#pm}} (uncompressed)',30,     0,      1.5       )
-        self.h_pT5ETFracUncomp         = ROOT.TH1F('pT5ETFracUncomp', ';p_{T,5} / E_{T,#tilde{#chi}^{#pm}} (uncompressed)',30,     0,      1.5       )
+        self.h_pT1ETFracUncomp         = ROOT.TH1F('pT1ETFracUncomp', ';p_{T,1} / E_{T,#tilde{#chi}^{#pm}} (uncompressed)',  40,     0,      2       )
+        self.h_pT2ETFracUncomp         = ROOT.TH1F('pT2ETFracUncomp', ';p_{T,2} / E_{T,#tilde{#chi}^{#pm}} (uncompressed)',  40,     0,      2       )
+        self.h_pT3ETFracUncomp         = ROOT.TH1F('pT3ETFracUncomp', ';p_{T,3} / E_{T,#tilde{#chi}^{#pm}} (uncompressed)',  40,     0,      2       )
+        self.h_pT4ETFracUncomp         = ROOT.TH1F('pT4ETFracUncomp', ';p_{T,4} / E_{T,#tilde{#chi}^{#pm}} (uncompressed)',  40,     0,      2       )
+        self.h_pT5ETFracUncomp         = ROOT.TH1F('pT5ETFracUncomp', ';p_{T,5} / E_{T,#tilde{#chi}^{#pm}} (uncompressed)',  40,     0,      2       )
 
-        self.h_pT1FracChiComp           = ROOT.TH1F('pT1FracChiComp',   ';p_{T,1} / H_{T,#tilde{#chi}^{#pm}} (compressed)',  20,     0,      1       )
-        self.h_pT2FracChiComp           = ROOT.TH1F('pT2FracChiComp',   ';p_{T,2} / H_{T,#tilde{#chi}^{#pm}} (compressed)',  20,     0,      1       )
-        self.h_pT3FracChiComp           = ROOT.TH1F('pT3FracChiComp',   ';p_{T,3} / H_{T,#tilde{#chi}^{#pm}} (compressed)',  20,     0,      1       )
-        self.h_pT4FracChiComp           = ROOT.TH1F('pT4FracChiComp',   ';p_{T,4} / H_{T,#tilde{#chi}^{#pm}} (compressed)',  20,     0,      1       )
-        self.h_pT5FracChiComp           = ROOT.TH1F('pT5FracChiComp',   ';p_{T,5} / H_{T,#tilde{#chi}^{#pm}} (compressed)',  20,     0,      1       )
+        self.h_pT1FracChiComp           = ROOT.TH1F('pT1FracChiComp',   ';p_{T,1} / H_{T,#tilde{#chi}^{#pm}} (compressed)',  40,     0,      2       )
+        self.h_pT2FracChiComp           = ROOT.TH1F('pT2FracChiComp',   ';p_{T,2} / H_{T,#tilde{#chi}^{#pm}} (compressed)',  40,     0,      2       )
+        self.h_pT3FracChiComp           = ROOT.TH1F('pT3FracChiComp',   ';p_{T,3} / H_{T,#tilde{#chi}^{#pm}} (compressed)',  40,     0,      2       )
+        self.h_pT4FracChiComp           = ROOT.TH1F('pT4FracChiComp',   ';p_{T,4} / H_{T,#tilde{#chi}^{#pm}} (compressed)',  40,     0,      2       )
+        self.h_pT5FracChiComp           = ROOT.TH1F('pT5FracChiComp',   ';p_{T,5} / H_{T,#tilde{#chi}^{#pm}} (compressed)',  40,     0,      2       )
 
-        self.h_pT1FracChiUncomp         = ROOT.TH1F('pT1FracChiUncomp', ';p_{T,1} / H_{T,#tilde{#chi}^{#pm}} (uncompressed)',20,     0,      1       )
-        self.h_pT2FracChiUncomp         = ROOT.TH1F('pT2FracChiUncomp', ';p_{T,2} / H_{T,#tilde{#chi}^{#pm}} (uncompressed)',20,     0,      1       )
-        self.h_pT3FracChiUncomp         = ROOT.TH1F('pT3FracChiUncomp', ';p_{T,3} / H_{T,#tilde{#chi}^{#pm}} (uncompressed)',20,     0,      1       )
-        self.h_pT4FracChiUncomp         = ROOT.TH1F('pT4FracChiUncomp', ';p_{T,4} / H_{T,#tilde{#chi}^{#pm}} (uncompressed)',20,     0,      1       )
-        self.h_pT5FracChiUncomp         = ROOT.TH1F('pT5FracChiUncomp', ';p_{T,5} / H_{T,#tilde{#chi}^{#pm}} (uncompressed)',20,     0,      1       )
+        self.h_pT1FracChiUncomp         = ROOT.TH1F('pT1FracChiUncomp', ';p_{T,1} / H_{T,#tilde{#chi}^{#pm}} (uncompressed)',40,     0,      2       )
+        self.h_pT2FracChiUncomp         = ROOT.TH1F('pT2FracChiUncomp', ';p_{T,2} / H_{T,#tilde{#chi}^{#pm}} (uncompressed)',40,     0,      2       )
+        self.h_pT3FracChiUncomp         = ROOT.TH1F('pT3FracChiUncomp', ';p_{T,3} / H_{T,#tilde{#chi}^{#pm}} (uncompressed)',40,     0,      2       )
+        self.h_pT4FracChiUncomp         = ROOT.TH1F('pT4FracChiUncomp', ';p_{T,4} / H_{T,#tilde{#chi}^{#pm}} (uncompressed)',40,     0,      2       )
+        self.h_pT5FracChiUncomp         = ROOT.TH1F('pT5FracChiUncomp', ';p_{T,5} / H_{T,#tilde{#chi}^{#pm}} (uncompressed)',40,     0,      2       )
 
 
-        self.h_pTMeanComp               = ROOT.TH1F('pTMeanComp',       ';#mu(p_{T,1},p_{T,2},p_{T,3}) [GeV]',               100,    0,      1000    )
-        self.h_pTSDComp                 = ROOT.TH1F('pTSDComp',     ';#sigma(p_{T,1},p_{T,2},p_{T,3}) [GeV]',            100,    0,      1000    )
-        self.h_pTMeanUncomp             = ROOT.TH1F('pTMeanUncomp',     ';#mu(p_{T,2},p_{T,3},p_{T,4}) [GeV]',               100,    0,      1000    )
-        self.h_pTSDUncomp               = ROOT.TH1F('pTSDUncomp',   ';#sigma(p_{T,2},p_{T,3},p_{T,4}) [GeV]',            100,    0,      1000    )
+        self.h_pTMeanComp               = ROOT.TH1F('pTMeanComp',       	';#mu(p_{T,1},p_{T,2},p_{T,3}) [GeV]',               50,    0,      1000    )
+        self.h_pTSDComp                 = ROOT.TH1F('pTSDComp',     		';#sigma(p_{T,1},p_{T,2},p_{T,3}) [GeV]',            50,    0,      1000    )
+        self.h_pTMeanSDFracComp         = ROOT.TH1F('pTMeanSDFracComp', 	';#Frac{#mu}{#sigma}(p_{T,1},p_{T,2},p_{T,3}) [GeV]',40,    0,      20      )
+        self.h_pTMeanUncomp             = ROOT.TH1F('pTMeanUncomp',     	';#mu(p_{T,2},p_{T,3},p_{T,4}) [GeV]',               50,    0,      1000    )
+        self.h_pTSDUncomp               = ROOT.TH1F('pTSDUncomp',   		';#sigma(p_{T,2},p_{T,3},p_{T,4}) [GeV]',            50,    0,      1000    )
+        self.h_pTMeanSDFracUncomp       = ROOT.TH1F('pTMeanSDFracUncomp',	';#Frac{#mu}{#sigma}(p_{T,2},p_{T,3},p_{T,4}) [GeV]',40,    0,      20      )
 
         self.h_dEta12			= ROOT.TH1F('dEta12',           ';|#Delta#eta_{1,2}|',                  50,     0,     	5     	)
         self.h_dEta13                   = ROOT.TH1F('dEta13',           ';|#Delta#eta_{1,3}|',                  50,     0,      5       )
@@ -265,25 +265,29 @@ class ExampleAnalysis(Module):
         looseBs        = filter(lambda x: x.btagDeepFlavB > bTagWPs[0],jets)
         mediumBs       = filter(lambda x: x.btagDeepFlavB > bTagWPs[1],jets)
         tightBs        = filter(lambda x: x.btagDeepFlavB > bTagWPs[2],jets)
-        genParts       = list(Collection(event,"GenPart"))
-        genAK4Jets     = list(Collection(event,"GenJet"))
-        goodElectrons  = filter(lambda x: x.cutBased == 4 and x.miniPFRelIso_all < 0.1 and x.pt > 30 and abs(x.eta) < 2.4,list(Collection(event,"Electron")))
-        goodMuons      = filter(lambda x: x.mediumId and x.miniPFRelIso_all < 0.2 and x.pt > 30 and abs(x.eta) < 2.4,list(Collection(event,"Muon")))
         MET            = ROOT.TVector2()
         MET.SetMagPhi(event.MET_pt,event.MET_phi)
 
-        # Get only outgoing particles of the hardest subprocess
-        gens = filter(lambda x: (((x.statusFlags >> 13) & 1) and ((x.statusFlags >> 8) & 1)) and not (((abs(x.pdgId) == 1) or (abs(x.pdgId) == 3)) and ((x.statusFlags >> 11) & 1)), genParts)
+        if self.isSignal:
+          genParts       = list(Collection(event,"GenPart"))
+          genAK4Jets     = list(Collection(event,"GenJet"))
+          # Get only outgoing particles of the hardest subprocess
+          gens = filter(lambda x: (((x.statusFlags >> 13) & 1) and ((x.statusFlags >> 8) & 1)) and not (((abs(x.pdgId) == 1) or (abs(x.pdgId) == 3)) and ((x.statusFlags >> 11) & 1)), genParts)
+
+        if not self.isSkimmed:
+          goodElectrons  = filter(lambda x: x.cutBased == 4 and x.miniPFRelIso_all < 0.1 and x.pt > 30 and abs(x.eta) < 2.4,list(Collection(event,"Electron")))
+          goodMuons      = filter(lambda x: x.mediumId and x.miniPFRelIso_all < 0.2 and x.pt > 30 and abs(x.eta) < 2.4,list(Collection(event,"Muon")))
 
         # Cuts
-        if len(jets) < 4 or len(jets) > 5: return False
-        if not jets[0].pt > 300: return False
-        if not (event.HLT_PFHT1050 or event.HLT_AK8PFJet360_TrimMass30): return False
-        if len(goodElectrons) != 0: return False
-        if len(goodMuons) != 0 : return False
-        if len(looseBs) < 2: return False
-        if not 2 < abs(jets[0].p4().DeltaR(jets[1].p4())) < 4: return False
-        if len(tightTs) != 0: return False
+        if not self.isSkimmed:
+          if len(jets) < 4 or len(jets) > 5: return False
+          if not jets[0].pt > 300: return False
+          if not (event.HLT_PFHT1050 or event.HLT_AK8PFJet360_TrimMass30): return False
+          if len(goodElectrons) != 0: return False
+          if len(goodMuons) != 0 : return False
+          if len(looseBs) < 2: return False
+          if not 2 < abs(jets[0].p4().DeltaR(jets[1].p4())) < 4: return False
+          if len(tightTs) != 0: return False
 
         try: 
           self.h_nQLHE.Fill(event.LHE_Nuds + event.LHE_Nc + event.LHE_Nb,genWeight)
@@ -505,10 +509,16 @@ class ExampleAnalysis(Module):
           self.h_pT4ETFracUncomp.Fill(jets[3].pt / sumJet3NoLead.Et(),genWeight)
           self.h_pT4FracChiComp.Fill(jets[3].pt / HT3,genWeight)
           self.h_pT4FracChiUncomp.Fill(jets[3].pt / HT3NoLead,genWeight)
-          self.h_pTMeanComp.Fill(mean([jets[0].pt,jets[1].pt,jets[2].pt]),genWeight)
-          self.h_pTSDComp.Fill(std([jets[0].pt,jets[1].pt,jets[2].pt]),genWeight)
-          self.h_pTMeanUncomp.Fill(mean([jets[1].pt,jets[2].pt,jets[3].pt]),genWeight)
-          self.h_pTSDUncomp.Fill(std([jets[1].pt,jets[2].pt,jets[3].pt]),genWeight)
+          pTMeanComp   = mean([jets[0].pt,jets[1].pt,jets[2].pt])
+          pTSDComp     = std([jets[0].pt,jets[1].pt,jets[2].pt])
+          pTMeanUncomp = mean([jets[1].pt,jets[2].pt,jets[3].pt])
+          pTSDUncomp   = std([jets[1].pt,jets[2].pt,jets[3].pt])
+          self.h_pTMeanComp.Fill(pTMeanComp,genWeight)
+          self.h_pTSDComp.Fill(pTSDComp,genWeight)
+          self.h_pTMeanSDFracComp.Fill(pTMeanComp / pTSDComp,genWeight)
+          self.h_pTMeanUncomp.Fill(pTMeanUncomp,genWeight)
+          self.h_pTSDUncomp.Fill(pTSDUncomp,genWeight)
+          self.h_pTMeanSDFracUncomp.Fill(pTMeanUncomp / pTSDUncomp,genWeight)
         if len(jets) >= 3:
           self.h_m3.Fill(sumJet3.M(),genWeight)
           self.h_dEta13.Fill(abs(jets[0].eta - jets[2].eta),genWeight)
@@ -566,6 +576,7 @@ parser.add_argument('--sample',type=str,default='signal',choices=['signal','TT',
 parser.add_argument('--tag',type=str,default='test',help='Tag for output label')
 parser.add_argument('-n',type=int,default=1,help='Sample index to run over for backgrounds')
 parser.add_argument('--points',type=str,default='all',help='Signal point(s) to run over, comma separated in MSTOP_MCHI format; "all" to run over all available points')
+parser.add_argument('--useskim',action='store_true',default=False,help='Flag to use NANOAODs skimmed with the nominal selections')
 args = parser.parse_args()
 
 outputPath = 'output/{}'.format(args.tag)
@@ -609,12 +620,28 @@ if args.sample == 'signal':
     files = ['root://cmsxrootd.fnal.gov/' + x.replace('/eos/uscms','') for x in files]
     #files = ['file:/uscms_data/d3/dmahon/RPVSingleStopRun3Patched/NANOAOD/CMSSW_12_4_5/test_2000_100-1.root']
     #files = ['/uscms_data/d3/dmahon/RPVSingleStopRun3Patched/NANOAOD/files/NANOAOD-{}.root'.format(masses)]
-    p = PostProcessor(".", files, cut=preselection, branchsel=None, modules=[
-                    ExampleAnalysis(isSignal=1,MCCampaign='UL2018')], noOut=True, histFileName='{}/{}_{}.root'.format(outputPath,args.sample,masses), histDirName="plots",
-                    maxEntries=None)
+    p = PostProcessor(".", files, cut=preselection, branchsel=None,
+                      modules=[ExampleAnalysis(isSignal=1,MCCampaign='UL2018',isSkimmed=False)],
+                      noOut=True, histFileName='{}/{}_{}.root'.format(outputPath,args.sample,masses), histDirName="plots",
+                      maxEntries=None)
     p.run()
 
+elif args.useskim: 
+
+  print('Running over skimmed {} files'.format(args.sample))
+  print('Using UL 2018 MC campaign working points')
+
+  files = ['root://cmsxrootd.fnal.gov//store/user/ckapsiak/SingleStop/Skims/Skim_2023_23_03/{}.root'.format(args.sample)]
+  if len(files) != 1: print('WARNING: Multiple files selected. All must be from the same MC campaign.')
+  p = PostProcessor(".", files, cut='', branchsel=None,
+                    modules=[ExampleAnalysis(isSignal=0,MCCampaign='UL2018',isSkimmed=True)],
+                    noOut=True, histFileName='{}/{}-ALL.root'.format(outputPath,args.sample), histDirName="plots",
+                    maxEntries=None)
+  p.run()
+
 else:
+
+  print('Running over file index {} for sample {}'.format(args.n,args.sample))
 
   files = open('samples/{}'.format(sampleFile)).read().split('\n')
   files = [['root://cmsxrootd.fnal.gov/' + x.replace('/eos/uscms','') for x in files][:-1][args.n - 1]]
@@ -627,7 +654,8 @@ else:
   else: 
     print('ERROR: Unable to determine MC campaign of {}'.format(files[0]))
     sys.exit()
-  p = PostProcessor(".", files, cut=preselection, branchsel=None, modules=[
-                  ExampleAnalysis(isSignal=0,MCCampaign=MCCampaign)], noOut=True, histFileName='{}/{}-{}.root'.format(outputPath,args.sample,args.n), histDirName="plots",
-                  maxEntries=None)
+  p = PostProcessor(".", files, cut=preselection, branchsel=None, 
+                    modules=[ExampleAnalysis(isSignal=0,MCCampaign=MCCampaign,isSkimmed=False)], 
+                    noOut=True, histFileName='{}/{}-{}.root'.format(outputPath,args.sample,args.n), histDirName="plots",
+                    maxEntries=None)
   p.run() 
