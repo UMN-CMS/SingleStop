@@ -320,33 +320,51 @@ class ExampleAnalysis(Module):
           # Match gens to particle
           stopPlus = True
           if True in (g.pdgId == 1000006 for g in gens):
-            for g in gens:
+          oneBChi = False
+	  for g in gens:
               if g.pdgId == 1000006: genStop = g
               elif g.pdgId == 1000024: genChi = g
               elif g.pdgId == 5: genBStop = g
-              elif g.pdgId == -5: genBChi = g
+              elif g.pdgId == -5: 
+		if not oneBChi:
+			genBChi1 = g
+			oneBChi = True
+		else:
+			if g.pT > genBChi1.pT:
+				genBChi2 = genBChi1
+				genBChi1 = g
+			else:
+				genBChi2 = g
               elif g.pdgId == -1: genD = g
-              elif g.pdgId == -3: genS = g
               else: print('WARNING: Unexpected particle with pdgId {}'.format(g.pdgId))
             genStopPlus = genStop
             genBStopPlus = genBStop
             genChiPlus = genChi
-            genBChiPlus = genBChi
+            genBChiPlus = genBChi1
           elif True in (g.pdgId == -1000006 for g in gens):
             stopPlus = False
+	    oneBChi = False
             for g in gens:
               if g.pdgId == -1000006: genStop = g
               elif g.pdgId == -1000024: genChi = g
               elif g.pdgId == -5: genBStop = g
-              elif g.pdgId == 5: genBChi = g
+              elif g.pdgId == 5:
+		if not oneBChi:
+			genBChi1 = g
+			oneBChi = True
+		else:
+			if g.pT > genBChi1.pT:
+				genBChi2 = genBChi1
+				genBChi1 = g
+			else:
+				genBChi2 = g
               elif g.pdgId == 1: genD = g
-              elif g.pdgId == 3: genS = g
               else: print('WARNING: Unexpected particle with pdgId {}'.format(g.pdgId))
             genStopMinus = genStop
             genBStopMinus = genBStop
             genChiMinus = genChi
-            genBChiMinus = genBChi
-            genQuarks = [genBStop,genBChi,genD,genS]
+            genBChiMinus = genBChi1
+            genQuarks = [genBStop,genBChi1,genD,genBChi2]
           else: print('WARNING: No stop found in event')
 
           #-----------------------------------------------------------------------
@@ -357,7 +375,7 @@ class ExampleAnalysis(Module):
           self.h_pTStop.Fill(genStop.pt,genWeight)
           self.h_pTChi.Fill(genChi.pt,genWeight)
           self.h_pTBStop.Fill(genBStop.pt,genWeight)
-          self.h_pTBChi.Fill(genBChi.pt,genWeight)
+          self.h_pTBChi.Fill(genBChi1.pt,genWeight)
           if stopPlus:
             self.h_pTBStopPlus.Fill(genBStopPlus.pt,genWeight)
             self.h_etaBStopPlus.Fill(genBStopPlus.eta,genWeight)
@@ -380,13 +398,13 @@ class ExampleAnalysis(Module):
           self.h_dEtaBChi.Fill(dEtaBChi,genWeight)
           self.h_dPhiBChi.Fill(abs(genBStop.p4().DeltaPhi(genChi.p4())),genWeight)
           self.h_dRBChi.Fill(abs(genBStop.p4().DeltaR(genChi.p4())),genWeight)
-          dRChiMax = max(genBChi.p4().DeltaR(genD.p4()),
-                                   genBChi.p4().DeltaR(genS.p4()),
-                                   genD.p4().DeltaR(genS.p4()))
+          dRChiMax = max(genBChi1.p4().DeltaR(genD.p4()),
+                                   genBChi1.p4().DeltaR(genBChi2.p4()),
+                                   genD.p4().DeltaR(genBChi2.p4()))
           self.h_dRChiMax.Fill(dRChiMax,genWeight)
-          self.h_dRBB.Fill(genBChi.p4().DeltaR(genBStop.p4()),genWeight)
-          self.h_dEtaBB.Fill(abs(genBChi.eta - genBStop.eta),genWeight)
-          self.h_dPhiBB.Fill(abs(genBChi.p4().DeltaPhi(genBStop.p4())),genWeight)
+          self.h_dRBB.Fill(genBChi1.p4().DeltaR(genBStop.p4()),genWeight)
+          self.h_dEtaBB.Fill(abs(genBChi1.eta - genBStop.eta),genWeight)
+          self.h_dPhiBB.Fill(abs(genBChi1.p4().DeltaPhi(genBStop.p4())),genWeight)
           self.h_pTBVsChi.Fill(genChi.pt,genBStop.pt,genWeight)
           self.h_dEtaVsPTStop.Fill(genChi.pt,abs(genChi.eta - genBStop.eta),genWeight)
           self.h_dEtaVsPTStopRatio.Fill(genChi.pt / (genStop.p4().M() - genChi.p4().M()),abs(genChi.eta - genBStop.eta),genWeight)
@@ -639,13 +657,13 @@ if args.sample == 'signal':
     print('ERROR: Invalid --points arguement format provided')
     sys.exit()
   for masses in points:
-    files = glob.glob('/eos/uscms/store/user/dmahon/condor/RPVSingleStopMC/NANOAOD-ALL/NANOAOD-{}.root'.format(masses))
+    files = glob.glob('/eos/uscms/store/user/dmahon/condor/RPVSingleStopMC313/NANOAOD-ALL/NANOAOD-{}.root'.format(masses))
     #files = glob.glob('/eos/uscms/store/user/dmahon/condor/RPVSingleStopMC/NANOAOD/NANOAOD-{}-*.root'.format(masses))
     files = ['root://cmsxrootd.fnal.gov/' + x.replace('/eos/uscms','') for x in files]
     #files = ['file:/uscms_data/d3/dmahon/RPVSingleStopRun3Patched/NANOAOD/CMSSW_12_4_5/test_2000_100-1.root']
     #files = ['/uscms_data/d3/dmahon/RPVSingleStopRun3Patched/NANOAOD/files/NANOAOD-{}.root'.format(masses)]
     p = PostProcessor(".", files, cut=preselection, branchsel=None,
-                      modules=[ExampleAnalysis(isSignal=1,MCCampaign='UL2018',isSkimmed=False)],
+                      modules=[ExampleAnalysis(isSignal=0,MCCampaign='UL2018',isSkimmed=False)],
                       noOut=True, histFileName='{}/{}_{}.root'.format(outputPath,args.sample,masses), histDirName="plots",
                       maxEntries=None)
     p.run()
