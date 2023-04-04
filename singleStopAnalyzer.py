@@ -303,51 +303,54 @@ class ExampleAnalysis(Module):
           # Match gens to particle
           stopPlus = True
           if True in (g.pdgId == 1000006 for g in gens):
-          oneBChi = False
-	  for g in gens:
-              if g.pdgId == 1000006: genStop = g
-              elif g.pdgId == 1000024: genChi = g
-              elif g.pdgId == 5: genBStop = g
-              elif g.pdgId == -5: 
-		if not oneBChi:
-			genBChi1 = g
-			oneBChi = True
-		else:
-			if g.pT > genBChi1.pT:
-				genBChi2 = genBChi1
+		  oneBChi = False
+		  for g in gens:
+		      if g.pdgId == 1000006: genStop = g
+		      elif g.pdgId == 1000024: genChi = g
+		      elif g.pdgId == 5: genBStop = g
+		      elif g.pdgId == -5: 
+			if not oneBChi:
 				genBChi1 = g
+				oneBChi = True
 			else:
-				genBChi2 = g
-              elif g.pdgId == -1: genD = g
-              else: print('WARNING: Unexpected particle with pdgId {}'.format(g.pdgId))
-            genStopPlus = genStop
-            genBStopPlus = genBStop
-            genChiPlus = genChi
-            genBChiPlus = genBChi1
+				if g.pT > genBChi1.pT:
+					genBChi2 = genBChi1
+					genBChi1 = g
+				else:
+					genBChi2 = g
+		      elif g.pdgId == -1: genD = g
+		      else: print('WARNING: Unexpected particle with pdgId {}'.format(g.pdgId))
+		      genStopPlus = genStop
+		      genBStopPlus = genBStop
+		      genChiPlus = genChi
+		      genBChiPlus1 = genBChi1
+		      genBChiPlus2 = genBChi2
           elif True in (g.pdgId == -1000006 for g in gens):
-            stopPlus = False
-	    oneBChi = False
-            for g in gens:
-              if g.pdgId == -1000006: genStop = g
-              elif g.pdgId == -1000024: genChi = g
-              elif g.pdgId == -5: genBStop = g
-              elif g.pdgId == 5:
-		if not oneBChi:
-			genBChi1 = g
-			oneBChi = True
-		else:
-			if g.pT > genBChi1.pT:
-				genBChi2 = genBChi1
-				genBChi1 = g
-			else:
-				genBChi2 = g
-              elif g.pdgId == 1: genD = g
-              else: print('WARNING: Unexpected particle with pdgId {}'.format(g.pdgId))
-            genStopMinus = genStop
-            genBStopMinus = genBStop
-            genChiMinus = genChi
-            genBChiMinus = genBChi1
-            genQuarks = [genBStop,genBChi1,genD,genBChi2]
+	      stopPlus = False
+	      oneBChi = False
+	      for g in gens:
+		      if g.pdgId == -1000006: genStop = g
+		      elif g.pdgId == -1000024: genChi = g
+		      elif g.pdgId == -5: genBStop = g
+		      elif g.pdgId == 5:
+			      if not oneBChi:
+				      genBChi1 = g
+				      oneBChi = True
+			      else:
+				      if g.pT > genBChi1.pT:
+					      genBChi2 = genBChi1
+					      genBChi1 = g
+				      else:
+					      genBChi2 = g
+		      elif g.pdgId == 1: genD = g
+		      else: print('WARNING: Unexpected particle with pdgId {}'.format(g.pdgId))
+	      genStopMinus = genStop
+	      genBStopMinus = genBStop
+	      genChiMinus = genChi
+	      genBChiMinus1 = genBChi1
+	      genBChiMinus2 = genBChi2
+	      genQuarks = [genBStop,genBChi1,genD,genBChi2]
+
           else: print('WARNING: No stop found in event')
 
           #-----------------------------------------------------------------------
@@ -362,8 +365,10 @@ class ExampleAnalysis(Module):
           if stopPlus:
             self.h_pTBStopPlus.Fill(genBStopPlus.pt,genWeight)
             self.h_etaBStopPlus.Fill(genBStopPlus.eta,genWeight)
-            self.h_pTBChiPlus.Fill(genBChiPlus.pt,genWeight)
-            self.h_etaBChiPlus.Fill(genBChiPlus.eta,genWeight)
+            self.h_pTBChiPlus1.Fill(genBChiPlus1.pt,genWeight)
+            self.h_pTBChiPlus2.Fill(genBChiPlus2.pt,genWeight)
+            self.h_etaBChiPlus1.Fill(genBChiPlus1.eta,genWeight)
+            self.h_etaBChiPlus2.Fill(genBChiPlus2.eta,genWeight)
             self.h_pTStopPlus.Fill(genStopPlus.pt,genWeight)
             self.h_etaStopPlus.Fill(genStopPlus.eta,genWeight)
             self.h_pTChiPlus.Fill(genChiPlus.pt,genWeight)
@@ -371,8 +376,10 @@ class ExampleAnalysis(Module):
           else:
             self.h_pTBStopMinus.Fill(genBStopMinus.pt,genWeight)
             self.h_etaBStopMinus.Fill(genBStopMinus.eta,genWeight)
-            self.h_pTBChiMinus.Fill(genBChiMinus.pt,genWeight)
-            self.h_etaBChiMinus.Fill(genBChiMinus.eta,genWeight)
+            self.h_pTBChiMinus1.Fill(genBChiMinus1.pt,genWeight)
+            self.h_pTBChiMinus2.Fill(genBChiMinus2.pt,genWeight)
+            self.h_etaBChiMinus1.Fill(genBChiMinus1.eta,genWeight)
+            self.h_etaBChiMinus2.Fill(genBChiMinus2.eta,genWeight)
             self.h_pTStopMinus.Fill(genStopMinus.pt,genWeight)
             self.h_etaStopMinus.Fill(genStopMinus.eta,genWeight)
             self.h_pTChiMinus.Fill(genChiMinus.pt,genWeight)
