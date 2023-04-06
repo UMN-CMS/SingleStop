@@ -11,7 +11,6 @@ import argparse
 from math import sqrt,fabs,copysign
 from numpy import mean,std
 ROOT.PyConfig.IgnoreCommandLineOptions = True
-import time
 
 class ExampleAnalysis(Module):
 
@@ -144,17 +143,17 @@ class ExampleAnalysis(Module):
         self.h_pT4Frac                  = ROOT.TH1F('pT4Frac',          ';p_{T,4} / H_{T}',                     20,     0,      1       )
         self.h_pT5Frac                  = ROOT.TH1F('pT5Frac',          ';p_{T,5} / H_{T}',                     20,     0,      1       )
 
-        self.h_pT1ETFracComp           = ROOT.TH1F('pT1ETFracComp',   ';p_{T,1} / E_{T,#tilde{#chi}^{#pm}} (compressed)',    40,     0,      2       )
-        self.h_pT2ETFracComp           = ROOT.TH1F('pT2ETFracComp',   ';p_{T,2} / E_{T,#tilde{#chi}^{#pm}} (compressed)',    40,     0,      2       )
-        self.h_pT3ETFracComp           = ROOT.TH1F('pT3ETFracComp',   ';p_{T,3} / E_{T,#tilde{#chi}^{#pm}} (compressed)',    40,     0,      2       )
-        self.h_pT4ETFracComp           = ROOT.TH1F('pT4ETFracComp',   ';p_{T,4} / E_{T,#tilde{#chi}^{#pm}} (compressed)',    40,     0,      2       )
-        self.h_pT5ETFracComp           = ROOT.TH1F('pT5ETFracComp',   ';p_{T,5} / E_{T,#tilde{#chi}^{#pm}} (compressed)',    40,     0,      2       )
+        self.h_pT1ETFracComp           = ROOT.TH1F('pT1ETFracComp',   ';p_{T,1} / E_{T,#tilde{#chi}^{#pm}} (compressed)',    60,     0,      3       )
+        self.h_pT2ETFracComp           = ROOT.TH1F('pT2ETFracComp',   ';p_{T,2} / E_{T,#tilde{#chi}^{#pm}} (compressed)',    60,     0,      3       )
+        self.h_pT3ETFracComp           = ROOT.TH1F('pT3ETFracComp',   ';p_{T,3} / E_{T,#tilde{#chi}^{#pm}} (compressed)',    60,     0,      3       )
+        self.h_pT4ETFracComp           = ROOT.TH1F('pT4ETFracComp',   ';p_{T,4} / E_{T,#tilde{#chi}^{#pm}} (compressed)',    60,     0,      3       )
+        self.h_pT5ETFracComp           = ROOT.TH1F('pT5ETFracComp',   ';p_{T,5} / E_{T,#tilde{#chi}^{#pm}} (compressed)',    60,     0,      3       )
 
-        self.h_pT1ETFracUncomp         = ROOT.TH1F('pT1ETFracUncomp', ';p_{T,1} / E_{T,#tilde{#chi}^{#pm}} (uncompressed)',  40,     0,      2       )
-        self.h_pT2ETFracUncomp         = ROOT.TH1F('pT2ETFracUncomp', ';p_{T,2} / E_{T,#tilde{#chi}^{#pm}} (uncompressed)',  40,     0,      2       )
-        self.h_pT3ETFracUncomp         = ROOT.TH1F('pT3ETFracUncomp', ';p_{T,3} / E_{T,#tilde{#chi}^{#pm}} (uncompressed)',  40,     0,      2       )
-        self.h_pT4ETFracUncomp         = ROOT.TH1F('pT4ETFracUncomp', ';p_{T,4} / E_{T,#tilde{#chi}^{#pm}} (uncompressed)',  40,     0,      2       )
-        self.h_pT5ETFracUncomp         = ROOT.TH1F('pT5ETFracUncomp', ';p_{T,5} / E_{T,#tilde{#chi}^{#pm}} (uncompressed)',  40,     0,      2       )
+        self.h_pT1ETFracUncomp         = ROOT.TH1F('pT1ETFracUncomp', ';p_{T,1} / E_{T,#tilde{#chi}^{#pm}} (uncompressed)',  60,     0,      3       )
+        self.h_pT2ETFracUncomp         = ROOT.TH1F('pT2ETFracUncomp', ';p_{T,2} / E_{T,#tilde{#chi}^{#pm}} (uncompressed)',  60,     0,      3       )
+        self.h_pT3ETFracUncomp         = ROOT.TH1F('pT3ETFracUncomp', ';p_{T,3} / E_{T,#tilde{#chi}^{#pm}} (uncompressed)',  60,     0,      3       )
+        self.h_pT4ETFracUncomp         = ROOT.TH1F('pT4ETFracUncomp', ';p_{T,4} / E_{T,#tilde{#chi}^{#pm}} (uncompressed)',  60,     0,      3       )
+        self.h_pT5ETFracUncomp         = ROOT.TH1F('pT5ETFracUncomp', ';p_{T,5} / E_{T,#tilde{#chi}^{#pm}} (uncompressed)',  60,     0,      3       )
 
         self.h_pT1FracChiComp           = ROOT.TH1F('pT1FracChiComp',   ';p_{T,1} / H_{T,#tilde{#chi}^{#pm}} (compressed)',  40,     0,      2       )
         self.h_pT2FracChiComp           = ROOT.TH1F('pT2FracChiComp',   ';p_{T,2} / H_{T,#tilde{#chi}^{#pm}} (compressed)',  40,     0,      2       )
@@ -171,10 +170,10 @@ class ExampleAnalysis(Module):
 
         self.h_pTMeanComp               = ROOT.TH1F('pTMeanComp',       	';#mu(p_{T,1},p_{T,2},p_{T,3}) [GeV]',               50,    0,      1000    )
         self.h_pTSDComp                 = ROOT.TH1F('pTSDComp',     		';#sigma(p_{T,1},p_{T,2},p_{T,3}) [GeV]',            50,    0,      1000    )
-        self.h_pTMeanSDFracComp         = ROOT.TH1F('pTMeanSDFracComp', 	';#Frac{#mu}{#sigma}(p_{T,1},p_{T,2},p_{T,3}) [GeV]',40,    0,      20      )
+        self.h_pTSDMeanFracComp         = ROOT.TH1F('pTSDMeanFracComp', 	';#frac{#sigma}{#mu}(p_{T,1},p_{T,2},p_{T,3})',      30,    0,      1.5     )
         self.h_pTMeanUncomp             = ROOT.TH1F('pTMeanUncomp',     	';#mu(p_{T,2},p_{T,3},p_{T,4}) [GeV]',               50,    0,      1000    )
         self.h_pTSDUncomp               = ROOT.TH1F('pTSDUncomp',   		';#sigma(p_{T,2},p_{T,3},p_{T,4}) [GeV]',            50,    0,      1000    )
-        self.h_pTMeanSDFracUncomp       = ROOT.TH1F('pTMeanSDFracUncomp',	';#Frac{#mu}{#sigma}(p_{T,2},p_{T,3},p_{T,4}) [GeV]',40,    0,      20      )
+        self.h_pTSDMeanFracUncomp       = ROOT.TH1F('pTSDMeanFracUncomp',	';#frac{#sigma}{#mu}(p_{T,2},p_{T,3},p_{T,4})',      30,    0,      1.5     )
 
         self.h_dEta12			= ROOT.TH1F('dEta12',           ';|#Delta#eta_{1,2}|',                  50,     0,     	5     	)
         self.h_dEta13                   = ROOT.TH1F('dEta13',           ';|#Delta#eta_{1,3}|',                  50,     0,      5       )
@@ -286,6 +285,7 @@ class ExampleAnalysis(Module):
           if len(goodElectrons) != 0: return False
           if len(goodMuons) != 0 : return False
           if len(looseBs) < 2: return False
+          if abs(looseBs[0].p4().DeltaR(looseBs[1].p4())) < 1: return False
           if not 2 < abs(jets[0].p4().DeltaR(jets[1].p4())) < 4: return False
           if len(tightTs) != 0: return False
 
@@ -515,10 +515,10 @@ class ExampleAnalysis(Module):
           pTSDUncomp   = std([jets[1].pt,jets[2].pt,jets[3].pt])
           self.h_pTMeanComp.Fill(pTMeanComp,genWeight)
           self.h_pTSDComp.Fill(pTSDComp,genWeight)
-          self.h_pTMeanSDFracComp.Fill(pTMeanComp / pTSDComp,genWeight)
+          self.h_pTSDMeanFracComp.Fill(pTSDComp / pTMeanComp,genWeight)
           self.h_pTMeanUncomp.Fill(pTMeanUncomp,genWeight)
           self.h_pTSDUncomp.Fill(pTSDUncomp,genWeight)
-          self.h_pTMeanSDFracUncomp.Fill(pTMeanUncomp / pTSDUncomp,genWeight)
+          self.h_pTSDMeanFracUncomp.Fill(pTSDUncomp / pTMeanUncomp,genWeight)
         if len(jets) >= 3:
           self.h_m3.Fill(sumJet3.M(),genWeight)
           self.h_dEta13.Fill(abs(jets[0].eta - jets[2].eta),genWeight)
