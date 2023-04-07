@@ -66,8 +66,8 @@ class ExampleAnalysis(Module):
         self.h_pTBStopPlus         	= ROOT.TH1F('pTBStopPlus', 	';p_{T,b from #tilde{t}^{+2/3}} [GeV]',	75,	0, 	1500	)
         self.h_pTBStopMinus    	   	= ROOT.TH1F('pTBStopMinus', 	';p_{T,b from #tilde{t}^{-2/3}} [GeV]',	75,	0, 	1500	)
         self.h_pTBChi              	= ROOT.TH1F('pTBChi', 		';p_{T,b from #tilde{#chi}^{#pm}}  [GeV]',75,	0, 	1500	)
-        self.h_pTBChiPlus          	= ROOT.TH1F('pTBChiPlus', 	';p_{T,b from #chi^{+}} [GeV]',		75,	0, 	1500	)
-        self.h_pTBChiMinus         	= ROOT.TH1F('pTBChiMinus', 	';p_{T,b from #chi^{-}} [GeV]',		75,	0, 	1500	) 
+        self.h_pTBChiPlus          	= ROOT.TH2F('pTBChiPlus', 	';p_{T,b from #chi^{+}_{1}} [GeV];p_{T, b from #chi^{+}_{2}} [GeV]', 75,	0, 	1500, 	75,	0, 	1500	)
+        self.h_pTBChiMinus         	= ROOT.TH2F('pTBChiMinus', 	';p_{T,b from #chi^{-}_{1}} [GeV];p_{T, b from #chi^{-}_{2}} [GeV]', 75,	0, 	1500,	75, 	0, 	1500	) 
 
         self.h_etaStop             	= ROOT.TH1F('etaStop', 		';#eta_{#tilde{t}}',			80,	-8,	8	)
         self.h_etaStopPlus         	= ROOT.TH1F('etaStopPlus', 	';#eta_{#tilde{t}^{+2/3}}',		80,	-8,	8	)
@@ -79,8 +79,8 @@ class ExampleAnalysis(Module):
         self.h_etaBStopPlus        	= ROOT.TH1F('etaBStopPlus',	';eta_{b from #tilde{t}^{+2/3}}',	80,	-8,	8	)
         self.h_etaBStopMinus       	= ROOT.TH1F('etaBStopMinus',	';eta_{b from #tilde{t}^{-2/3}}',	80,	-8,	8	)
         self.h_etaBChi             	= ROOT.TH1F('etaBChi' , 	';eta_{b from #tilde{#chi}^{#pm}}',	80,	-8,	8	)
-        self.h_etaBChiPlus         	= ROOT.TH1F('etaBChiPlus', 	';eta_{b from #chi^{+}}',		80,	-8,	8	)
-        self.h_etaBChiMinus        	= ROOT.TH1F('etaBChiMinus', 	';eta_{b from #chi^{-}}',		80,	-8,	8	)
+        self.h_etaBChiPlus         	= ROOT.TH2F('etaBChiPlus', 	';eta_{b from #chi^{+}_{1}};eta_{b from #chi&{+}_{2}}',	80,	-8,	8, 	80,	-8, 	8	)
+        self.h_etaBChiMinus        	= ROOT.TH2F('etaBChiMinus', 	';eta_{b from #chi^{-}_{1}};eta_{b from #chi^{-}_{2}}',	80,	-8,	8, 	80, 	-8, 	8	)
 
         self.h_dEtaBChi         	= ROOT.TH1F('dEtaBChi',		';|#Delta#eta_{b,#tilde{#chi}^{#pm}}|',	50,	0,	5.0   	)
         self.h_dPhiBChi         	= ROOT.TH1F('dPhiBChi',		';|#Delta#phi_{b,#tilde{#chi}^{#pm}}|',	50,	0,	5.0   	)
@@ -282,7 +282,7 @@ class ExampleAnalysis(Module):
           genParts       = list(Collection(event,"GenPart"))
           genAK4Jets     = list(Collection(event,"GenJet"))
           # Get only outgoing particles of the hardest subprocess
-          gens = filter(lambda x: (((x.statusFlags >> 13) & 1) and ((x.statusFlags >> 8) & 1)) and not (((abs(x.pdgId) == 1) or (abs(x.pdgId) == 3)) and ((x.statusFlags >> 11) & 1)), genParts)
+          gens = filter(lambda x: (((x.statusFlags >> 13) & 1) and ((x.statusFlags >> 8) & 1)) and not (((abs(x.pdgId) == 1) or (abs(x.pdgId) == 5)) and ((x.statusFlags >> 11) & 1)), genParts)
 
         if not self.isSkimmed:
           goodElectrons  = filter(lambda x: x.cutBased == 4 and x.miniPFRelIso_all < 0.1 and x.pt > 30 and abs(x.eta) < 2.4,list(Collection(event,"Electron")))
@@ -330,18 +330,15 @@ class ExampleAnalysis(Module):
 				genBChi1 = g
 				oneBChi = True
 			else:
-				if g.pT > genBChi1.pT:
-					genBChi2 = genBChi1
-					genBChi1 = g
-				else:
-					genBChi2 = g
+				genBChi2 = g
 		      elif g.pdgId == -1: genD = g
 		      else: print('WARNING: Unexpected particle with pdgId {}'.format(g.pdgId))
-		      genStopPlus = genStop
-		      genBStopPlus = genBStop
-		      genChiPlus = genChi
-		      genBChiPlus1 = genBChi1
-		      genBChiPlus2 = genBChi2
+		  if genBChi2.pt > genBChi1.pt: genBChi1, genBChi2 = genBChi2, genBChi1
+		  genStopPlus = genStop
+	          genBStopPlus = genBStop
+		  genChiPlus = genChi
+		  genBChiPlus1 = genBChi1
+		  genBChiPlus2 = genBChi2
           elif True in (g.pdgId == -1000006 for g in gens):
 	      stopPlus = False
 	      oneBChi = False
@@ -354,13 +351,10 @@ class ExampleAnalysis(Module):
 				      genBChi1 = g
 				      oneBChi = True
 			      else:
-				      if g.pT > genBChi1.pT:
-					      genBChi2 = genBChi1
-					      genBChi1 = g
-				      else:
-					      genBChi2 = g
+				      genBChi2 = g
 		      elif g.pdgId == 1: genD = g
 		      else: print('WARNING: Unexpected particle with pdgId {}'.format(g.pdgId))
+	      if genBChi2.pt > genBChi1.pt: genBChi1, genBChi2 = genBChi2, genBChi1  
 	      genStopMinus = genStop
 	      genBStopMinus = genBStop
 	      genChiMinus = genChi
@@ -382,10 +376,8 @@ class ExampleAnalysis(Module):
           if stopPlus:
             self.h_pTBStopPlus.Fill(genBStopPlus.pt,genWeight)
             self.h_etaBStopPlus.Fill(genBStopPlus.eta,genWeight)
-            self.h_pTBChiPlus1.Fill(genBChiPlus1.pt,genWeight)
-            self.h_pTBChiPlus2.Fill(genBChiPlus2.pt,genWeight)
-            self.h_etaBChiPlus1.Fill(genBChiPlus1.eta,genWeight)
-            self.h_etaBChiPlus2.Fill(genBChiPlus2.eta,genWeight)
+            self.h_pTBChiPlus.Fill(genBChiPlus1.pt, genBChiPlus2.pt, genWeight)
+            self.h_etaBChiPlus.Fill(genBChiPlus1.eta, genBChiPlus2.eta, genWeight)
             self.h_pTStopPlus.Fill(genStopPlus.pt,genWeight)
             self.h_etaStopPlus.Fill(genStopPlus.eta,genWeight)
             self.h_pTChiPlus.Fill(genChiPlus.pt,genWeight)
@@ -393,10 +385,8 @@ class ExampleAnalysis(Module):
           else:
             self.h_pTBStopMinus.Fill(genBStopMinus.pt,genWeight)
             self.h_etaBStopMinus.Fill(genBStopMinus.eta,genWeight)
-            self.h_pTBChiMinus1.Fill(genBChiMinus1.pt,genWeight)
-            self.h_pTBChiMinus2.Fill(genBChiMinus2.pt,genWeight)
-            self.h_etaBChiMinus1.Fill(genBChiMinus1.eta,genWeight)
-            self.h_etaBChiMinus2.Fill(genBChiMinus2.eta,genWeight)
+            self.h_pTBChiMinus.Fill(genBChiMinus1.pt, genBChiMinus2.pt, genWeight)
+            self.h_etaBChiMinus.Fill(genBChiMinus1.eta, genBChiMinus2.eta, genWeight)
             self.h_pTStopMinus.Fill(genStopMinus.pt,genWeight)
             self.h_etaStopMinus.Fill(genStopMinus.eta,genWeight)
             self.h_pTChiMinus.Fill(genChiMinus.pt,genWeight)
@@ -670,7 +660,7 @@ if args.sample == 'signal':
     #files = ['file:/uscms_data/d3/dmahon/RPVSingleStopRun3Patched/NANOAOD/CMSSW_12_4_5/test_2000_100-1.root']
     #files = ['/uscms_data/d3/dmahon/RPVSingleStopRun3Patched/NANOAOD/files/NANOAOD-{}.root'.format(masses)]
     p = PostProcessor(".", files, cut=preselection, branchsel=None,
-                      modules=[ExampleAnalysis(isSignal=0,MCCampaign='UL2018',isSkimmed=False)],
+                      modules=[ExampleAnalysis(isSignal=1,MCCampaign='UL2018',isSkimmed=False)],
                       noOut=True, histFileName='{}/{}_{}.root'.format(outputPath,args.sample,masses), histDirName="plots",
                       maxEntries=None)
     p.run()

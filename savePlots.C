@@ -1,11 +1,11 @@
 void savePlots(){
 
-  int doPlots = 1;
-  int doCompare = 0;
+  int doPlots = 0;
+  int doCompare = 1;
   int doTrigPlots = 0;
   int doTrigMassPlots = 0;
 
-  string inputDir = "Run3_22-12-02";
+  string inputDir = "test";
 
   if (doPlots){
     vector<string> masses = {"2000_100"};//{"200_100","300_100","300_200","500_100","500_200","500_400","700_100","700_400","700_600","1000_100","1000_400","1000_900","1500_100","1500_600","1500_1400","2000_100","2000_900","2000_1900"};
@@ -26,22 +26,25 @@ void savePlots(){
   gStyle->SetPalette(kBlueRedYellow);//kPastel);
   gStyle->SetOptTitle(0);
   if (doCompare){
-    vector<string> compare = {"500_100","700_400","1000_100","1500_600","2000_1900","2000_100"}; //"200_100","2000_100","2000_1900","1000_400"};
-    vector<string> plotNames = {"m4"}; //"HT","m4","m3NoLead","nJets","nb","pT1","pT2","jetMatch","leadJetMatch","nJetsChiMerged"};
+    vector<string> compare = {"signal_1000_400","signal_1000_900","signal_1500_900","signal_2000_400","signal_2000_1900"};
+    vector<string> plotNames = {"nbLoose","nbMedium","nbTight","HT","nJets","mAll","m4","m3","pT1","pT2","pT3","pT4","eta1","eta2","eta3","eta4","m3NoLead","m3NoLeadOrSub","dEta12","dPhi12","dR12","ntLoose","ntMedium","ntTight","MET","dPhiMET1","dPhiMET2","dPhiMET3","dPhiMET4","HTLHE","nQLHE","nGLHE","nJLHE","pT1Gen","pT2Gen","pT3GEn","pT4Gen","eta1Gen","eta2Gen","eta3Gen","eta4Gen","pTStop","pTStopPlus","pTStopMinus","pTChi","pTChiPlus","pTChiMinus","pTBStop","pTBStopPlus","pTBStopMinus","pTBChi1","pTBChi2","pTBChiPlus","pTBChiMinus","etaStop","etaStopPlus","etaStopMinus","etaChi","etaChiPlus","etaChiMinus","etaBStop","etaBStopPlus","etaBStopMinus","etaBChi","etaBChiPlus","etaBChiMinus","dEtaBChi","dPhiBChi","nJetsChiMerged","dRBB","dEtaBB","dPhiBB","passDijet","dEtaWJs","mWJs","dRChiMax","dRBChi"};
     //float yMax = 0;
     for(string n:plotNames){
       TCanvas* c1 = new TCanvas();
       THStack* stack = new THStack();
-      TLegend* legend = new TLegend(0.68,0.89,0.89,0.40);
+      TLegend* legend = new TLegend(0.68,0.89,0.89,0.65);
       string xTitle, yTitle;
       for(string s:compare){
-        TFile* file = new TFile(Form("output/%s/hist_%s.root",inputDir.c_str(),s.c_str()));
-        TDirectory* plots = file->GetDirectory("plots");
-        TH1F* plot = (TH1F*)plots->Get(n.c_str());
+        TFile* file = new TFile(Form("output/%s/%s.root",inputDir.c_str(),s.c_str()));
+        //TDirectory* plots = file->GetDirectory("plots");
+        TH1D* plot = (TH1D*)file->Get(n.c_str());
+        //TH1D* plot = (TH1D*)plots->Get(n.c_str());
         stringstream plotTitle;
-        plotTitle << "(" << s.substr(0,s.find("_")) << ", " << s.substr(s.find("_") + 1) << ")";
+        //plotTitle << "(" << s.substr(0,s.find("_")) << ", " << s.substr(s.find("_") + 1) << ")";
+        plotTitle << s;
         plot->SetTitle(plotTitle.str().c_str());
-        plot->SetLineWidth(2);
+        plot->SetLineWidth(3);
+        plot->SetMarkerSize(0);
         plot->Scale(1. / plot->Integral());
         legend->AddEntry(plot);
         stack->Add(plot);
@@ -52,13 +55,15 @@ void savePlots(){
       } 
       stack->Draw("HIST PLC NOSTACK");
       stack->GetXaxis()->SetTitle(xTitle.c_str());
-      stack->GetYaxis()->SetTitle("Fraction of Events");
-      legend->SetHeader("( m_{#tilde{t}} , m_{#tilde{#chi_{1}^{#pm}}} )","C");
+      //stack->GetYaxis()->SetTitle("Fraction of Events");
+      stack->GetYaxis()->SetTitle("Events");
+      //legend->SetHeader("( m_{#tilde{t}} , m_{#tilde{#chi_{1}^{#pm}}} )","C");
       //legend->SetTextSize(0.03);
       legend->Draw();
       //TLegendEntry *header = (TLegendEntry*)legend->GetListOfPrimitives()->First();
       //header->SetTextSize(0.05);
-      c1->SaveAs(Form("plots/%s/overlaid/%s.png",inputDir.c_str(),n.c_str()));
+      gPad->SetLogy();
+      c1->SaveAs(Form("plots/%s/overlaid/%s.pdf",inputDir.c_str(),n.c_str()));
     }
   }
 

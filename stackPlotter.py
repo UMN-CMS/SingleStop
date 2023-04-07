@@ -1,7 +1,7 @@
 import os, argparse, math, ROOT
 ROOT.gROOT.SetBatch(True)
-path = 'root-test-files'
-files = ['signal_1500_600.root', 'QCD.root', 'TT.root']
+path = 'output/signal_2000_1900_1500_600_1000_400'
+files = ['signal_2000_1900.root', 'signal_1500_600.root', 'signal_1000_400.root']
 colors = [2, 3, 4]
 
 
@@ -27,4 +27,4 @@ for param in param_list:
 	h_stack.SetMinimum(1)	
 	h_stack.SetMaximum(10**8)
 	#h_stack.Draw('HIST')
-	c1.SaveAs('plots/{}.png'.format(param))
+	c1.SaveAs('plots/313/{}.png'.format(param))
