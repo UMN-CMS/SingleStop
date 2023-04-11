@@ -5,7 +5,7 @@ void saveTwoCouplings(){
   int doTrigPlots = 0;
   int doTrigMassPlots = 0;
 
-  string inputDirs[]= ["313", "312"];
+  string inputDirs[2]= {"313", "312"};
   string saveTo = "313_312";
 
   if (doPlots){
@@ -30,8 +30,8 @@ void saveTwoCouplings(){
   gStyle->SetPalette(kBlueRedYellow);//kPastel);
   gStyle->SetOptTitle(0);
   if (doCompare){
-    vector<string> compare = {"signal_1000_400","signal_1000_900","signal_1500_900","signal_2000_400","signal_2000_1900"};
-    vector<string> plotNames = {"nbLoose","nbMedium","nbTight","HT","nJets","mAll","m4","m3","pT1","pT2","pT3","pT4","eta1","eta2","eta3","eta4","m3NoLead","m3NoLeadOrSub","dEta12","dPhi12","dR12","ntLoose","ntMedium","ntTight","MET","dPhiMET1","dPhiMET2","dPhiMET3","dPhiMET4","HTLHE","nQLHE","nGLHE","nJLHE","pT1Gen","pT2Gen","pT3GEn","pT4Gen","eta1Gen","eta2Gen","eta3Gen","eta4Gen","pTStop","pTStopPlus","pTStopMinus","pTChi","pTChiPlus","pTChiMinus","pTBStop","pTBStopPlus","pTBStopMinus","pTBChi1","pTBChi2","pTBChiPlus","pTBChiMinus","etaStop","etaStopPlus","etaStopMinus","etaChi","etaChiPlus","etaChiMinus","etaBStop","etaBStopPlus","etaBStopMinus","etaBChi","etaBChiPlus","etaBChiMinus","dEtaBChi","dPhiBChi","nJetsChiMerged","dRBB","dEtaBB","dPhiBB","passDijet","dEtaWJs","mWJs","dRChiMax","dRBChi"};
+    vector<string> compare = {"signal_1000_400","signal_1500_600","signal_2000_1900"};
+    vector<string> plotNames = {"nbLoose","nbMedium","nbTight","HT","nJets","mAll","m4","m3","pT1","pT2","pT3","pT4","eta1","eta2","eta3","eta4","m3NoLead","m3NoLeadOrSub","dEta12","dPhi12","dR12","ntLoose","ntMedium","ntTight","MET","HTLHE","nQLHE","nGLHE","nJLHE","pT1Gen","pT2Gen","pT3GEn","pT4Gen","eta1Gen","eta2Gen","eta3Gen","eta4Gen","pTStop","pTStopPlus","pTStopMinus","pTChi","pTChiPlus","pTChiMinus","pTBStop","pTBStopPlus","pTBStopMinus","etaStop","etaStopPlus","etaStopMinus","etaChi","etaChiPlus","etaChiMinus","etaBStop","etaBStopPlus","etaBStopMinus","etaBChi","dEtaBChi","dPhiBChi","nJetsChiMerged","dRBB","dEtaBB","dPhiBB","passDijet","dEtaWJs","mWJs","dRChiMax","dRBChi"};
     //float yMax = 0;
     for(string n:plotNames){
 	    TCanvas* c1 = new TCanvas();
@@ -40,14 +40,15 @@ void saveTwoCouplings(){
 	    string xTitle, yTitle;
 	    for(string s:compare){
 		for (string inputDir:inputDirs) {
+		    cout << Form("output/%s/%s.root",inputDir.c_str(),s.c_str()) << endl;
 		    TFile* file = new TFile(Form("output/%s/%s.root",inputDir.c_str(),s.c_str()));
-		    //TDirectory* plots = file->GetDirectory("plots");
-		    TH1D* plot = (TH1D*)file->Get(n.c_str());
-		    //TH1D* plot = (TH1D*)plots->Get(n.c_str());
+		    TDirectory* plots = file->GetDirectory("plots");
+		    //TH1D* plot = (TH1D*)file->Get(n.c_str());
+		    TH1D* plot = (TH1D*)plots->Get(n.c_str());
 		    stringstream plotTitle;
 		    //plotTitle << "(" << s.substr(0,s.find("_")) << ", " << s.substr(s.find("_") + 1) << ")";
 		    plotTitle << s;
-		    plot->SetTitle(plotTitle.str().c_str());
+		    plot->SetTitle(Form("%s_%s",plotTitle.str().c_str(), inputDir.c_str()));
 		    plot->SetLineWidth(3);
 		    plot->SetMarkerSize(0);
 		    plot->Scale(1. / plot->Integral());
