@@ -7,7 +7,11 @@ colors = [2, 3, 4]
 
 ROOT.gStyle.SetPalette(ROOT.kOcean)
 
+<<<<<<< HEAD
 file1 = ROOT.TFile.Open('{}/{}'.format(path, files[0]), "READ")
+=======
+file1 = ROOT.TFile.Open('root-test-files/signal_1500_600.root', "READ")
+>>>>>>> Stack Plotter as of Feb. 28 Meeting
 param_list = [key.GetName() for key in file1.GetListOfKeys()]
 ROOT.TFile.Close(file1)
 files = {fname: ROOT.TFile.Open('{}/{}'.format(path, fname), "READ") for fname in files}
