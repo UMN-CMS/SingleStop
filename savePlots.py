@@ -18,11 +18,12 @@ ROOT.gROOT.SetBatch(True)
 ROOT.gStyle.SetOptStat(0)
 
 if args.sample == 'overlaid':
-  if not os.path.exists('{}/overlaid'.format(args.output)): os.makedirs('{}/overlaid'.format(args.output))
+  outputDir = '{}/overlaid{}'.format(args.output,'_norm' if args.norm else '')
+  if not os.path.exists(outputDir): os.makedirs(outputDir)
   ROOT.gStyle.SetPalette(60) # kBlueRedYellow = 60
   ROOT.gStyle.SetOptTitle(0)
-  samples = ['QCD2018','signal_1000_400','signal_1200_400','signal_1400_400']
-  plotNames = ['m4']
+  samples = ['QCD2018','TT2018','signal_1200_400','signal_1500_900','signal_2000_1900']
+  plotNames = ['cutflow','pT4ETFracUncomp','nQLHE','pTb3','dEtabb','dR35','dPhi24','dPhi23','dRRecoUncomp','HT','dR45','pT1Frac','dEta14','pT3ETFracComp','pT2FracChiComp','dR25','dR24','nWTight','pT4Frac','dR23','dPhiRecoComp','ntMedium','dPhi34','pTSDComp','pT5FracChiComp','pT5Frac','dEtaRecoComp','pT5ETFracComp','dR12','dR14','dR15','ntDeepWP4','ntDeepWP1','ntDeepWP3','ntDeepWP2','nWMedium','dPhi25','dR34','pTb4','nbMedium','pTb2','m3NoLead','pT1ETFracUncomp','dEta12','dEta13','dEta15','pTMeanUncomp','dPhi15','dPhi14','dPhi13','pT4FracChiUncomp','pT3ETFracUncomp','pT1FracChiComp','eta3','eta2','m3NoLeadOrSub','eta4','m4','pT2Frac','m3','pT4ETFracComp','dPhi12','nbTight','dR13','nJLHE','pT2ETFracUncomp','pT4FracChiComp','pT3Frac','dEta34','dEta35','dRRecoComp','dPhiRecoUncomp','nWDeepWP4','nWDeepWP1','nWDeepWP2','nWDeepWP3','ntTight','mAll','pT2FracChiUncomp','ntLoose','dRbb','dEta23','dEta25','dEta24','pT5ETFracUncomp','HTLHE','eta1','dPhibb','pT1FracChiUncomp','nWLoose','pTSDUncomp','dPhi35','pT4','dPhi45','nGLHE','pT1','nbLoose','pT3','dEtaRecoUncomp','pT5FracChiUncomp','pT3FracChiComp','pTMeanComp','nJets','MET','pT1ETFracComp','pT2','dEta45','pT2ETFracComp','pT3FracChiUncomp','pTb1','pTSDMeanFracComp','pTSDMeanFracUncomp']
   for plotName in plotNames:
     c1 = ROOT.TCanvas()
     stack = ROOT.THStack()
@@ -30,10 +31,13 @@ if args.sample == 'overlaid':
     for sample in samples:
       f = ROOT.TFile.Open('{}/{}.root'.format(args.input,sample))
       plot = f.Get(plotName)
+      if plot.GetEntries() == 0: continue
       plot.SetTitle(sample)
       plot.SetLineWidth(3)
       plot.SetMarkerSize(0)
-      if args.norm: plot.Scale(1/plot.Integral())
+      if args.norm: 
+        if plotName == 'cutflow': plot.Scale(1/plot.GetBinContent(1))
+        else: plot.Scale(1/plot.Integral())
       ROOT.gROOT.cd()
       plot = plot.Clone()
       legend.AddEntry(plot,plot.GetTitle(),'l')
@@ -44,11 +48,12 @@ if args.sample == 'overlaid':
     else:         stack.GetYaxis().SetTitle('Events')
     legend.Draw()
     ROOT.gPad.SetLogy()
-    c1.SaveAs('{}/overlaid/{}.pdf'.format(args.output,plotName))
+    c1.SaveAs('{}/{}.pdf'.format(outputDir,plotName))
 
 elif args.sample != 'signal':
 
-  if not os.path.exists('{}/{}'.format(args.output,args.sample)): os.makedirs('{}/{}'.format(args.output,args.sample))
+  outputDir = '{}/{}{}'.format(args.output,args.sample,'_norm' if args.norm else '')
+  if not os.path.exists(outputDir): os.makedirs(outputDir)
   f = ROOT.TFile.Open('{}/{}.root'.format(args.input,args.sample))
   keys = [key.GetName() for key in f.GetListOfKeys()]
   for key in keys:
@@ -60,21 +65,23 @@ elif args.sample != 'signal':
     c1.SetRightMargin(0.15)
     if args.norm: h.Scale(1.0 / h.Integral())
     h.Draw() if not h.InheritsFrom('TH2') else h.Draw('COLZ')
-    c1.SaveAs('{}/{}/{}.pdf'.format(args.output,args.sample,h.GetName()))
+    c1.SaveAs('{}/{}.pdf'.format(outputDir,h.GetName()))
 
 else:
 
   masses = ['1000_400','1000_900','1500_600','1500_1400','2000_900','2000_1900','1000_600','1500_400','2000_400','2000_1400','1500_900','2000_600']
   for m in masses:
-    if not os.path.exists('{}/{}_{}'.format(args.output,args.sample,m)): os.makedirs('{}/{}_{}'.format(args.output,args.sample,m))
+    outputDir = '{}/{}_{}{}'.format(args.output,args.sample,m,'_norm' if args.norm else '')
+    if not os.path.exists(outputDir): os.makedirs(outputDir)
     f = ROOT.TFile.Open('{}/signal_{}.root'.format(args.input,m))
     keys = [key.GetName() for key in f.GetListOfKeys()]
     for key in keys:
       h = f.Get(key)
+      if h.GetEntries() == 0: continue
       if args.TH1 and h.InheritsFrom('TH2'): continue
       if args.TH2 and not h.InheritsFrom('TH2'): continue
       c1 = ROOT.TCanvas()
       c1.SetRightMargin(0.15)
       if args.norm: h.Scale(1.0 / h.Integral())
       h.Draw() if not h.InheritsFrom('TH2') else h.Draw('COLZ')
-      c1.SaveAs('{}/{}_{}/{}.png'.format(args.output,args.sample,m,h.GetName()))
+      c1.SaveAs('{}/{}.pdf'.format(outputDir,h.GetName()))
