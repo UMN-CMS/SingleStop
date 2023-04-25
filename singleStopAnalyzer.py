@@ -299,7 +299,7 @@ class ExampleAnalysis(Module):
           self.h_cutflow.Fill(3,genWeight)
           if len(goodElectrons) != 0 or len(goodMuons) != 0: return False
           self.h_cutflow.Fill(4,genWeight)
-          if not 2 < abs(jets[0].p4().DeltaR(jets[1].p4())) < 4: return False
+          #if not 2 < abs(jets[0].p4().DeltaR(jets[1].p4())) < 4: return False
           self.h_cutflow.Fill(5,genWeight)
           if len(looseBs) < 2: return False
           self.h_cutflow.Fill(6,genWeight)
@@ -373,24 +373,15 @@ class ExampleAnalysis(Module):
           self.h_pTChi.Fill(genChi.pt,genWeight)
           self.h_pTBStop.Fill(genBStop.pt,genWeight)
           self.h_pTBChi.Fill(genBChi1.pt,genWeight)
-          if stopPlus:
-            self.h_pTBStopPlus.Fill(genBStopPlus.pt,genWeight)
-            self.h_etaBStopPlus.Fill(genBStopPlus.eta,genWeight)
-            self.h_pTBChiPlus.Fill(genBChiPlus1.pt, genBChiPlus2.pt, genWeight)
-            self.h_etaBChiPlus.Fill(genBChiPlus1.eta, genBChiPlus2.eta, genWeight)
-            self.h_pTStopPlus.Fill(genStopPlus.pt,genWeight)
-            self.h_etaStopPlus.Fill(genStopPlus.eta,genWeight)
-            self.h_pTChiPlus.Fill(genChiPlus.pt,genWeight)
-            self.h_etaChiPlus.Fill(genChiPlus.eta,genWeight)
-          else:
-            self.h_pTBStopMinus.Fill(genBStopMinus.pt,genWeight)
-            self.h_etaBStopMinus.Fill(genBStopMinus.eta,genWeight)
-            self.h_pTBChiMinus.Fill(genBChiMinus1.pt, genBChiMinus2.pt, genWeight)
-            self.h_etaBChiMinus.Fill(genBChiMinus1.eta, genBChiMinus2.eta, genWeight)
-            self.h_pTStopMinus.Fill(genStopMinus.pt,genWeight)
-            self.h_etaStopMinus.Fill(genStopMinus.eta,genWeight)
-            self.h_pTChiMinus.Fill(genChiMinus.pt,genWeight)
-            self.h_etaChiMinus.Fill(genChiMinus.eta,genWeight)
+	  self.h_pTBChi.Fill(genBChi2.pt, genWeight)
+          self.h_pTBStop.Fill(genBStop.pt,genWeight)
+          self.h_etaBStop.Fill(genBStop.eta,genWeight)
+          self.h_etaBChi.Fill(genBChi1.eta, genWeight)
+	  self.h_etaBChi.Fill(genBChi2.eta, genWeight)
+          self.h_pTStop.Fill(genStop.pt,genWeight)
+          self.h_etaStop.Fill(genStop.eta,genWeight)
+          self.h_pTChi.Fill(genChi.pt,genWeight)
+          self.h_etaChi.Fill(genChi.eta,genWeight)
           dEtaBChi = abs(genBStop.eta - genChi.eta)
           self.h_dEtaBChi.Fill(dEtaBChi,genWeight)
           self.h_dPhiBChi.Fill(abs(genBStop.p4().DeltaPhi(genChi.p4())),genWeight)
