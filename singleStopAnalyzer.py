@@ -299,11 +299,11 @@ class ExampleAnalysis(Module):
           self.h_cutflow.Fill(3,genWeight)
           if len(goodElectrons) != 0 or len(goodMuons) != 0: return False
           self.h_cutflow.Fill(4,genWeight)
-          #if not 2 < abs(jets[0].p4().DeltaR(jets[1].p4())) < 4: return False
+          if not 2 < abs(jets[0].p4().DeltaR(jets[1].p4())) < 4: return False
           self.h_cutflow.Fill(5,genWeight)
           if len(looseBs) < 2: return False
           self.h_cutflow.Fill(6,genWeight)
-          if abs(looseBs[0].p4().DeltaR(looseBs[1].p4())) < 1: return False
+          #if abs(looseBs[0].p4().DeltaR(looseBs[1].p4())) < 1: return False
           self.h_cutflow.Fill(7,genWeight)
           if len(tightTs) != 0: return False
           self.h_cutflow.Fill(8,genWeight)
@@ -629,12 +629,12 @@ preselection = (
 
 if args.sample == 'signal':
 
-  allPoints = ['1000_400','1000_600','1000_900',
-               '1200_400','1200_600','1200_1100',
-               '1300_400','1300_600','1300_1200',
-               '1400_400','1400_600','1400_1300',
-               '1500_400','1500_600','1500_900','1500_1400',
-               '2000_400','2000_600','2000_900','2000_1400','2000_1900']
+  allPoints = ['1000_400']#,'1000_600','1000_900',
+               #'1200_400','1200_600','1200_1100',
+               #'1300_400','1300_600','1300_1200',
+               #'1400_400','1400_600','1400_1300',
+               #'1500_400','1500_600','1500_900','1500_1400',
+               #'2000_400','2000_600','2000_900','2000_1400','2000_1900']
   if args.points == 'all': 
     print('Running over all available signal points...')
     points = allPoints
