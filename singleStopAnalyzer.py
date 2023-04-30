@@ -57,30 +57,30 @@ class ExampleAnalysis(Module):
 
         # SUSY particle kinematics
         self.h_pTStop              	= ROOT.TH1F('pTStop', 		';p_{T,#tilde{t}}  [GeV]',		75,	0,    	1500	)
-        self.h_pTStopPlus          	= ROOT.TH1F('pTStopPlus', 	';p_{T,#tilde{t}^{+2/3}}  [GeV]',	75,	0,    	1500	)
-        self.h_pTStopMinus         	= ROOT.TH1F('pTStopMinus', 	';p_{T,#tilde{t}^{-2/3}} [GeV]',	75,	0,    	1500	)
+        #self.h_pTStopPlus          	= ROOT.TH1F('pTStopPlus', 	';p_{T,#tilde{t}^{+2/3}}  [GeV]',	75,	0,    	1500	)
+        #self.h_pTStopMinus         	= ROOT.TH1F('pTStopMinus', 	';p_{T,#tilde{t}^{-2/3}} [GeV]',	75,	0,    	1500	)
         self.h_pTChi               	= ROOT.TH1F('pTChi',		';p_{T,#tilde{#chi}^{#pm}}  [GeV]',     75,	0,    	1500	)
-        self.h_pTChiPlus           	= ROOT.TH1F('pTChiPlus', 	';p_{T,#chi^{+}} [GeV]',		75,	0,    	1500	)
-        self.h_pTChiMinus          	= ROOT.TH1F('pTChiMinus', 	';p_{T,#chi^{-}} [GeV]',		75,	0,    	1500	)
+        #self.h_pTChiPlus           	= ROOT.TH1F('pTChiPlus', 	';p_{T,#chi^{+}} [GeV]',		75,	0,    	1500	)
+        #self.h_pTChiMinus          	= ROOT.TH1F('pTChiMinus', 	';p_{T,#chi^{-}} [GeV]',		75,	0,    	1500	)
         self.h_pTBStop             	= ROOT.TH1F('pTBStop', 		';p_{T,b from #tilde{t}}  [GeV]',	75,	0,    	1500	)
-        self.h_pTBStopPlus         	= ROOT.TH1F('pTBStopPlus', 	';p_{T,b from #tilde{t}^{+2/3}} [GeV]',	75,	0, 	1500	)
-        self.h_pTBStopMinus    	   	= ROOT.TH1F('pTBStopMinus', 	';p_{T,b from #tilde{t}^{-2/3}} [GeV]',	75,	0, 	1500	)
+        #self.h_pTBStopPlus         	= ROOT.TH1F('pTBStopPlus', 	';p_{T,b from #tilde{t}^{+2/3}} [GeV]',	75,	0, 	1500	)
+        #self.h_pTBStopMinus    	   	= ROOT.TH1F('pTBStopMinus', 	';p_{T,b from #tilde{t}^{-2/3}} [GeV]',	75,	0, 	1500	)
         self.h_pTBChi              	= ROOT.TH1F('pTBChi', 		';p_{T,b from #tilde{#chi}^{#pm}}  [GeV]',75,	0, 	1500	)
-        self.h_pTBChiPlus          	= ROOT.TH2F('pTBChiPlus', 	';p_{T,b from #chi^{+}_{1}} [GeV];p_{T, b from #chi^{+}_{2}} [GeV]', 75,	0, 	1500, 	75,	0, 	1500	)
-        self.h_pTBChiMinus         	= ROOT.TH2F('pTBChiMinus', 	';p_{T,b from #chi^{-}_{1}} [GeV];p_{T, b from #chi^{-}_{2}} [GeV]', 75,	0, 	1500,	75, 	0, 	1500	) 
+        #self.h_pTBChiPlus          	= ROOT.TH2F('pTBChiPlus', 	';p_{T,b from #chi^{+}_{1}} [GeV];p_{T, b from #chi^{+}_{2}} [GeV]', 75,	0, 	1500, 	75,	0, 	1500	)
+        #self.h_pTBChiMinus         	= ROOT.TH2F('pTBChiMinus', 	';p_{T,b from #chi^{-}_{1}} [GeV];p_{T, b from #chi^{-}_{2}} [GeV]', 75,	0, 	1500,	75, 	0, 	1500	) 
 
         self.h_etaStop             	= ROOT.TH1F('etaStop', 		';#eta_{#tilde{t}}',			80,	-8,	8	)
-        self.h_etaStopPlus         	= ROOT.TH1F('etaStopPlus', 	';#eta_{#tilde{t}^{+2/3}}',		80,	-8,	8	)
-        self.h_etaStopMinus        	= ROOT.TH1F('etaStopMinus', 	';eta_{#tilde{t}^{-2/3}}',		80,	-8,	8	) 
+        #self.h_etaStopPlus         	= ROOT.TH1F('etaStopPlus', 	';#eta_{#tilde{t}^{+2/3}}',		80,	-8,	8	)
+        #self.h_etaStopMinus        	= ROOT.TH1F('etaStopMinus', 	';eta_{#tilde{t}^{-2/3}}',		80,	-8,	8	) 
         self.h_etaChi              	= ROOT.TH1F('etaChi', 		';#eta_{#tilde{#chi}^{#pm}}',		80,	-8,	8	)
-        self.h_etaChiPlus          	= ROOT.TH1F('etaChiPlus',	';#eta_{#chi^{+}}',			80,	-8,	8	)
-        self.h_etaChiMinus         	= ROOT.TH1F('etaChiMinus',	';#eta_{#chi^{-}}',			80,	-8,	8	)
+        #self.h_etaChiPlus          	= ROOT.TH1F('etaChiPlus',	';#eta_{#chi^{+}}',			80,	-8,	8	)
+        #self.h_etaChiMinus         	= ROOT.TH1F('etaChiMinus',	';#eta_{#chi^{-}}',			80,	-8,	8	)
         self.h_etaBStop            	= ROOT.TH1F('etaBStop',		';eta_{b from #tilde{t}}',		80,	-8,	8	)       
-        self.h_etaBStopPlus        	= ROOT.TH1F('etaBStopPlus',	';eta_{b from #tilde{t}^{+2/3}}',	80,	-8,	8	)
-        self.h_etaBStopMinus       	= ROOT.TH1F('etaBStopMinus',	';eta_{b from #tilde{t}^{-2/3}}',	80,	-8,	8	)
+        #self.h_etaBStopPlus        	= ROOT.TH1F('etaBStopPlus',	';eta_{b from #tilde{t}^{+2/3}}',	80,	-8,	8	)
+        #self.h_etaBStopMinus       	= ROOT.TH1F('etaBStopMinus',	';eta_{b from #tilde{t}^{-2/3}}',	80,	-8,	8	)
         self.h_etaBChi             	= ROOT.TH1F('etaBChi' , 	';eta_{b from #tilde{#chi}^{#pm}}',	80,	-8,	8	)
-        self.h_etaBChiPlus         	= ROOT.TH2F('etaBChiPlus', 	';eta_{b from #chi^{+}_{1}};eta_{b from #chi&{+}_{2}}',	80,	-8,	8, 	80,	-8, 	8	)
-        self.h_etaBChiMinus        	= ROOT.TH2F('etaBChiMinus', 	';eta_{b from #chi^{-}_{1}};eta_{b from #chi^{-}_{2}}',	80,	-8,	8, 	80, 	-8, 	8	)
+        #self.h_etaBChiPlus         	= ROOT.TH2F('etaBChiPlus', 	';eta_{b from #chi^{+}_{1}};eta_{b from #chi&{+}_{2}}',	80,	-8,	8, 	80,	-8, 	8	)
+        #self.h_etaBChiMinus        	= ROOT.TH2F('etaBChiMinus', 	';eta_{b from #chi^{-}_{1}};eta_{b from #chi^{-}_{2}}',	80,	-8,	8, 	80, 	-8, 	8	)
 
         self.h_dEtaBChi         	= ROOT.TH1F('dEtaBChi',		';|#Delta#eta_{b,#tilde{#chi}^{#pm}}|',	50,	0,	5.0   	)
         self.h_dPhiBChi         	= ROOT.TH1F('dPhiBChi',		';|#Delta#phi_{b,#tilde{#chi}^{#pm}}|',	50,	0,	5.0   	)
@@ -627,12 +627,12 @@ preselection = (
 
 if args.sample == 'signal':
 
-  allPoints = ['1000_400']#,'1000_600','1000_900',
-               #'1200_400','1200_600','1200_1100',
-               #'1300_400','1300_600','1300_1200',
-               #'1400_400','1400_600','1400_1300',
-               #'1500_400','1500_600','1500_900','1500_1400',
-               #'2000_400','2000_600','2000_900','2000_1400','2000_1900']
+  allPoints = ['1000_400','1000_600','1000_900',
+               '1200_400','1200_600','1200_1100',
+               '1300_400','1300_600','1300_1200',
+               '1400_400','1400_600','1400_1300',
+               '1500_400','1500_600','1500_900','1500_1400',
+               '2000_400','2000_600','2000_900','2000_1400','2000_1900']
   if args.points == 'all': 
     print('Running over all available signal points...')
     points = allPoints
