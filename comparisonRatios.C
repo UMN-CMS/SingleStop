@@ -9,7 +9,7 @@ void comparisonRatios(){
   string saveTo = "313_312";
 
   if (doPlots){
-    vector<string> masses = {"2000_100"};//{"200_100","300_100","300_200","500_100","500_200","500_400","700_100","700_400","700_600","1000_100","1000_400","1000_900","1500_100","1500_600","1500_1400","2000_100","2000_900","2000_1900"};
+    vector<string> masses = {"1500_900"};//{"200_100","300_100","300_200","500_100","500_200","500_400","700_100","700_400","700_600","1000_100","1000_400","1000_900","1500_100","1500_600","1500_1400","2000_100","2000_900","2000_1900"};
     for (string inputDir:inputDirs) {
 	    for(string s:masses){
 		    TFile* file = new TFile(Form("output/%s/hist_%s.root",inputDir.c_str(),s.c_str()));
@@ -22,7 +22,7 @@ void comparisonRatios(){
 			    h->Draw();
 			    c1->SaveAs(Form("plots/%s/%s/%s.png",saveTo.c_str(),s.c_str(),h->GetName()));
 		    }
-	    }
+    }
     }
   }
 
@@ -31,7 +31,7 @@ void comparisonRatios(){
   gStyle->SetOptTitle(0);
   if (doCompare){
     vector<string> compare = {"signal_1000_400"};//,"signal_1500_600","signal_2000_1900"};
-    vector<string> plotNames = {"nbLoose","nbMedium","nbTight","HT","nJets","mAll","m4","m3","pT1","pT2","pT3","pT4","eta1","eta2","eta3","eta4","m3NoLead","m3NoLeadOrSub","dEta12","dPhi12","dR12","ntLoose","ntMedium","ntTight","MET","pT1Gen","pT2Gen","pT3GEn","pT4Gen","eta1Gen","eta2Gen","eta3Gen","eta4Gen","pTStop","pTChi","pTBStop","etaStop","etaChi","etaBStop","etaBChi","dEtaBChi","dPhiBChi","nJetsChiMerged","dRBB","dEtaBB","dPhiBB","passDijet","dEtaWJs","mWJs","dRChiMax","dRBChi"};
+    vector<string> plotNames = {"nbLoose","nbMedium","nbTight","HT","nJets","mAll","m4","m3","pT1","pT2","pT3","pT4","eta1","eta2","eta3","eta4","m3NoLead","m3NoLeadOrSub","dEta12","dPhi12","dR12","ntLoose","ntMedium","ntTight","MET","pT1Gen","pT2Gen","pT3GEn","pT4Gen","eta1Gen","eta2Gen","eta3Gen","eta4Gen","pTStop","pTChi","pTBStop","dEtaBChi","dPhiBChi","dRBB","dEtaBB","dPhiBB","passDijet","dEtaWJs","mWJs","dRChiMax","dRBChi"};
     //float yMax = 0;
     for(string n:plotNames){
 	    TCanvas* c1 = new TCanvas();
@@ -46,7 +46,7 @@ void comparisonRatios(){
 		    TFile* file = new TFile(Form("output/%s/%s.root",inputDir.c_str(),s.c_str()));
 		    TDirectory* plots = file->GetDirectory("plots");
 		    //TH1D* plot = (TH1D*)file->Get(n.c_str());
-		    if (strcmp(inputDir.c_str(), "313")) {
+		    if (strcmp(inputDir.c_str(), "313") == 0) {
 		    	plot_313 = (TH1D*)plots->Get(n.c_str());	
 		     	stringstream plotTitle;
 		    	//plotTitle << "(" << s.substr(0,s.find("_")) << ", " << s.substr(s.find("_") + 1) << ")";
@@ -82,11 +82,20 @@ void comparisonRatios(){
 		    }
 	    	}
 	    } 
-	    TRatioPlot* ratio = new TRatioPlot(plot_313, plot_312);
+	    double max_312 = plot_312->GetMaximum();
+	    double max_313 = plot_313->GetMaximum();
+	    plot_312->SetMaximum(1.05 * max(max_312, max_313));
+  	    plot_313->SetMaximum(1.05 * max(max_312, max_313));
+	    TRatioPlot* ratio = new TRatioPlot(plot_312, plot_313);
 	    ratio->SetH1DrawOpt("HIST E0");
 	    ratio->SetH2DrawOpt("HIST E0");
 	    ratio->Draw();
 	    ratio->GetLowerRefYaxis()->SetRangeUser(0.0, 2.0);
+	    if (strcmp(n.c_str(), "nbLoose") == 0 || strcmp(n.c_str(), "nbMedium") == 0 || strcmp(n.c_str(), "nbTight") == 0 || strcmp(n.c_str(), "ntLoose") == 0 || strcmp(n.c_str(), "ntMedium") == 0 || strcmp(n.c_str(), "ntTight") == 0 ) {
+		ratio->GetUpperRefXaxis()->SetRangeUser(0, 7);
+
+	    }
+	    //ratio->Draw();
 	    //stack->Draw("HIST PLC NOSTACK");
 	    //stack->GetXaxis()->SetTitle(xTitle.c_str());
 	    //stack->GetYaxis()->SetTitle("Fraction of Events");
@@ -96,7 +105,7 @@ void comparisonRatios(){
 	    legend->Draw();
 	    //TLegendEntry *header = (TLegendEntry*)legend->GetListOfPrimitives()->First();
 	    //header->SetTextSize(0.05);
-	    gPad->SetLogy();
+	    //gPad->SetLogy();
 	    c1->SaveAs(Form("plots/%s/overlaid/%s.pdf",saveTo.c_str(),n.c_str()));
     }
   }
