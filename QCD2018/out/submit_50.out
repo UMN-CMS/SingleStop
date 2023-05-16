@@ -1,0 +1,59 @@
+[FERMIHTC-APPTAINER]: INFO -- No Apptainer image specified
+[FERMIHTC-APPTAINER]: INFO -- Running job on the host machine
+
+[FERMIHTC-APPTAINER]: INFO -- Running ./condor_exec.exe
+Starting job on  Tue May 16 14:46:16 UTC 2023
+Running on: Linux shardulr-32129155-49-cmswn2116.fnal.gov 3.10.0-1160.90.1.el7.x86_64 #1 SMP Thu Apr 27 13:14:20 CDT 2023 x86_64 x86_64 x86_64 GNU/Linux
+System software: Scientific Linux release 7.9 (Nitrogen)
+Running ls -alrth:
+total 136K
+-rw-r--r--  1 shardulr fnalgrid  11K May 16 14:45 .machine.ad
+-rw-r--r--  1 shardulr fnalgrid 5.1K May 16 14:45 .job.ad
+-rwx------  1 shardulr fnalgrid   49 May 16 14:45 .chirp.config
+-rw-------  1 shardulr fnalgrid  11K May 16 14:46 x509up
+drwxr-xr-x  2 shardulr fnalgrid 4.0K May 16 14:46 samples
+drwxr-xr-x  2 shardulr fnalgrid 4.0K May 16 14:46 framework
+-rw-r--r--  1 shardulr fnalgrid  46K May 16 14:46 singleStopAnalyzer.py
+-rwxr-xr-x  1 shardulr fnalgrid  667 May 16 14:46 condor_exec.exe
+-rw-r--r--  1 shardulr fnalgrid    0 May 16 14:46 docker_stderror
+drwxrwxrwt  3 shardulr fnalgrid 4.0K May 16 14:46 var
+drwxrwxrwt  2 shardulr fnalgrid 4.0K May 16 14:46 tmp
+-rw-r--r--  1 shardulr fnalgrid  11K May 16 14:46 .update.ad
+drwxr-xr-x  3 root     root     4.0K May 16 14:46 ..
+srwxr-xr-x  1 shardulr fnalgrid    0 May 16 14:46 .docker_sock
+-rw-r--r--  1 shardulr fnalgrid  113 May 16 14:46 _condor_stderr
+drwx------  7 shardulr fnalgrid 4.0K May 16 14:46 .
+drwxr-xr-x 17 shardulr fnalgrid 4.0K May 16 14:46 CMSSW_10_6_19_patch2
+-rw-r--r--  1 shardulr fnalgrid  453 May 16 14:46 _condor_stdout
+/storage/local/data1/condor/execute/dir_50400/CMSSW_10_6_19_patch2 is the CMSSW we created on the local worker node
+Running over file index 50 for sample QCD2018
+Pre-select 42640 entries out of 59704 (71.42%)
+Processed    10000/   42640 entries, 23.45% (elapsed time    42.0s, curr speed    0.238 kHz, avg speed    0.238 kHz), accepted     4751/   10001 events (47.51%)
+Processed    20000/   42640 entries, 46.90% (elapsed time    82.4s, curr speed    0.247 kHz, avg speed    0.243 kHz), accepted     9394/   20001 events (46.97%)
+Processed    30000/   42640 entries, 70.36% (elapsed time   123.1s, curr speed    0.246 kHz, avg speed    0.244 kHz), accepted    14062/   30001 events (46.87%)
+Processed    40000/   42640 entries, 93.81% (elapsed time   163.5s, curr speed    0.248 kHz, avg speed    0.245 kHz), accepted    18764/   40001 events (46.91%)
+Processed 42640 preselected entries from root://cmsxrootd.fnal.gov//store/mc/RunIISummer20UL18NanoAODv9/QCD_bEnriched_HT1500to2000_TuneCP5_13TeV-madgraph-pythia8/NANOAODSIM/106X_upgrade2018_realistic_v16_L1v1-v1/280000/DA5014D0-9AA8-3841-920E-1C5BB41612FD.root (59704 entries). Finally selected 20009 entries
+Total time 185.8 sec. to process 59704 events. Rate = 321.4 Hz.
+Running pwd:
+/storage/local/data1/condor/execute/dir_50400
+Running ls -alrth:
+total 140K
+-rw-r--r--  1 shardulr fnalgrid  11K May 16 14:45 .machine.ad
+-rw-r--r--  1 shardulr fnalgrid 5.1K May 16 14:45 .job.ad
+-rwx------  1 shardulr fnalgrid   49 May 16 14:45 .chirp.config
+-rw-------  1 shardulr fnalgrid  11K May 16 14:46 x509up
+drwxr-xr-x  2 shardulr fnalgrid 4.0K May 16 14:46 samples
+-rw-r--r--  1 shardulr fnalgrid  46K May 16 14:46 singleStopAnalyzer.py
+-rwxr-xr-x  1 shardulr fnalgrid  667 May 16 14:46 condor_exec.exe
+-rw-r--r--  1 shardulr fnalgrid    0 May 16 14:46 docker_stderror
+drwxrwxrwt  3 shardulr fnalgrid 4.0K May 16 14:46 var
+drwxrwxrwt  2 shardulr fnalgrid 4.0K May 16 14:46 tmp
+drwxr-xr-x  3 root     root     4.0K May 16 14:46 ..
+srwxr-xr-x  1 shardulr fnalgrid    0 May 16 14:46 .docker_sock
+-rw-r--r--  1 shardulr fnalgrid  113 May 16 14:46 _condor_stderr
+drwxr-xr-x 17 shardulr fnalgrid 4.0K May 16 14:46 CMSSW_10_6_19_patch2
+drwxr-xr-x  2 shardulr fnalgrid 4.0K May 16 14:46 framework
+drwxr-xr-x  3 shardulr fnalgrid 4.0K May 16 14:46 output
+-rw-r--r--  1 shardulr fnalgrid  11K May 16 14:49 .update.ad
+drwx------  8 shardulr fnalgrid 4.0K May 16 14:49 .
+-rw-r--r--  1 shardulr fnalgrid 2.9K May 16 14:49 _condor_stdout
