@@ -303,10 +303,8 @@ class ExampleAnalysis(Module):
           self.h_cutflow.Fill(5,genWeight)
           if len(looseBs) < 2: return False
           self.h_cutflow.Fill(6,genWeight)
-          #if abs(looseBs[0].p4().DeltaR(looseBs[1].p4())) < 1: return False
-          self.h_cutflow.Fill(7,genWeight)
           if len(tightTs) != 0: return False
-          self.h_cutflow.Fill(8,genWeight)
+          self.h_cutflow.Fill(7,genWeight)
 
         try: 
           self.h_nQLHE.Fill(event.LHE_Nuds + event.LHE_Nc + event.LHE_Nb,genWeight)
