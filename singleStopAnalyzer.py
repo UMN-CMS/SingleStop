@@ -301,7 +301,7 @@ class ExampleAnalysis(Module):
           self.h_cutflow.Fill(4,genWeight)
           if not 2 < abs(jets[0].p4().DeltaR(jets[1].p4())) < 4: return False
           self.h_cutflow.Fill(5,genWeight)
-          if len(mediumBs) < 3 or len(tightBs) < 1: return False
+          if len(looseBs) < 3: return False
           self.h_cutflow.Fill(6,genWeight)
           if len(tightTs) != 0: return False
           self.h_cutflow.Fill(7,genWeight)

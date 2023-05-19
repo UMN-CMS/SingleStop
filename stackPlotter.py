@@ -1,6 +1,6 @@
 import ROOT
 ROOT.gROOT.SetBatch(True)
-bTags = '021'
+bTags = '1B'
 signalPath = 'output/313/{}'.format(bTags)
 signalFiles = ['signal_2000_1900.root', 'signal_1500_900.root', 'signal_1000_400.root']
 colors = [2, 3, 4]
@@ -16,9 +16,8 @@ files = {fname: ROOT.TFile.Open('{}/{}'.format(signalPath, fname), "READ") for f
 files.update( {backgroundFile: ROOT.TFile.Open('{}/{}'.format(backgroundPath, backgroundFile), "READ") } )
 
 file1.cd("plots")
-#param_list = [key.GetName() for key in ROOT.gDirectory.GetListOfKeys()]
-#print(param_list)
-param_list = ['cutflow']
+param_list = [key.GetName() for key in ROOT.gDirectory.GetListOfKeys()]
+print(param_list)
 ROOT.TFile.Close(file1)
 
 for param in param_list:
