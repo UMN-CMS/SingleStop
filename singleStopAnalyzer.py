@@ -15,11 +15,12 @@ ROOT.PyConfig.IgnoreCommandLineOptions = True
 
 class ExampleAnalysis(Module):
 
-    def __init__(self,isSignal,MCCampaign,isSkimmed):
+    def __init__(self,isSignal,MCCampaign,isSkimmed,coupling):
         self.writeHistFile = True
         self.isSignal = isSignal
         self.MCCampaign = MCCampaign
         self.isSkimmed = isSkimmed
+	self.coupling = coupling
 
     def create2DHists(self,titles,labels,*args):
         for i,title in enumerate(titles):
@@ -85,9 +86,21 @@ class ExampleAnalysis(Module):
         self.h_dEtaBChi         	= ROOT.TH1F('dEtaBChi',		';|#Delta#eta_{b,#tilde{#chi}^{#pm}}|',	50,	0,	5.0   	)
         self.h_dPhiBChi         	= ROOT.TH1F('dPhiBChi',		';|#Delta#phi_{b,#tilde{#chi}^{#pm}}|',	50,	0,	5.0   	)
         self.h_nJetsChiMerged   	= ROOT.TH1D('nJetsChiMerged',	';N_{j} matched with #tilde{#chi}^{#pm}',4,	0,	4   	)
-        self.h_dRBB             	= ROOT.TH1F('dRBB',		';#DeltaR_{b,b}',			35,	0,	7    	)
-        self.h_dEtaBB           	= ROOT.TH1F('dEtaBB',		';|#Delta#eta_{b,b}|',			50,	0,	5.0   	)
-        self.h_dPhiBB           	= ROOT.TH1F('dPhiBB',		';|#Delta#phi_{b,b}|',			50,	0,	5.0   	)
+	if self.coupling == '312':
+        	self.h_dRBB             	= ROOT.TH1F('dRBB',		';#DeltaR_{b,b}',			35,	0,	7    	)
+        	self.h_dEtaBB           	= ROOT.TH1F('dEtaBB',		';|#Delta#eta_{b,b}|',			50,	0,	5.0   	)
+        	self.h_dPhiBB           	= ROOT.TH1F('dPhiBB',		';|#Delta#phi_{b,b}|',			50,	0,	5.0   	)
+	else:
+		self.h_dRBB12			= ROOT.TH1F('dRBB12',		';#DeltaR_{b_1,b_2}', 			35,	0, 	7	)
+		self.h_dRBB1Stop		= ROOT.TH1F('dRBB1Stop',	';#DeltaR_{b_1,b_{Stop}}', 		35,	0, 	7	)
+		self.h_dRBB2Stop		= ROOT.TH1F('dRBB2Stop',	';#DeltaR_{b_2,b_{Stop}}', 		35,	0, 	7	)
+        	self.h_dEtaBB12           	= ROOT.TH1F('dEtaBB12',		';|#Delta#eta_{b_1,b_2}|',		50,	0,	5.0   	)
+        	self.h_dEtaBB1Stop           	= ROOT.TH1F('dEtaBB1Stop',	';|#Delta#eta_{b_1,b_{Stop}}|',		50,	0,	5.0   	)
+        	self.h_dEtaBB2Stop           	= ROOT.TH1F('dEtaBB2Stop',	';|#Delta#eta_{b_2,b_{Stop}}|',		50,	0,	5.0   	)
+        	self.h_dPhiBB12           	= ROOT.TH1F('dPhiBB12',		';|#Delta#phi_{b_1,b_2}|',		50,	0,	5.0   	)
+        	self.h_dPhiBB1Stop           	= ROOT.TH1F('dPhiBB1Stop',	';|#Delta#phi_{b_1,b_{Stop}}|',		50,	0,	5.0   	)
+        	self.h_dPhiBB2Stop           	= ROOT.TH1F('dPhiBB2Stop',	';|#Delta#phi_{b_2,b_{Stop}}|',		50,	0,	5.0   	)
+		
         self.h_passDijet        	= ROOT.TH1D('passDijet',	';Pass Dijet Search Requirements',	2,	0,	2	)
         self.h_dEtaWJs			= ROOT.TH1F('dEtaWJs',		';|#Delta#eta_{j,j}| (wide jets)',	50,	0,	5.0	)
         self.h_mWJs			= ROOT.TH1F('mWJs',		';m_jj (wide jets) [GeV]',		150,    0,      3000    )	
@@ -294,17 +307,15 @@ class ExampleAnalysis(Module):
           if not (event.HLT_PFHT1050 or event.HLT_AK8PFJet360_TrimMass30): return False
           self.h_cutflow.Fill(1,genWeight)
           if len(jets) > 0 and not jets[0].pt > 300: return False
-          self.h_cutflow.Fill(2,genWeight)
-          if len(jets) < 4 or len(jets) > 5: return False
-          self.h_cutflow.Fill(3,genWeight)
+          self.h_cutflow.Fill('leading jet pT > 300',genWeight)
+          if len(jets) < 4 or len(jets) > 6: return False
+          self.h_cutflow.Fill('4 <= nJets <= 6',genWeight)
           if len(goodElectrons) != 0 or len(goodMuons) != 0: return False
-          self.h_cutflow.Fill(4,genWeight)
+          self.h_cutflow.Fill('no leptons',genWeight)
           if not 2 < abs(jets[0].p4().DeltaR(jets[1].p4())) < 4: return False
-          self.h_cutflow.Fill(5,genWeight)
+          self.h_cutflow.Fill('2 < deltaR leading jets < 4',genWeight)
           if len(looseBs) < 3: return False
-          self.h_cutflow.Fill(6,genWeight)
-          if len(tightTs) != 0: return False
-          self.h_cutflow.Fill(7,genWeight)
+          self.h_cutflow.Fill('loose Bs >= 3',genWeight)
 
         try: 
           self.h_nQLHE.Fill(event.LHE_Nuds + event.LHE_Nc + event.LHE_Nb,genWeight)
@@ -325,20 +336,19 @@ class ExampleAnalysis(Module):
 		      if g.pdgId == 1000006: genStop = g
 		      elif g.pdgId == 1000024: genChi = g
 		      elif g.pdgId == 5: genBStop = g
-		      elif g.pdgId == -5: 
-			if not oneBChi:
-				genBChi1 = g
-				oneBChi = True
+		      elif g.pdgId == -5:
+			if self.coupling == '312':
+				genBChi = g
 			else:
-				genBChi2 = g
+				if not oneBChi:
+					genBChi1 = g
+					oneBChi = True
+				else:
+					genBChi2 = g
+		      elif g.pdgId == -3: genS = g 
 		      elif g.pdgId == -1: genD = g
 		      else: print('WARNING: Unexpected particle with pdgId {}'.format(g.pdgId))
-		  if genBChi2.pt > genBChi1.pt: genBChi1, genBChi2 = genBChi2, genBChi1
-		  genStopPlus = genStop
-	          genBStopPlus = genBStop
-		  genChiPlus = genChi
-		  genBChiPlus1 = genBChi1
-		  genBChiPlus2 = genBChi2
+		  if self.coupling == '313' and genBChi2.pt > genBChi1.pt: genBChi1, genBChi2 = genBChi2, genBChi1
           elif True in (g.pdgId == -1000006 for g in gens):
 	      stopPlus = False
 	      oneBChi = False
@@ -347,20 +357,22 @@ class ExampleAnalysis(Module):
 		      elif g.pdgId == -1000024: genChi = g
 		      elif g.pdgId == -5: genBStop = g
 		      elif g.pdgId == 5:
-			      if not oneBChi:
-				      genBChi1 = g
-				      oneBChi = True
-			      else:
-				      genBChi2 = g
+			if self.coupling == '312':
+				genBChi = g
+			else:
+				if not oneBChi:
+					genBChi1 = g
+				        oneBChi = True
+			        else:
+				        genBChi2 = g
+		      elif g.pdgId == 3: genS = g	
 		      elif g.pdgId == 1: genD = g
 		      else: print('WARNING: Unexpected particle with pdgId {}'.format(g.pdgId))
-	      if genBChi2.pt > genBChi1.pt: genBChi1, genBChi2 = genBChi2, genBChi1  
-	      genStopMinus = genStop
-	      genBStopMinus = genBStop
-	      genChiMinus = genChi
-	      genBChiMinus1 = genBChi1
-	      genBChiMinus2 = genBChi2
-	      genQuarks = [genBStop,genBChi1,genD,genBChi2]
+	      if self.coupling == '313' and genBChi2.pt > genBChi1.pt: genBChi1, genBChi2 = genBChi2, genBChi1
+	      if self.coupling == '312':
+		genQuarks = [genBStop, genBChi, genD, genS]
+	      else:  
+	      	genQuarks = [genBStop,genBChi1,genD,genBChi2]
 
           else: print('WARNING: No stop found in event')
 
@@ -369,35 +381,68 @@ class ExampleAnalysis(Module):
           #-----------------------------------------------------------------------
 
           # Gen kinematics
-          self.h_pTStop.Fill(genStop.pt,genWeight)
-          self.h_pTChi.Fill(genChi.pt,genWeight)
-          self.h_pTBStop.Fill(genBStop.pt,genWeight)
-          self.h_pTBChi.Fill(genBChi1.pt,genWeight)
-	  self.h_pTBChi.Fill(genBChi2.pt, genWeight)
-          self.h_pTBStop.Fill(genBStop.pt,genWeight)
-          self.h_etaBStop.Fill(genBStop.eta,genWeight)
-          self.h_etaBChi.Fill(genBChi1.eta, genWeight)
-	  self.h_etaBChi.Fill(genBChi2.eta, genWeight)
-          self.h_pTStop.Fill(genStop.pt,genWeight)
-          self.h_etaStop.Fill(genStop.eta,genWeight)
-          self.h_pTChi.Fill(genChi.pt,genWeight)
-          self.h_etaChi.Fill(genChi.eta,genWeight)
-          dEtaBChi = abs(genBStop.eta - genChi.eta)
-          self.h_dEtaBChi.Fill(dEtaBChi,genWeight)
-          self.h_dPhiBChi.Fill(abs(genBStop.p4().DeltaPhi(genChi.p4())),genWeight)
-          self.h_dRBChi.Fill(abs(genBStop.p4().DeltaR(genChi.p4())),genWeight)
-          dRChiMax = max(genBChi1.p4().DeltaR(genD.p4()),
+	  if self.coupling == '312':
+		  self.h_pTStop.Fill(genStop.pt,genWeight)
+		  self.h_pTChi.Fill(genChi.pt,genWeight)
+		  self.h_pTBChi.Fill(genBChi.pt,genWeight)
+		  self.h_pTBStop.Fill(genBStop.pt,genWeight)
+		  self.h_etaBStop.Fill(genBStop.eta,genWeight)
+		  self.h_etaBChi.Fill(genBChi.eta, genWeight)
+		  self.h_etaStop.Fill(genStop.eta,genWeight)
+		  self.h_pTChi.Fill(genChi.pt,genWeight)
+		  self.h_etaChi.Fill(genChi.eta,genWeight)
+		  dEtaBChi = abs(genBStop.eta - genChi.eta)
+		  self.h_dEtaBChi.Fill(dEtaBChi,genWeight)
+		  self.h_dPhiBChi.Fill(abs(genBStop.p4().DeltaPhi(genChi.p4())),genWeight)
+		  self.h_dRBChi.Fill(abs(genBStop.p4().DeltaR(genChi.p4())),genWeight)
+		  dRChiMax = max(genBChi.p4().DeltaR(genD.p4()),
+                                   genBChi.p4().DeltaR(genS.p4()),
+                                   genD.p4().DeltaR(genS.p4()))
+		  self.h_dRChiMax.Fill(dRChiMax,genWeight)
+		  self.h_dRBB.Fill(genBChi.p4().DeltaR(genBStop.p4()),genWeight)
+		  self.h_dEtaBB.Fill(abs(genBChi.eta - genBStop.eta),genWeight)
+		  self.h_dPhiBB.Fill(abs(genBChi.p4().DeltaPhi(genBStop.p4())),genWeight)
+		  self.h_pTBVsChi.Fill(genChi.pt,genBStop.pt,genWeight)
+		  self.h_dEtaVsPTStop.Fill(genChi.pt,abs(genChi.eta - genBStop.eta),genWeight)
+		  self.h_dEtaVsPTStopRatio.Fill(genChi.pt / (genStop.p4().M() - genChi.p4().M()),abs(genChi.eta - genBStop.eta),genWeight)
+		  self.h_passDijet.Fill(1 if (dRChiMax < 1.1 and dEtaBChi < 1.1) else 0,genWeight)
+	  else:
+		  self.h_pTStop.Fill(genStop.pt,genWeight)
+		  self.h_pTChi.Fill(genChi.pt,genWeight)
+		  self.h_pTBStop.Fill(genBStop.pt,genWeight)
+		  self.h_pTBChi.Fill(genBChi1.pt,genWeight)
+		  self.h_pTBChi.Fill(genBChi2.pt, genWeight)
+		  self.h_pTBStop.Fill(genBStop.pt,genWeight)
+		  self.h_etaBStop.Fill(genBStop.eta,genWeight)
+		  self.h_etaBChi.Fill(genBChi1.eta, genWeight)
+		  self.h_etaBChi.Fill(genBChi2.eta, genWeight)
+		  self.h_etaStop.Fill(genStop.eta,genWeight)
+		  self.h_pTChi.Fill(genChi.pt,genWeight)
+		  self.h_etaChi.Fill(genChi.eta,genWeight)
+		  dEtaBChi = abs(genBStop.eta - genChi.eta)
+		  self.h_dEtaBChi.Fill(dEtaBChi,genWeight)
+		  self.h_dPhiBChi.Fill(abs(genBStop.p4().DeltaPhi(genChi.p4())),genWeight)
+		  self.h_dRBChi.Fill(abs(genBStop.p4().DeltaR(genChi.p4())),genWeight)
+		  dRChiMax = max(genBChi1.p4().DeltaR(genD.p4()),
                                    genBChi1.p4().DeltaR(genBChi2.p4()),
                                    genD.p4().DeltaR(genBChi2.p4()))
-          self.h_dRChiMax.Fill(dRChiMax,genWeight)
-          self.h_dRBB.Fill(genBChi1.p4().DeltaR(genBStop.p4()),genWeight)
-          self.h_dEtaBB.Fill(abs(genBChi1.eta - genBStop.eta),genWeight)
-          self.h_dPhiBB.Fill(abs(genBChi1.p4().DeltaPhi(genBStop.p4())),genWeight)
-          self.h_pTBVsChi.Fill(genChi.pt,genBStop.pt,genWeight)
-          self.h_dEtaVsPTStop.Fill(genChi.pt,abs(genChi.eta - genBStop.eta),genWeight)
-          self.h_dEtaVsPTStopRatio.Fill(genChi.pt / (genStop.p4().M() - genChi.p4().M()),abs(genChi.eta - genBStop.eta),genWeight)
-          self.h_passDijet.Fill(1 if (dRChiMax < 1.1 and dEtaBChi < 1.1) else 0,genWeight)
+		  self.h_dRChiMax.Fill(dRChiMax,genWeight)
+			
+		  self.h_dRBB12.Fill(genBChi1.p4().DeltaR(genBChi2.p4()),genWeight)
+		  self.h_dRBB1Stop.Fill(genBChi1.p4().DeltaR(genBStop.p4()), genWeight)
+		  self.h_dRBB2Stop.Fill(genBChi2.p4().DeltaR(genBStop.p4()), genWeight)
+		  self.h_dEtaBB12.Fill(abs(genBChi1.eta - genBChi2.eta),genWeight)
+		  self.h_dEtaBB1Stop.Fill(abs(genBChi1.eta - genBStop.eta),genWeight)
+		  self.h_dEtaBB2Stop.Fill(abs(genBChi2.eta - genBStop.eta),genWeight)
+		  self.h_dPhiBB12.Fill(abs(genBChi1.p4().DeltaPhi(genBChi2.p4())),genWeight)
+		  self.h_dPhiBB1Stop.Fill(abs(genBChi1.p4().DeltaPhi(genBStop.p4())),genWeight)
+		  self.h_dPhiBB2Stop.Fill(abs(genBChi2.p4().DeltaPhi(genBStop.p4())),genWeight)
 
+		  self.h_pTBVsChi.Fill(genChi.pt,genBStop.pt,genWeight)
+		  self.h_dEtaVsPTStop.Fill(genChi.pt,abs(genChi.eta - genBStop.eta),genWeight)
+		  self.h_dEtaVsPTStopRatio.Fill(genChi.pt / (genStop.p4().M() - genChi.p4().M()),abs(genChi.eta - genBStop.eta),genWeight)
+		  self.h_passDijet.Fill(1 if (dRChiMax < 1.1 and dEtaBChi < 1.1) else 0,genWeight)
+		
           #pT and eta of the gen AK4 jets
           for i,j in enumerate(genAK4Jets):
             if i == 0:
@@ -602,6 +647,7 @@ parser.add_argument('--tag',type=str,default='test',help='Tag for output label')
 parser.add_argument('-n',type=int,default=1,help='Sample index to run over for backgrounds')
 parser.add_argument('--points',type=str,default='all',help='Signal point(s) to run over, comma separated in MSTOP_MCHI format; "all" to run over all available points')
 parser.add_argument('--useskim',action='store_true',default=False,help='Flag to use NANOAODs skimmed with the nominal selections')
+parser.add_argument('--coupling', type = str, default = '313', choices = ['312', '313'])
 args = parser.parse_args()
 
 outputPath = 'output/{}'.format(args.tag)
@@ -645,13 +691,16 @@ if args.sample == 'signal':
     print('ERROR: Invalid --points arguement format provided')
     sys.exit()
   for masses in points:
-    files = glob.glob('/eos/uscms/store/user/dmahon/condor/RPVSingleStopMC313/NANOAOD-ALL/NANOAOD-{}.root'.format(masses))
+    if args.coupling == '313':
+    	files = glob.glob('/eos/uscms/store/user/dmahon/condor/RPVSingleStopMC313/NANOAOD-ALL/NANOAOD-{}.root'.format(masses))
+    else:
+	files = glob.glob('/eos/uscms/store/user/dmahon/condor/RPVSingleStopMC/NANOAOD-ALL/NANOAOD-{}.root'.format(masses))
     #files = glob.glob('/eos/uscms/store/user/dmahon/condor/RPVSingleStopMC/NANOAOD/NANOAOD-{}-*.root'.format(masses))
     files = ['root://cmsxrootd.fnal.gov/' + x.replace('/eos/uscms','') for x in files]
     #files = ['file:/uscms_data/d3/dmahon/RPVSingleStopRun3Patched/NANOAOD/CMSSW_12_4_5/test_2000_100-1.root']
     #files = ['/uscms_data/d3/dmahon/RPVSingleStopRun3Patched/NANOAOD/files/NANOAOD-{}.root'.format(masses)]
     p = PostProcessor(".", files, cut=preselection, branchsel=None,
-                      modules=[ExampleAnalysis(isSignal=1,MCCampaign='UL2018',isSkimmed=False)],
+                      modules=[ExampleAnalysis(isSignal=1,MCCampaign='UL2018',isSkimmed=False, coupling = args.coupling)],
                       noOut=True, histFileName='{}/{}_{}.root'.format(outputPath,args.sample,masses), histDirName="plots",
                       maxEntries=None)
     p.run()
