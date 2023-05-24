@@ -207,6 +207,16 @@ class ExampleAnalysis(Module):
         self.create2DHists(['dPhi{}Vs{}'.format(i,j) for [i,j] in jetCombos2D],
                            [';|#Delta#phi_{{{}}}|;|#Delta#phi_{{{}}}|'.format(j,i) for [i,j] in jetCombos2D],
                            16,0,3.2,16,0,3.2)
+        bJetCombos2D = [[''.join(map(str,i)),''.join(map(str,j))] for i,j in combinations(combinations([1,2,3],2),2)]
+        self.create2DHists(['dEtabb{}Vs{}'.format(i,j) for [i,j] in bJetCombos2D],
+			   [';|#Delta#eta_{{{}}}|;|#Delta#eta_{{{}}}|'.format(j,i) for [i, j] in bJetCombos2D], 
+			   16,0,3.2,16,0,3.2)
+        self.create2DHists(['dPhibb{}Vs{}'.format(i,j) for [i,j] in bJetCombos2D],
+			   [';|#Delta#phi_{{{}}}|;|#Delta#phi_{{{}}}|'.format(j,i) for [i, j] in bJetCombos2D], 
+			   16,0,3.2,16,0,3.2)
+        self.create2DHists(['dRbb{}Vs{}'.format(i,j) for [i,j] in bJetCombos2D],
+			   [';|#DeltaR_{{{}}}|;|#DeltaR_{{{}}}|'.format(j,i) for [i, j] in bJetCombos2D], 
+			   16,0,3.2,16,0,3.2)
 
         self.h_dR12			= ROOT.TH1F('dR12',           	';#Delta R_{1,2}',                    	35,     0,      7     	)
         self.h_dR13                     = ROOT.TH1F('dR13',             ';#Delta R_{1,3}',                      35,     0,      7       )
@@ -219,9 +229,15 @@ class ExampleAnalysis(Module):
         self.h_dR35                     = ROOT.TH1F('dR35',             ';#Delta R_{3,5}',                      35,     0,      7       )
         self.h_dR45                     = ROOT.TH1F('dR45',             ';#Delta R_{4,5}',                      35,     0,      7       )
 
-        self.h_dEtabb                   = ROOT.TH1F('dEtabb',           ';|#Delta#eta_{b_{1},b_{2}}| (loose)',  50,     0,      5       )
-        self.h_dPhibb                   = ROOT.TH1F('dPhibb',           ';|#Delta#phi_{b_{1},b_{2}}| (loose)',  50,     0,      5       )
-        self.h_dRbb                     = ROOT.TH1F('dRbb',             ';#Delta R_{b_{1},b_{2}} (loose)',      35,     0,      7       )
+        self.h_dEtabb12                 = ROOT.TH1F('dEtabb12',         ';|#Delta#eta_{b_{1},b_{2}}| (loose)',  50,     0,      5       )
+        self.h_dPhibb12                 = ROOT.TH1F('dPhibb12',         ';|#Delta#phi_{b_{1},b_{2}}| (loose)',  50,     0,      5       )
+        self.h_dRbb12                   = ROOT.TH1F('dRbb12',           ';#Delta R_{b_{1},b_{2}} (loose)',      35,     0,      7       )
+        self.h_dEtabb13                 = ROOT.TH1F('dEtabb13',         ';|#Delta#eta_{b_{1},b_{3}}| (loose)',  50,     0,      5       )
+        self.h_dPhibb13                 = ROOT.TH1F('dPhibb13',         ';|#Delta#phi_{b_{1},b_{3}}| (loose)',  50,     0,      5       )
+        self.h_dRbb13                   = ROOT.TH1F('dRbb13',           ';#Delta R_{b_{1},b_{3}} (loose)',      35,     0,      7       )
+        self.h_dEtabb23                 = ROOT.TH1F('dEtabb23',         ';|#Delta#eta_{b_{2},b_{3}}| (loose)',  50,     0,      5       )
+        self.h_dPhibb23                 = ROOT.TH1F('dPhibb23',         ';|#Delta#phi_{b_{2},b_{3}}| (loose)',  50,     0,      5       )
+        self.h_dRbb23                   = ROOT.TH1F('dRbb23',           ';#Delta R_{b_{2},b_{3}} (loose)',      35,     0,      7       )
 
         self.h_dEtaRecoComp             = ROOT.TH1F('dEtaRecoComp',     ';|#Delta#eta_{#tilde{t},#tilde{#chi}^{#pm}}| (compressed)',  50,     0,      5       )
         self.h_dPhiRecoComp             = ROOT.TH1F('dPhiRecoComp',     ';|#Delta#phi_{#tilde{t},#tilde{#chi}^{#pm}}| (compressed)',  50,     0,      5       )
@@ -582,10 +598,32 @@ class ExampleAnalysis(Module):
           elif i == 2: self.h_pTb3.Fill(b.pt,genWeight)
           elif i == 3: self.h_pTb4.Fill(b.pt,genWeight)
 
-        if len(looseBs) >= 2: 
-          self.h_dEtabb.Fill(abs(looseBs[0].eta - looseBs[1].eta),genWeight)
-          self.h_dPhibb.Fill(abs(looseBs[0].p4().DeltaPhi(looseBs[1].p4())),genWeight)
-          self.h_dRbb.Fill(abs(looseBs[0].p4().DeltaR(looseBs[1].p4())),genWeight)
+        if len(looseBs) >= 3: 
+          self.h_dEtabb12.Fill(abs(looseBs[0].eta - looseBs[1].eta),genWeight)
+          self.h_dEtabb13.Fill(abs(looseBs[0].eta - looseBs[2].eta),genWeight)
+          self.h_dEtabb23.Fill(abs(looseBs[1].eta - looseBs[2].eta),genWeight)	
+          self.h_dPhibb12.Fill(abs(looseBs[0].p4().DeltaPhi(looseBs[1].p4())),genWeight)
+          self.h_dPhibb13.Fill(abs(looseBs[0].p4().DeltaPhi(looseBs[2].p4())),genWeight)
+          self.h_dPhibb23.Fill(abs(looseBs[1].p4().DeltaPhi(looseBs[2].p4())),genWeight)
+          self.h_dRbb12.Fill(abs(looseBs[0].p4().DeltaR(looseBs[1].p4())),genWeight)
+          self.h_dRbb13.Fill(abs(looseBs[0].p4().DeltaR(looseBs[2].p4())),genWeight)
+          self.h_dRbb23.Fill(abs(looseBs[1].p4().DeltaR(looseBs[2].p4())),genWeight)
+	
+	bJetCombos2D = [[''.join(map(str, i)), ''.join(map(str, j))] for i, j in combinations(combinations([1, 2, 3], 2), 2)]
+
+	self.fill2DHists(['dEtabb{}Vs{}'.format(i, j) for [i, j] in bJetCombos2D],
+			 [abs(looseBs[int(i) - 1].eta - looseBs[int(j) - 1].eta) for i, j in [x[0] for x in bJetCombos2D]],
+			 [abs(looseBs[int(i) - 1].eta - looseBs[int(j) - 1].eta) for i, j in [x[1] for x in bJetCombos2D]],
+			 genWeight)
+	self.fill2DHists(['dPhibb{}Vs{}'.format(i, j) for [i, j] in bJetCombos2D],
+			 [abs(looseBs[int(i) - 1].p4().DeltaPhi(looseBs[int(j) - 1].p4())) for i, j in [x[0] for x in bJetCombos2D]],
+			 [abs(looseBs[int(i) - 1].p4().DeltaPhi(looseBs[int(j) - 1].p4())) for i, j in [x[1] for x in bJetCombos2D]],
+			 genWeight)
+	self.fill2DHists(['dRbb{}Vs{}'.format(i, j) for [i, j] in bJetCombos2D],
+			 [abs(looseBs[int(i) - 1].p4().DeltaR(looseBs[int(j) - 1].p4())) for i, j in [x[0] for x in bJetCombos2D]],
+			 [abs(looseBs[int(i) - 1].p4().DeltaR(looseBs[int(j) - 1].p4())) for i, j in [x[1] for x in bJetCombos2D]],
+			 genWeight)
+
 
         self.h_dEtaRecoComp.Fill(abs(sumJet3.Eta() - sumJet4.Eta()),genWeight)
         self.h_dPhiRecoComp.Fill(abs(sumJet3.DeltaPhi(sumJet4)),genWeight)
@@ -664,7 +702,7 @@ elif args.useskim:
   files = ['root://cmsxrootd.fnal.gov//store/user/ckapsiak/SingleStop/Skims/Skim_2023_23_03/{}.root'.format(args.sample)]
   if len(files) != 1: print('WARNING: Multiple files selected. All must be from the same MC campaign.')
   p = PostProcessor(".", files, cut='', branchsel=None,
-                    modules=[ExampleAnalysis(isSignal=0,MCCampaign='UL2018',isSkimmed=True)],
+                    modules=[ExampleAnalysis(isSignal=0,MCCampaign='UL2018',isSkimmed=True, coupling = args.coupling)],
                     noOut=True, histFileName='{}/{}-ALL.root'.format(outputPath,args.sample), histDirName="plots",
                     maxEntries=None)
   p.run()
@@ -685,7 +723,7 @@ else:
     print('ERROR: Unable to determine MC campaign of {}'.format(files[0]))
     sys.exit()
   p = PostProcessor(".", files, cut=preselection, branchsel=None, 
-                    modules=[ExampleAnalysis(isSignal=0,MCCampaign=MCCampaign,isSkimmed=False)], 
+                    modules=[ExampleAnalysis(isSignal=0,MCCampaign=MCCampaign,isSkimmed=False, coupling = args.coupling)], 
                     noOut=True, histFileName='{}/{}-{}.root'.format(outputPath,args.sample,args.n), histDirName="plots",
                     maxEntries=None)
   p.run() 
