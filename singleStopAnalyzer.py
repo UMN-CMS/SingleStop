@@ -58,48 +58,32 @@ class ExampleAnalysis(Module):
 
         # SUSY particle kinematics
         self.h_pTStop              	= ROOT.TH1F('pTStop', 		';p_{T,#tilde{t}}  [GeV]',		75,	0,    	1500	)
-        #self.h_pTStopPlus          	= ROOT.TH1F('pTStopPlus', 	';p_{T,#tilde{t}^{+2/3}}  [GeV]',	75,	0,    	1500	)
-        #self.h_pTStopMinus         	= ROOT.TH1F('pTStopMinus', 	';p_{T,#tilde{t}^{-2/3}} [GeV]',	75,	0,    	1500	)
         self.h_pTChi               	= ROOT.TH1F('pTChi',		';p_{T,#tilde{#chi}^{#pm}}  [GeV]',     75,	0,    	1500	)
-        #self.h_pTChiPlus           	= ROOT.TH1F('pTChiPlus', 	';p_{T,#chi^{+}} [GeV]',		75,	0,    	1500	)
-        #self.h_pTChiMinus          	= ROOT.TH1F('pTChiMinus', 	';p_{T,#chi^{-}} [GeV]',		75,	0,    	1500	)
         self.h_pTBStop             	= ROOT.TH1F('pTBStop', 		';p_{T,b from #tilde{t}}  [GeV]',	75,	0,    	1500	)
-        #self.h_pTBStopPlus         	= ROOT.TH1F('pTBStopPlus', 	';p_{T,b from #tilde{t}^{+2/3}} [GeV]',	75,	0, 	1500	)
-        #self.h_pTBStopMinus    	   	= ROOT.TH1F('pTBStopMinus', 	';p_{T,b from #tilde{t}^{-2/3}} [GeV]',	75,	0, 	1500	)
         self.h_pTBChi              	= ROOT.TH1F('pTBChi', 		';p_{T,b from #tilde{#chi}^{#pm}}  [GeV]',75,	0, 	1500	)
-        #self.h_pTBChiPlus          	= ROOT.TH2F('pTBChiPlus', 	';p_{T,b from #chi^{+}_{1}} [GeV];p_{T, b from #chi^{+}_{2}} [GeV]', 75,	0, 	1500, 	75,	0, 	1500	)
-        #self.h_pTBChiMinus         	= ROOT.TH2F('pTBChiMinus', 	';p_{T,b from #chi^{-}_{1}} [GeV];p_{T, b from #chi^{-}_{2}} [GeV]', 75,	0, 	1500,	75, 	0, 	1500	) 
 
         self.h_etaStop             	= ROOT.TH1F('etaStop', 		';#eta_{#tilde{t}}',			80,	-8,	8	)
-        #self.h_etaStopPlus         	= ROOT.TH1F('etaStopPlus', 	';#eta_{#tilde{t}^{+2/3}}',		80,	-8,	8	)
-        #self.h_etaStopMinus        	= ROOT.TH1F('etaStopMinus', 	';eta_{#tilde{t}^{-2/3}}',		80,	-8,	8	) 
         self.h_etaChi              	= ROOT.TH1F('etaChi', 		';#eta_{#tilde{#chi}^{#pm}}',		80,	-8,	8	)
-        #self.h_etaChiPlus          	= ROOT.TH1F('etaChiPlus',	';#eta_{#chi^{+}}',			80,	-8,	8	)
-        #self.h_etaChiMinus         	= ROOT.TH1F('etaChiMinus',	';#eta_{#chi^{-}}',			80,	-8,	8	)
         self.h_etaBStop            	= ROOT.TH1F('etaBStop',		';eta_{b from #tilde{t}}',		80,	-8,	8	)       
-        #self.h_etaBStopPlus        	= ROOT.TH1F('etaBStopPlus',	';eta_{b from #tilde{t}^{+2/3}}',	80,	-8,	8	)
-        #self.h_etaBStopMinus       	= ROOT.TH1F('etaBStopMinus',	';eta_{b from #tilde{t}^{-2/3}}',	80,	-8,	8	)
         self.h_etaBChi             	= ROOT.TH1F('etaBChi' , 	';eta_{b from #tilde{#chi}^{#pm}}',	80,	-8,	8	)
-        #self.h_etaBChiPlus         	= ROOT.TH2F('etaBChiPlus', 	';eta_{b from #chi^{+}_{1}};eta_{b from #chi&{+}_{2}}',	80,	-8,	8, 	80,	-8, 	8	)
-        #self.h_etaBChiMinus        	= ROOT.TH2F('etaBChiMinus', 	';eta_{b from #chi^{-}_{1}};eta_{b from #chi^{-}_{2}}',	80,	-8,	8, 	80, 	-8, 	8	)
 
         self.h_dEtaBChi         	= ROOT.TH1F('dEtaBChi',		';|#Delta#eta_{b,#tilde{#chi}^{#pm}}|',	50,	0,	5.0   	)
         self.h_dPhiBChi         	= ROOT.TH1F('dPhiBChi',		';|#Delta#phi_{b,#tilde{#chi}^{#pm}}|',	50,	0,	5.0   	)
         self.h_nJetsChiMerged   	= ROOT.TH1D('nJetsChiMerged',	';N_{j} matched with #tilde{#chi}^{#pm}',4,	0,	4   	)
 	if self.coupling == '312':
-        	self.h_dRBB             	= ROOT.TH1F('dRBB',		';#DeltaR_{b,b}',			35,	0,	7    	)
-        	self.h_dEtaBB           	= ROOT.TH1F('dEtaBB',		';|#Delta#eta_{b,b}|',			50,	0,	5.0   	)
-        	self.h_dPhiBB           	= ROOT.TH1F('dPhiBB',		';|#Delta#phi_{b,b}|',			50,	0,	5.0   	)
+        	self.h_dRBB            	= ROOT.TH1F('dRBB',		';#DeltaR_{b,b}',			35,	0,	7    	)
+        	self.h_dEtaBB          	= ROOT.TH1F('dEtaBB',		';|#Delta#eta_{b,b}|',			50,	0,	5.0   	)
+        	self.h_dPhiBB          	= ROOT.TH1F('dPhiBB',		';|#Delta#phi_{b,b}|',			50,	0,	5.0   	)
 	else:
-		self.h_dRBB12			= ROOT.TH1F('dRBB12',		';#DeltaR_{b_1,b_2}', 			35,	0, 	7	)
-		self.h_dRBB1Stop		= ROOT.TH1F('dRBB1Stop',	';#DeltaR_{b_1,b_{Stop}}', 		35,	0, 	7	)
-		self.h_dRBB2Stop		= ROOT.TH1F('dRBB2Stop',	';#DeltaR_{b_2,b_{Stop}}', 		35,	0, 	7	)
-        	self.h_dEtaBB12           	= ROOT.TH1F('dEtaBB12',		';|#Delta#eta_{b_1,b_2}|',		50,	0,	5.0   	)
-        	self.h_dEtaBB1Stop           	= ROOT.TH1F('dEtaBB1Stop',	';|#Delta#eta_{b_1,b_{Stop}}|',		50,	0,	5.0   	)
-        	self.h_dEtaBB2Stop           	= ROOT.TH1F('dEtaBB2Stop',	';|#Delta#eta_{b_2,b_{Stop}}|',		50,	0,	5.0   	)
-        	self.h_dPhiBB12           	= ROOT.TH1F('dPhiBB12',		';|#Delta#phi_{b_1,b_2}|',		50,	0,	5.0   	)
-        	self.h_dPhiBB1Stop           	= ROOT.TH1F('dPhiBB1Stop',	';|#Delta#phi_{b_1,b_{Stop}}|',		50,	0,	5.0   	)
-        	self.h_dPhiBB2Stop           	= ROOT.TH1F('dPhiBB2Stop',	';|#Delta#phi_{b_2,b_{Stop}}|',		50,	0,	5.0   	)
+		self.h_dRBB12		= ROOT.TH1F('dRBB12',		';#DeltaR_{b_1,b_2}', 			35,	0, 	7	)
+		self.h_dRBB1Stop	= ROOT.TH1F('dRBB1Stop',	';#DeltaR_{b_1,b_{Stop}}', 		35,	0, 	7	)
+		self.h_dRBB2Stop	= ROOT.TH1F('dRBB2Stop',	';#DeltaR_{b_2,b_{Stop}}', 		35,	0, 	7	)
+        	self.h_dEtaBB12         = ROOT.TH1F('dEtaBB12',		';|#Delta#eta_{b_1,b_2}|',		50,	0,	5.0   	)
+        	self.h_dEtaBB1Stop      = ROOT.TH1F('dEtaBB1Stop',	';|#Delta#eta_{b_1,b_{Stop}}|',		50,	0,	5.0   	)
+        	self.h_dEtaBB2Stop      = ROOT.TH1F('dEtaBB2Stop',	';|#Delta#eta_{b_2,b_{Stop}}|',		50,	0,	5.0   	)
+        	self.h_dPhiBB12         = ROOT.TH1F('dPhiBB12',		';|#Delta#phi_{b_1,b_2}|',		50,	0,	5.0   	)
+        	self.h_dPhiBB1Stop      = ROOT.TH1F('dPhiBB1Stop',	';|#Delta#phi_{b_1,b_{Stop}}|',		50,	0,	5.0   	)
+        	self.h_dPhiBB2Stop      = ROOT.TH1F('dPhiBB2Stop',	';|#Delta#phi_{b_2,b_{Stop}}|',		50,	0,	5.0   	)
 		
         self.h_passDijet        	= ROOT.TH1D('passDijet',	';Pass Dijet Search Requirements',	2,	0,	2	)
         self.h_dEtaWJs			= ROOT.TH1F('dEtaWJs',		';|#Delta#eta_{j,j}| (wide jets)',	50,	0,	5.0	)
@@ -151,10 +135,24 @@ class ExampleAnalysis(Module):
         self.h_pTb2                     = ROOT.TH1F('pTb2',             ';p_{T,b_{2}} (loose) [GeV]',           75,     0,      1500    )
         self.h_pTb3                     = ROOT.TH1F('pTb3',             ';p_{T,b_{3}} (loose) [GeV]',           75,     0,      1500    )
         self.h_pTb4                     = ROOT.TH1F('pTb4',             ';p_{T,b_{4}} (loose) [GeV]',           75,     0,      1500    )
+	self.h_pTChiComp		= ROOT.TH1F('pTChiComp',	';p_{T,#tilde{#chi}^{#pm}} (compressed)',	75, 	0, 	2000	)
+	self.h_pTChiUncomp		= ROOT.TH1F('pTChiUncomp',	';p_{T,#tilde{#chi}^{#pm}} (uncompressed)',	75, 	0, 	2000	)
         self.h_eta1          		= ROOT.TH1F('eta1',       	';#eta_{1}',     			80,	-8,	8	)
         self.h_eta2          		= ROOT.TH1F('eta2',       	';#eta_{2}',     			80,	-8,	8	)
         self.h_eta3          		= ROOT.TH1F('eta3',       	';#eta_{3}',     			80,	-8,	8	)
         self.h_eta4          		= ROOT.TH1F('eta4',       	';#eta_{4}',     			80,	-8,	8	)
+	
+	self.h_etaChiComp		= ROOT.TH1F('etaChiComp', 	';#eta_{#tilde{#chi}^{#pm}} (compressed)',	80, 	-8, 	8	)	
+	self.h_etaChiUncomp		= ROOT.TH1F('etaChiUncomp', 	';#eta_{#tilde{#chi}^{#pm}} (uncompressed)',	80, 	-8, 	8	)
+	self.h_phiChiComp		= ROOT.TH1F('phiChiComp',	';#phi_{#tilde{#chi}^{#pm}} (compressed)',	80,	-8, 	8	)
+	self.h_phiChiUncomp		= ROOT.TH1F('phiChiUncomp',	';#phi_{#tilde{#chi}^{#pm}} (uncompressed)',	80,	-8, 	8	)
+	self.h_dEtaBChiComp		= ROOT.TH1F('dEtaBChiComp', 	';|#Delta#eta_{b, #tilde{#chi}^{#pm}}| (compressed)',	50, 	0, 	5	)
+	self.h_dEtaBChiUncomp		= ROOT.TH1F('dEtaBChiUncomp', 	';|#Delta#eta_{b, #tilde{#chi}^{#pm}}| (uncompressed)',	50, 	0, 	5	)
+	self.h_dPhiBChiComp		= ROOT.TH1F('dPhiBChiComp', 	';|#Delta#phi_{b, #tilde{#chi}^{#pm}}| (compressed)',	50, 	0, 	5	)
+	self.h_dPhiBChiUncomp		= ROOT.TH1F('dPhiBChiUncomp', 	';|#Delta#phi_{b, #tilde{#chi}^{#pm}}| (uncompressed)',	50, 	0, 	5	)
+	self.h_dRBChiComp		= ROOT.TH1F('dRBChiComp',	';|#Delta#R_{b, #tilde{#chi}^{#pm}}| (compressed)',	35, 	0, 	7	)
+	self.h_dRBChiUncomp		= ROOT.TH1F('dRBChiUncomp', 	';|#Delta#R_{b, #tilde{#chi}^{#pm}}| (uncompressed)',	35, 	0, 	7	)
+
 
         self.h_pT1Frac                  = ROOT.TH1F('pT1Frac',          ';p_{T,1} / H_{T}',                     20,     0,      1       )
         self.h_pT2Frac                  = ROOT.TH1F('pT2Frac',          ';p_{T,2} / H_{T}',                     20,     0,      1       )
@@ -251,6 +249,7 @@ class ExampleAnalysis(Module):
         self.h_dEtabb23                 = ROOT.TH1F('dEtabb23',         ';|#Delta#eta_{b_{2},b_{3}}| (loose)',  50,     0,      5       )
         self.h_dPhibb23                 = ROOT.TH1F('dPhibb23',         ';|#Delta#phi_{b_{2},b_{3}}| (loose)',  50,     0,      5       )
         self.h_dRbb23                   = ROOT.TH1F('dRbb23',           ';#Delta R_{b_{2},b_{3}} (loose)',      35,     0,      7       )
+	
 
         self.h_dEtaRecoComp             = ROOT.TH1F('dEtaRecoComp',     ';|#Delta#eta_{#tilde{t},#tilde{#chi}^{#pm}}| (compressed)',  50,     0,      5       )
         self.h_dPhiRecoComp             = ROOT.TH1F('dPhiRecoComp',     ';|#Delta#phi_{#tilde{t},#tilde{#chi}^{#pm}}| (compressed)',  50,     0,      5       )
@@ -322,7 +321,7 @@ class ExampleAnalysis(Module):
           self.h_cutflow.Fill(0,genWeight)
           if not (event.HLT_PFHT1050 or event.HLT_AK8PFJet360_TrimMass30): return False
           self.h_cutflow.Fill(1,genWeight)
-          if len(jets) > 0 and not jets[0].pt > 300: return False
+          if len(jets) > 0 and not (0 < jets[0].pt < 300): return False
           self.h_cutflow.Fill('leading jet pT > 300',genWeight)
           if len(jets) < 4 or len(jets) > 6: return False
           self.h_cutflow.Fill('4 <= nJets <= 6',genWeight)
@@ -330,8 +329,8 @@ class ExampleAnalysis(Module):
           self.h_cutflow.Fill('no leptons',genWeight)
           if not 2 < abs(jets[0].p4().DeltaR(jets[1].p4())) < 4: return False
           self.h_cutflow.Fill('2 < deltaR leading jets < 4',genWeight)
-          if len(looseBs) < 3: return False
-          self.h_cutflow.Fill('loose Bs >= 3',genWeight)
+          if len(looseBs) < 2: return False
+          self.h_cutflow.Fill('loose Bs >= 0',genWeight)
 
         try: 
           self.h_nQLHE.Fill(event.LHE_Nuds + event.LHE_Nc + event.LHE_Nb,genWeight)
@@ -495,11 +494,11 @@ class ExampleAnalysis(Module):
         # RECO
         #-----------------------------------------------------------------------
 
-        sumJet             = ROOT.TLorentzVector()
-        sumJet4            = ROOT.TLorentzVector()
-        sumJet3            = ROOT.TLorentzVector()
-        sumJet3NoLead      = ROOT.TLorentzVector()
-        sumJet3NoLeadOrSub = ROOT.TLorentzVector()
+        sumJet          	= ROOT.TLorentzVector()
+        sumJet4       		= ROOT.TLorentzVector()
+        sumJet3                 = ROOT.TLorentzVector()
+        sumJet3NoLead	      	= ROOT.TLorentzVector()
+        sumJet3NoLeadOrSub 	= ROOT.TLorentzVector()
 
         # n jets
         self.h_nJets.Fill(len(jets),genWeight)
@@ -599,6 +598,22 @@ class ExampleAnalysis(Module):
           self.h_pTMeanUncomp.Fill(pTMeanUncomp,genWeight)
           self.h_pTSDUncomp.Fill(pTSDUncomp,genWeight)
           self.h_pTSDMeanFracUncomp.Fill(pTSDUncomp / pTMeanUncomp,genWeight)
+	
+	  #Chargino Candidate Object Plots
+	  self.h_pTChiComp.Fill(sumJet3.Pt(), genWeight)
+	  self.h_pTChiUncomp.Fill(sumJet3NoLead.Pt(), genWeight)
+	  self.h_etaChiComp.Fill(sumJet3.Eta(), genWeight)
+	  self.h_etaChiUncomp.Fill(sumJet3NoLead.Eta(), genWeight)
+	  self.h_phiChiComp.Fill(sumJet3.Phi(), genWeight)
+	  self.h_phiChiUncomp.Fill(sumJet3NoLead.Phi(), genWeight)
+	  if len(looseBs) > 0:
+		  self.h_dEtaBChiComp.Fill(abs(sumJet3.Eta() - looseBs[0].eta), genWeight)
+		  self.h_dEtaBChiUncomp.Fill(abs(looseBs[0].eta - sumJet3NoLead.Eta()), genWeight)
+		  self.h_dPhiBChiComp.Fill(abs(sumJet3.DeltaPhi(looseBs[0].p4())), genWeight)
+		  self.h_dPhiBChiUncomp.Fill(abs(sumJet3NoLead.DeltaPhi(looseBs[0].p4())), genWeight)
+		  self.h_dRBChiComp.Fill(abs(sumJet3.DeltaR(looseBs[0].p4())), genWeight)
+		  self.h_dRBChiUncomp.Fill(abs(sumJet3NoLead.DeltaR(looseBs[0].p4())), genWeight)
+
         if len(jets) >= 3:
           self.h_m3.Fill(sumJet3.M(),genWeight)
           self.h_dEta13.Fill(abs(jets[0].eta - jets[2].eta),genWeight)
@@ -647,6 +662,8 @@ class ExampleAnalysis(Module):
           self.h_dEtabb12.Fill(abs(looseBs[0].eta - looseBs[1].eta),genWeight)
           self.h_dEtabb13.Fill(abs(looseBs[0].eta - looseBs[2].eta),genWeight)
           self.h_dEtabb23.Fill(abs(looseBs[1].eta - looseBs[2].eta),genWeight)	
+          self.h_dEtabb23.Fill(abs(looseBs[1].eta - looseBs[2].eta),genWeight)	
+          self.h_dPhibb12.Fill(abs(looseBs[0].p4().DeltaPhi(looseBs[1].p4())),genWeight)
           self.h_dPhibb12.Fill(abs(looseBs[0].p4().DeltaPhi(looseBs[1].p4())),genWeight)
           self.h_dPhibb13.Fill(abs(looseBs[0].p4().DeltaPhi(looseBs[2].p4())),genWeight)
           self.h_dPhibb23.Fill(abs(looseBs[1].p4().DeltaPhi(looseBs[2].p4())),genWeight)
@@ -654,19 +671,19 @@ class ExampleAnalysis(Module):
           self.h_dRbb13.Fill(abs(looseBs[0].p4().DeltaR(looseBs[2].p4())),genWeight)
           self.h_dRbb23.Fill(abs(looseBs[1].p4().DeltaR(looseBs[2].p4())),genWeight)
 	
-	bJetCombos2D = [[''.join(map(str, i)), ''.join(map(str, j))] for i, j in combinations(combinations([1, 2, 3], 2), 2)]
+	  bJetCombos2D = [[''.join(map(str, i)), ''.join(map(str, j))] for i, j in combinations(combinations([1, 2, 3], 2), 2)]
 
-	self.fill2DHists(['dEtabb{}Vs{}'.format(i, j) for [i, j] in bJetCombos2D],
-			 [abs(looseBs[int(i) - 1].eta - looseBs[int(j) - 1].eta) for i, j in [x[0] for x in bJetCombos2D]],
+	  self.fill2DHists(['dEtabb{}Vs{}'.format(i, j) for [i, j] in bJetCombos2D],
 			 [abs(looseBs[int(i) - 1].eta - looseBs[int(j) - 1].eta) for i, j in [x[1] for x in bJetCombos2D]],
+			 [abs(looseBs[int(i) - 1].eta - looseBs[int(j) - 1].eta) for i, j in [x[0] for x in bJetCombos2D]],
 			 genWeight)
-	self.fill2DHists(['dPhibb{}Vs{}'.format(i, j) for [i, j] in bJetCombos2D],
-			 [abs(looseBs[int(i) - 1].p4().DeltaPhi(looseBs[int(j) - 1].p4())) for i, j in [x[0] for x in bJetCombos2D]],
+	  self.fill2DHists(['dPhibb{}Vs{}'.format(i, j) for [i, j] in bJetCombos2D],
 			 [abs(looseBs[int(i) - 1].p4().DeltaPhi(looseBs[int(j) - 1].p4())) for i, j in [x[1] for x in bJetCombos2D]],
+			 [abs(looseBs[int(i) - 1].p4().DeltaPhi(looseBs[int(j) - 1].p4())) for i, j in [x[0] for x in bJetCombos2D]],
 			 genWeight)
-	self.fill2DHists(['dRbb{}Vs{}'.format(i, j) for [i, j] in bJetCombos2D],
-			 [abs(looseBs[int(i) - 1].p4().DeltaR(looseBs[int(j) - 1].p4())) for i, j in [x[0] for x in bJetCombos2D]],
+	  self.fill2DHists(['dRbb{}Vs{}'.format(i, j) for [i, j] in bJetCombos2D],
 			 [abs(looseBs[int(i) - 1].p4().DeltaR(looseBs[int(j) - 1].p4())) for i, j in [x[1] for x in bJetCombos2D]],
+			 [abs(looseBs[int(i) - 1].p4().DeltaR(looseBs[int(j) - 1].p4())) for i, j in [x[0] for x in bJetCombos2D]],
 			 genWeight)
 
 
@@ -705,7 +722,7 @@ elif args.sample != 'signal': print('ERROR: Unexpected sample argument')
 
 preselection = (
 		'(Jet_pt[3] > 30) &&'
-		'(Jet_pt[0] > 300) &&'
+		#'(Jet_pt[0] > 300) && '
 		'(HLT_PFHT1050 || HLT_AK8PFJet360_TrimMass30)'
                )
 
