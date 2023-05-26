@@ -295,7 +295,7 @@ class ExampleAnalysis(Module):
           self.h_cutflow.Fill(1,genWeight)
           if len(jets) > 0 and not jets[0].pt > 300: return False
           self.h_cutflow.Fill(2,genWeight)
-          if len(jets) < 4 or len(jets) > 5: return False
+          if len(jets) < 4 or len(jets) > 6: return False
           self.h_cutflow.Fill(3,genWeight)
           if len(goodElectrons) != 0 or len(goodMuons) != 0: return False
           self.h_cutflow.Fill(4,genWeight)
@@ -305,8 +305,6 @@ class ExampleAnalysis(Module):
           self.h_cutflow.Fill(6,genWeight)
           if abs(looseBs[0].p4().DeltaR(looseBs[1].p4())) < 1: return False
           self.h_cutflow.Fill(7,genWeight)
-          if len(tightTs) != 0: return False
-          self.h_cutflow.Fill(8,genWeight)
 
         try: 
           self.h_nQLHE.Fill(event.LHE_Nuds + event.LHE_Nc + event.LHE_Nb,genWeight)
