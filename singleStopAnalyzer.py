@@ -321,16 +321,16 @@ class ExampleAnalysis(Module):
           self.h_cutflow.Fill(0,genWeight)
           if not (event.HLT_PFHT1050 or event.HLT_AK8PFJet360_TrimMass30): return False
           self.h_cutflow.Fill(1,genWeight)
-          if len(jets) > 0 and not (0 < jets[0].pt < 300): return False
-          self.h_cutflow.Fill('leading jet pT > 300',genWeight)
+          if len(jets) > 0 and jets[0].pt < 300: return False
+          self.h_cutflow.Fill(2,genWeight)
           if len(jets) < 4 or len(jets) > 6: return False
-          self.h_cutflow.Fill('4 <= nJets <= 6',genWeight)
+          self.h_cutflow.Fill(3,genWeight)
           if len(goodElectrons) != 0 or len(goodMuons) != 0: return False
-          self.h_cutflow.Fill('no leptons',genWeight)
+          self.h_cutflow.Fill(4,genWeight)
           if not 2 < abs(jets[0].p4().DeltaR(jets[1].p4())) < 4: return False
-          self.h_cutflow.Fill('2 < deltaR leading jets < 4',genWeight)
-          if len(looseBs) < 2: return False
-          self.h_cutflow.Fill('loose Bs >= 0',genWeight)
+          self.h_cutflow.Fill(5,genWeight)
+          if len(looseBs) < 3: return False
+          self.h_cutflow.Fill(6,genWeight)
 
         try: 
           self.h_nQLHE.Fill(event.LHE_Nuds + event.LHE_Nc + event.LHE_Nb,genWeight)
@@ -722,7 +722,7 @@ elif args.sample != 'signal': print('ERROR: Unexpected sample argument')
 
 preselection = (
 		'(Jet_pt[3] > 30) &&'
-		#'(Jet_pt[0] > 300) && '
+		'(Jet_pt[0] > 300) && '
 		'(HLT_PFHT1050 || HLT_AK8PFJet360_TrimMass30)'
                )
 
