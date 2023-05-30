@@ -11,7 +11,11 @@ import argparse
 from math import sqrt,fabs,copysign
 from numpy import mean,std
 from itertools import combinations
+from bJetMatcher import bJetMatcher 
 ROOT.PyConfig.IgnoreCommandLineOptions = True
+
+def jetMatching(jets, particles):
+	best_permutation = bJetMatcher(jets, particles)
 
 class ExampleAnalysis(Module):
 
@@ -306,7 +310,7 @@ class ExampleAnalysis(Module):
         MET            = ROOT.TVector2()
         MET.SetMagPhi(event.MET_pt,event.MET_phi)
 
-        if self.isSignal:
+        if self.isSignal or True:
           genParts       = list(Collection(event,"GenPart"))
           genAK4Jets     = list(Collection(event,"GenJet"))
           # Get only outgoing particles of the hardest subprocess
@@ -329,8 +333,10 @@ class ExampleAnalysis(Module):
           self.h_cutflow.Fill(4,genWeight)
           if not 2 < abs(jets[0].p4().DeltaR(jets[1].p4())) < 4: return False
           self.h_cutflow.Fill(5,genWeight)
-          if len(looseBs) < 3: return False
+          if len(mediumBs) < 3: return False
           self.h_cutflow.Fill(6,genWeight)
+	  if abs(mediumBs[0].p4().DeltaR(mediumBs[1].p4())) < 1: return False
+	  self.h_cutflow.Fill(7, genWeight)
 
         try: 
           self.h_nQLHE.Fill(event.LHE_Nuds + event.LHE_Nc + event.LHE_Nb,genWeight)
@@ -387,7 +393,7 @@ class ExampleAnalysis(Module):
 	      if self.coupling == '312':
 		genQuarks = [genBStop, genBChi, genD, genS]
 	      else:  
-	      	genQuarks = [genBStop,genBChi1,genD,genBChi2]
+	      	genQuarks = [genBStop, genBChi1, genD, genBChi2]
 
           else: print('WARNING: No stop found in event')
 
@@ -606,13 +612,13 @@ class ExampleAnalysis(Module):
 	  self.h_etaChiUncomp.Fill(sumJet3NoLead.Eta(), genWeight)
 	  self.h_phiChiComp.Fill(sumJet3.Phi(), genWeight)
 	  self.h_phiChiUncomp.Fill(sumJet3NoLead.Phi(), genWeight)
-	  if len(looseBs) > 0:
-		  self.h_dEtaBChiComp.Fill(abs(sumJet3.Eta() - looseBs[0].eta), genWeight)
-		  self.h_dEtaBChiUncomp.Fill(abs(looseBs[0].eta - sumJet3NoLead.Eta()), genWeight)
-		  self.h_dPhiBChiComp.Fill(abs(sumJet3.DeltaPhi(looseBs[0].p4())), genWeight)
-		  self.h_dPhiBChiUncomp.Fill(abs(sumJet3NoLead.DeltaPhi(looseBs[0].p4())), genWeight)
-		  self.h_dRBChiComp.Fill(abs(sumJet3.DeltaR(looseBs[0].p4())), genWeight)
-		  self.h_dRBChiUncomp.Fill(abs(sumJet3NoLead.DeltaR(looseBs[0].p4())), genWeight)
+	  if len(mediumBs) > 0:
+		  self.h_dEtaBChiComp.Fill(abs(sumJet3.Eta() - mediumBs[0].eta), genWeight)
+		  self.h_dEtaBChiUncomp.Fill(abs(mediumBs[0].eta - sumJet3NoLead.Eta()), genWeight)
+		  self.h_dPhiBChiComp.Fill(abs(sumJet3.DeltaPhi(mediumBs[0].p4())), genWeight)
+		  self.h_dPhiBChiUncomp.Fill(abs(sumJet3NoLead.DeltaPhi(mediumBs[0].p4())), genWeight)
+		  self.h_dRBChiComp.Fill(abs(sumJet3.DeltaR(mediumBs[0].p4())), genWeight)
+		  self.h_dRBChiUncomp.Fill(abs(sumJet3NoLead.DeltaR(mediumBs[0].p4())), genWeight)
 
         if len(jets) >= 3:
           self.h_m3.Fill(sumJet3.M(),genWeight)
@@ -652,38 +658,38 @@ class ExampleAnalysis(Module):
                           genWeight)
 
         # b jets
-        for i,b in enumerate(looseBs):
+        for i,b in enumerate(mediumBs):
           if i == 0: self.h_pTb1.Fill(b.pt,genWeight)
           elif i == 1: self.h_pTb2.Fill(b.pt,genWeight)
           elif i == 2: self.h_pTb3.Fill(b.pt,genWeight)
           elif i == 3: self.h_pTb4.Fill(b.pt,genWeight)
 
-        if len(looseBs) >= 3: 
-          self.h_dEtabb12.Fill(abs(looseBs[0].eta - looseBs[1].eta),genWeight)
-          self.h_dEtabb13.Fill(abs(looseBs[0].eta - looseBs[2].eta),genWeight)
-          self.h_dEtabb23.Fill(abs(looseBs[1].eta - looseBs[2].eta),genWeight)	
-          self.h_dEtabb23.Fill(abs(looseBs[1].eta - looseBs[2].eta),genWeight)	
-          self.h_dPhibb12.Fill(abs(looseBs[0].p4().DeltaPhi(looseBs[1].p4())),genWeight)
-          self.h_dPhibb12.Fill(abs(looseBs[0].p4().DeltaPhi(looseBs[1].p4())),genWeight)
-          self.h_dPhibb13.Fill(abs(looseBs[0].p4().DeltaPhi(looseBs[2].p4())),genWeight)
-          self.h_dPhibb23.Fill(abs(looseBs[1].p4().DeltaPhi(looseBs[2].p4())),genWeight)
-          self.h_dRbb12.Fill(abs(looseBs[0].p4().DeltaR(looseBs[1].p4())),genWeight)
-          self.h_dRbb13.Fill(abs(looseBs[0].p4().DeltaR(looseBs[2].p4())),genWeight)
-          self.h_dRbb23.Fill(abs(looseBs[1].p4().DeltaR(looseBs[2].p4())),genWeight)
+        if len(mediumBs) >= 3: 
+          self.h_dEtabb12.Fill(abs(mediumBs[0].eta - mediumBs[1].eta),genWeight)
+          self.h_dEtabb13.Fill(abs(mediumBs[0].eta - mediumBs[2].eta),genWeight)
+          self.h_dEtabb23.Fill(abs(mediumBs[1].eta - mediumBs[2].eta),genWeight)	
+          self.h_dEtabb23.Fill(abs(mediumBs[1].eta - mediumBs[2].eta),genWeight)	
+          self.h_dPhibb12.Fill(abs(mediumBs[0].p4().DeltaPhi(mediumBs[1].p4())),genWeight)
+          self.h_dPhibb12.Fill(abs(mediumBs[0].p4().DeltaPhi(mediumBs[1].p4())),genWeight)
+          self.h_dPhibb13.Fill(abs(mediumBs[0].p4().DeltaPhi(mediumBs[2].p4())),genWeight)
+          self.h_dPhibb23.Fill(abs(mediumBs[1].p4().DeltaPhi(mediumBs[2].p4())),genWeight)
+          self.h_dRbb12.Fill(abs(mediumBs[0].p4().DeltaR(mediumBs[1].p4())),genWeight)
+          self.h_dRbb13.Fill(abs(mediumBs[0].p4().DeltaR(mediumBs[2].p4())),genWeight)
+          self.h_dRbb23.Fill(abs(mediumBs[1].p4().DeltaR(mediumBs[2].p4())),genWeight)
 	
 	  bJetCombos2D = [[''.join(map(str, i)), ''.join(map(str, j))] for i, j in combinations(combinations([1, 2, 3], 2), 2)]
 
 	  self.fill2DHists(['dEtabb{}Vs{}'.format(i, j) for [i, j] in bJetCombos2D],
-			 [abs(looseBs[int(i) - 1].eta - looseBs[int(j) - 1].eta) for i, j in [x[1] for x in bJetCombos2D]],
-			 [abs(looseBs[int(i) - 1].eta - looseBs[int(j) - 1].eta) for i, j in [x[0] for x in bJetCombos2D]],
+			 [abs(mediumBs[int(i) - 1].eta - mediumBs[int(j) - 1].eta) for i, j in [x[1] for x in bJetCombos2D]],
+			 [abs(mediumBs[int(i) - 1].eta - mediumBs[int(j) - 1].eta) for i, j in [x[0] for x in bJetCombos2D]],
 			 genWeight)
 	  self.fill2DHists(['dPhibb{}Vs{}'.format(i, j) for [i, j] in bJetCombos2D],
-			 [abs(looseBs[int(i) - 1].p4().DeltaPhi(looseBs[int(j) - 1].p4())) for i, j in [x[1] for x in bJetCombos2D]],
-			 [abs(looseBs[int(i) - 1].p4().DeltaPhi(looseBs[int(j) - 1].p4())) for i, j in [x[0] for x in bJetCombos2D]],
+			 [abs(mediumBs[int(i) - 1].p4().DeltaPhi(mediumBs[int(j) - 1].p4())) for i, j in [x[1] for x in bJetCombos2D]],
+			 [abs(mediumBs[int(i) - 1].p4().DeltaPhi(mediumBs[int(j) - 1].p4())) for i, j in [x[0] for x in bJetCombos2D]],
 			 genWeight)
 	  self.fill2DHists(['dRbb{}Vs{}'.format(i, j) for [i, j] in bJetCombos2D],
-			 [abs(looseBs[int(i) - 1].p4().DeltaR(looseBs[int(j) - 1].p4())) for i, j in [x[1] for x in bJetCombos2D]],
-			 [abs(looseBs[int(i) - 1].p4().DeltaR(looseBs[int(j) - 1].p4())) for i, j in [x[0] for x in bJetCombos2D]],
+			 [abs(mediumBs[int(i) - 1].p4().DeltaR(mediumBs[int(j) - 1].p4())) for i, j in [x[1] for x in bJetCombos2D]],
+			 [abs(mediumBs[int(i) - 1].p4().DeltaR(mediumBs[int(j) - 1].p4())) for i, j in [x[0] for x in bJetCombos2D]],
 			 genWeight)
 
 
