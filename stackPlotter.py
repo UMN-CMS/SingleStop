@@ -20,22 +20,23 @@ ROOT.gStyle.SetPalette(ROOT.kRainBow)
 file1 = ROOT.TFile.Open('{}/{}'.format(signalPath, signalFiles[0]), "READ")
 files = {fname: ROOT.TFile.Open('{}/{}'.format(signalPath, fname), "READ") for fname in signalFiles}
 files.update( {QCDFile: ROOT.TFile.Open('{}/{}'.format(QCDPath, QCDFile), "READ") } )
-files.update( {TTFile: ROOT.TFile.Open('{}/{}'.format(TTPath, TTFile), "READ") } )
+#files.update( {TTFile: ROOT.TFile.Open('{}/{}'.format(TTPath, TTFile), "READ") } )
 
 param_list = [key.GetName() for key in file1.GetListOfKeys()]
 #param_list = ['cutflow', 'dEtabb12', 'dEtabb13', 'dEtabb23', 'dPhibb12', 'dPhibb13', 'dPhibb23', 'dRbb12', 'dRbb13', 'dRbb23']
 #print(param_list)
 ROOT.TFile.Close(file1)
-labels = {}
+#labels = {'QCD2018.root': 'QCD 2018', 'TT2018.root': r'$t \overline{t}$ 2018', 'signal_1000_400.root': r'$\tilde{t}$ = 1000, $\tilde{chi}^{\pm}$ = 400', 'signal_1500_900.root': r'$\tilde{t}$ = 1500, $\tilde{chi}^{\pm}$ = 900', 'signal_2000_1900.root': r'$\tilde{t}$ = 2000, $\tilde{chi}^{\pm}$ = 1900'}
 
 bb2DHists = []
 for param in param_list:
-	h_stack = ROOT.THStack(param, "{};{};Events".format(param, param))
+	h_stack = ROOT.THStack(param, "{};{};Events".format(param, files['signal_2000_1900.root'].Get(param).GetXaxis().GetTitle()))
 	legend = ROOT.TLegend(0.68, 0.89, 0.89, 0.65)
 	for i, f in enumerate(files):
 		newfile = files[f]
 		h_new = newfile.Get(param)
-		if 'bb' in param and h_new.InheritsFrom('TH2D'): bb2DHists.append(param)
+		#if 'bb' in param and h_new.InheritsFrom('TH2D'): bb2DHists.append(param)
+		if 'bb' not in param and h_new.InheritsFrom('TH2D'): bb2DHists.append(param)
 		if h_new == None or not (h_new.InheritsFrom('TH1F') or h_new.InheritsFrom('TH1D')): continue
 		if param == 'cutflow': 
 			print(f, h_new.GetBinContent(6), h_new.GetBinContent(7), 1 - h_new.GetBinContent(7) / h_new.GetBinContent(6))				
@@ -62,7 +63,7 @@ for param in bb2DHists:
 		h_new = newfile.Get(param)
 		h_new.SetTitle('{}'.format(f[:len(f) - 5]))
 		if h_new.Integral() != 0: h_new.Scale(1 / h_new.Integral())
-		if param == 'dRbb12Vs13': print(f, h_new.Integral(h_new.GetXaxis().FindBin(0), h_new.GetXaxis().FindBin(2.5999), h_new.GetYaxis().FindBin(0), h_new.GetYaxis().FindBin(0.999)))
+		if param == 'dPhi13Vs34': print(f, h_new.Integral(h_new.GetXaxis().FindBin(0), h_new.GetXaxis().FindBin(0.7999), h_new.GetYaxis().FindBin(2.6), h_new.GetYaxis().FindBin(3.1999)))
 		h_new.SetStats(0)
 		c1 = ROOT.TCanvas()
 		c1.SetRightMargin(0.15)
