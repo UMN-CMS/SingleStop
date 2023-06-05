@@ -92,7 +92,11 @@ void ratiosOnly(){
 	    //ratio->SetH2DrawOpt("HIST E0");
 	    //ratio->Draw();
 	    //ratio->GetLowerRefYaxis()->SetRangeUser(0.0, 2.0);
+<<<<<<< HEAD
 	    stack->Draw("HIST PLC NOSTACK");
+=======
+	    stack->Draw("PLC NOSTACK");
+>>>>>>> fc898d5c1291443da43d3bf989a583d5d2c126b6
 	    stack->GetXaxis()->SetTitle(xTitle.c_str());
 	    stack->GetYaxis()->SetTitle("Ratio of Events");
 	    //stack->GetYaxis()->SetTitle("Events");
