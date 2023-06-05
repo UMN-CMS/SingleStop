@@ -63,32 +63,6 @@ class ExampleAnalysis(Module):
 
         # SUSY particle kinematics
         self.h_pTStop              	= ROOT.TH1F('pTStop', 		';p_{T,#tilde{t}}  [GeV]',		75,	0,    	1500	)
-<<<<<<< HEAD
-        #self.h_pTStopPlus          	= ROOT.TH1F('pTStopPlus', 	';p_{T,#tilde{t}^{+2/3}}  [GeV]',	75,	0,    	1500	)
-        #self.h_pTStopMinus         	= ROOT.TH1F('pTStopMinus', 	';p_{T,#tilde{t}^{-2/3}} [GeV]',	75,	0,    	1500	)
-        self.h_pTChi               	= ROOT.TH1F('pTChi',		';p_{T,#tilde{#chi}^{#pm}}  [GeV]',     75,	0,    	1500	)
-        #self.h_pTChiPlus           	= ROOT.TH1F('pTChiPlus', 	';p_{T,#chi^{+}} [GeV]',		75,	0,    	1500	)
-        #self.h_pTChiMinus          	= ROOT.TH1F('pTChiMinus', 	';p_{T,#chi^{-}} [GeV]',		75,	0,    	1500	)
-        self.h_pTBStop             	= ROOT.TH1F('pTBStop', 		';p_{T,b from #tilde{t}}  [GeV]',	75,	0,    	1500	)
-        #self.h_pTBStopPlus         	= ROOT.TH1F('pTBStopPlus', 	';p_{T,b from #tilde{t}^{+2/3}} [GeV]',	75,	0, 	1500	)
-        #self.h_pTBStopMinus    	   	= ROOT.TH1F('pTBStopMinus', 	';p_{T,b from #tilde{t}^{-2/3}} [GeV]',	75,	0, 	1500	)
-        self.h_pTBChi              	= ROOT.TH1F('pTBChi', 		';p_{T,b from #tilde{#chi}^{#pm}}  [GeV]',75,	0, 	1500	)
-        #self.h_pTBChiPlus          	= ROOT.TH2F('pTBChiPlus', 	';p_{T,b from #chi^{+}_{1}} [GeV];p_{T, b from #chi^{+}_{2}} [GeV]', 75,	0, 	1500, 	75,	0, 	1500	)
-        #self.h_pTBChiMinus         	= ROOT.TH2F('pTBChiMinus', 	';p_{T,b from #chi^{-}_{1}} [GeV];p_{T, b from #chi^{-}_{2}} [GeV]', 75,	0, 	1500,	75, 	0, 	1500	) 
-
-        self.h_etaStop             	= ROOT.TH1F('etaStop', 		';#eta_{#tilde{t}}',			80,	-8,	8	)
-        #self.h_etaStopPlus         	= ROOT.TH1F('etaStopPlus', 	';#eta_{#tilde{t}^{+2/3}}',		80,	-8,	8	)
-        #self.h_etaStopMinus        	= ROOT.TH1F('etaStopMinus', 	';eta_{#tilde{t}^{-2/3}}',		80,	-8,	8	) 
-        self.h_etaChi              	= ROOT.TH1F('etaChi', 		';#eta_{#tilde{#chi}^{#pm}}',		80,	-8,	8	)
-        #self.h_etaChiPlus          	= ROOT.TH1F('etaChiPlus',	';#eta_{#chi^{+}}',			80,	-8,	8	)
-        #self.h_etaChiMinus         	= ROOT.TH1F('etaChiMinus',	';#eta_{#chi^{-}}',			80,	-8,	8	)
-        self.h_etaBStop            	= ROOT.TH1F('etaBStop',		';eta_{b from #tilde{t}}',		80,	-8,	8	)       
-        #self.h_etaBStopPlus        	= ROOT.TH1F('etaBStopPlus',	';eta_{b from #tilde{t}^{+2/3}}',	80,	-8,	8	)
-        #self.h_etaBStopMinus       	= ROOT.TH1F('etaBStopMinus',	';eta_{b from #tilde{t}^{-2/3}}',	80,	-8,	8	)
-        self.h_etaBChi             	= ROOT.TH1F('etaBChi' , 	';eta_{b from #tilde{#chi}^{#pm}}',	80,	-8,	8	)
-        #self.h_etaBChiPlus         	= ROOT.TH2F('etaBChiPlus', 	';eta_{b from #chi^{+}_{1}};eta_{b from #chi&{+}_{2}}',	80,	-8,	8, 	80,	-8, 	8	)
-        #self.h_etaBChiMinus        	= ROOT.TH2F('etaBChiMinus', 	';eta_{b from #chi^{-}_{1}};eta_{b from #chi^{-}_{2}}',	80,	-8,	8, 	80, 	-8, 	8	)
-=======
         self.h_pTChi               	= ROOT.TH1F('pTChi',		';p_{T,#tilde{#chi}^{#pm}}  [GeV]',     75,	0,    	1500	)
         self.h_pTBStop             	= ROOT.TH1F('pTBStop', 		';p_{T,b from #tilde{t}}  [GeV]',	75,	0,    	1500	)
         self.h_pTBChi              	= ROOT.TH1F('pTBChi', 		';p_{T,b from #tilde{#chi}^{#pm}}  [GeV]',75,	0, 	1500	)
@@ -97,7 +71,6 @@ class ExampleAnalysis(Module):
         self.h_etaChi              	= ROOT.TH1F('etaChi', 		';#eta_{#tilde{#chi}^{#pm}}',		80,	-8,	8	)
         self.h_etaBStop            	= ROOT.TH1F('etaBStop',		';eta_{b from #tilde{t}}',		80,	-8,	8	)       
         self.h_etaBChi             	= ROOT.TH1F('etaBChi' , 	';eta_{b from #tilde{#chi}^{#pm}}',	80,	-8,	8	)
->>>>>>> fc898d5c1291443da43d3bf989a583d5d2c126b6
 
         self.h_dEtaBChi         	= ROOT.TH1F('dEtaBChi',		';|#Delta#eta_{b,#tilde{#chi}^{#pm}}|',	50,	0,	5.0   	)
         self.h_dPhiBChi         	= ROOT.TH1F('dPhiBChi',		';|#Delta#phi_{b,#tilde{#chi}^{#pm}}|',	50,	0,	5.0   	)
@@ -272,17 +245,6 @@ class ExampleAnalysis(Module):
         self.h_dR35                     = ROOT.TH1F('dR35',             ';#Delta R_{3,5}',                      35,     0,      7       )
         self.h_dR45                     = ROOT.TH1F('dR45',             ';#Delta R_{4,5}',                      35,     0,      7       )
 
-<<<<<<< HEAD
-        self.h_dEtabb12                 = ROOT.TH1F('dEtabb12',         ';|#Delta#eta_{b_{1},b_{2}}| (loose)',  50,     0,      5       )
-        self.h_dPhibb12                 = ROOT.TH1F('dPhibb12',         ';|#Delta#phi_{b_{1},b_{2}}| (loose)',  50,     0,      5       )
-        self.h_dRbb12                   = ROOT.TH1F('dRbb12',           ';#Delta R_{b_{1},b_{2}} (loose)',      35,     0,      7       )
-        self.h_dEtabb13                 = ROOT.TH1F('dEtabb13',         ';|#Delta#eta_{b_{1},b_{3}}| (loose)',  50,     0,      5       )
-        self.h_dPhibb13                 = ROOT.TH1F('dPhibb13',         ';|#Delta#phi_{b_{1},b_{3}}| (loose)',  50,     0,      5       )
-        self.h_dRbb13                   = ROOT.TH1F('dRbb13',           ';#Delta R_{b_{1},b_{3}} (loose)',      35,     0,      7       )
-        self.h_dEtabb23                 = ROOT.TH1F('dEtabb23',         ';|#Delta#eta_{b_{2},b_{3}}| (loose)',  50,     0,      5       )
-        self.h_dPhibb23                 = ROOT.TH1F('dPhibb23',         ';|#Delta#phi_{b_{2},b_{3}}| (loose)',  50,     0,      5       )
-        self.h_dRbb23                   = ROOT.TH1F('dRbb23',           ';#Delta R_{b_{2},b_{3}} (loose)',      35,     0,      7       )
-=======
         self.h_dEtabb12                 = ROOT.TH1F('dEtabb12',         ';|#Delta#eta_{b_{1},b_{2}}| (medium)',  50,     0,      5       )
         self.h_dPhibb12                 = ROOT.TH1F('dPhibb12',         ';|#Delta#phi_{b_{1},b_{2}}| (medium)',  50,     0,      5       )
         self.h_dRbb12                   = ROOT.TH1F('dRbb12',           ';#Delta R_{b_{1},b_{2}} (medium)',      35,     0,      7       )
@@ -293,8 +255,6 @@ class ExampleAnalysis(Module):
         self.h_dPhibb23                 = ROOT.TH1F('dPhibb23',         ';|#Delta#phi_{b_{2},b_{3}}| (medium)',  50,     0,      5       )
         self.h_dRbb23                   = ROOT.TH1F('dRbb23',           ';#Delta R_{b_{2},b_{3}} (medium)',      35,     0,      7       )
 	
->>>>>>> fc898d5c1291443da43d3bf989a583d5d2c126b6
-
         self.h_dEtaRecoComp             = ROOT.TH1F('dEtaRecoComp',     ';|#Delta#eta_{#tilde{t},#tilde{#chi}^{#pm}}| (compressed)',  50,     0,      5       )
         self.h_dPhiRecoComp             = ROOT.TH1F('dPhiRecoComp',     ';|#Delta#phi_{#tilde{t},#tilde{#chi}^{#pm}}| (compressed)',  50,     0,      5       )
         self.h_dRRecoComp               = ROOT.TH1F('dRRecoComp',       ';#Delta R_{#tilde{t},#tilde{#chi}^{#pm}} (compressed)',      35,     0,      7       )
@@ -367,19 +327,11 @@ class ExampleAnalysis(Module):
         genParts       = list(Collection(event,"GenPart"))
         genAK4Jets     = list(Collection(event,"GenJet"))
         if self.isSignal:
-<<<<<<< HEAD
-          genParts       = list(Collection(event,"GenPart"))
-          genAK4Jets     = list(Collection(event,"GenJet"))
-          # Get only outgoing particles of the hardest subprocess
-          gens = filter(lambda x: (((x.statusFlags >> 13) & 1) and ((x.statusFlags >> 8) & 1)) and not (((abs(x.pdgId) == 1) or (abs(x.pdgId) == 5)) and ((x.statusFlags >> 11) & 1)), genParts)
-=======
   	  # Get only outgoing particles of the hardest subprocess
           gens = filter(lambda x: (((x.statusFlags >> 13) & 1) and ((x.statusFlags >> 8) & 1)) and not (((abs(x.pdgId) == 1) or (abs(x.pdgId) == 5)) and ((x.statusFlags >> 11) & 1)), genParts)
 	if self.isQCD:
 	  # 7: FromHardProcess, 13: IsLastCopy (gen Bs)
 	  gens = filter(lambda x: (x.statusFlags >> 13) & 1, genParts)
->>>>>>> fc898d5c1291443da43d3bf989a583d5d2c126b6
-
         if not self.isSkimmed:
           goodElectrons  = filter(lambda x: x.cutBased == 4 and x.miniPFRelIso_all < 0.1 and x.pt > 30 and abs(x.eta) < 2.4,list(Collection(event,"Electron")))
           goodMuons      = filter(lambda x: x.mediumId and x.miniPFRelIso_all < 0.2 and x.pt > 30 and abs(x.eta) < 2.4,list(Collection(event,"Muon")))
@@ -397,12 +349,6 @@ class ExampleAnalysis(Module):
           self.h_cutflow.Fill(4,genWeight)
           if not 2 < abs(jets[0].p4().DeltaR(jets[1].p4())) < 4: return False
           self.h_cutflow.Fill(5,genWeight)
-<<<<<<< HEAD
-          if len(looseBs) < 2: return False
-          self.h_cutflow.Fill(6,genWeight)
-          #if abs(looseBs[0].p4().DeltaR(looseBs[1].p4())) < 1: return False
-          self.h_cutflow.Fill(7,genWeight)
-=======
 	  if self.bAlgo == 'medium':
           	if len(mediumBs) < 3: return False
           	self.h_cutflow.Fill(6,genWeight)
@@ -413,7 +359,6 @@ class ExampleAnalysis(Module):
 		self.h_cutflow.Fill(6, genWeight)
 		if abs(looseBs[0].p4().DeltaR(looseBs[1].p4())) < 1: return False
 	 	self.h_cutflow.Fill(7, genWeight)
->>>>>>> fc898d5c1291443da43d3bf989a583d5d2c126b6
 
         try: 
           self.h_nQLHE.Fill(event.LHE_Nuds + event.LHE_Nc + event.LHE_Nb,genWeight)
@@ -434,22 +379,6 @@ class ExampleAnalysis(Module):
 		      if g.pdgId == 1000006: genStop = g
 		      elif g.pdgId == 1000024: genChi = g
 		      elif g.pdgId == 5: genBStop = g
-<<<<<<< HEAD
-		      elif g.pdgId == -5: 
-			if not oneBChi:
-				genBChi1 = g
-				oneBChi = True
-			else:
-				genBChi2 = g
-		      elif g.pdgId == -1: genD = g
-		      else: print('WARNING: Unexpected particle with pdgId {}'.format(g.pdgId))
-		  if genBChi2.pt > genBChi1.pt: genBChi1, genBChi2 = genBChi2, genBChi1
-		  genStopPlus = genStop
-	          genBStopPlus = genBStop
-		  genChiPlus = genChi
-		  genBChiPlus1 = genBChi1
-		  genBChiPlus2 = genBChi2
-=======
 		      elif g.pdgId == -5:
 			if self.coupling == '312':
 				genBChi = g
@@ -463,7 +392,6 @@ class ExampleAnalysis(Module):
 		      elif g.pdgId == -1: genD = g
 		      else: print('WARNING: Unexpected particle with pdgId {}'.format(g.pdgId))
 		  if self.coupling == '313' and genBChi2.pt > genBChi1.pt: genBChi1, genBChi2 = genBChi2, genBChi1
->>>>>>> fc898d5c1291443da43d3bf989a583d5d2c126b6
           elif True in (g.pdgId == -1000006 for g in gens):
 	      stopPlus = False
 	      oneBChi = False
@@ -472,22 +400,6 @@ class ExampleAnalysis(Module):
 		      elif g.pdgId == -1000024: genChi = g
 		      elif g.pdgId == -5: genBStop = g
 		      elif g.pdgId == 5:
-<<<<<<< HEAD
-			      if not oneBChi:
-				      genBChi1 = g
-				      oneBChi = True
-			      else:
-				      genBChi2 = g
-		      elif g.pdgId == 1: genD = g
-		      else: print('WARNING: Unexpected particle with pdgId {}'.format(g.pdgId))
-	      if genBChi2.pt > genBChi1.pt: genBChi1, genBChi2 = genBChi2, genBChi1  
-	      genStopMinus = genStop
-	      genBStopMinus = genBStop
-	      genChiMinus = genChi
-	      genBChiMinus1 = genBChi1
-	      genBChiMinus2 = genBChi2
-	      genQuarks = [genBStop,genBChi1,genD,genBChi2]
-=======
 			if self.coupling == '312':
 				genBChi = g
 			else:
@@ -504,7 +416,6 @@ class ExampleAnalysis(Module):
 		genQuarks = [genBStop, genBChi, genD, genS]
 	      else:  
 	      	genQuarks = [genBStop, genBChi1, genD, genBChi2]
->>>>>>> fc898d5c1291443da43d3bf989a583d5d2c126b6
 
           else: print('WARNING: No stop found in event')
 
@@ -513,37 +424,6 @@ class ExampleAnalysis(Module):
           #-----------------------------------------------------------------------
 
           # Gen kinematics
-<<<<<<< HEAD
-          self.h_pTStop.Fill(genStop.pt,genWeight)
-          self.h_pTChi.Fill(genChi.pt,genWeight)
-          self.h_pTBStop.Fill(genBStop.pt,genWeight)
-          self.h_pTBChi.Fill(genBChi1.pt,genWeight)
-	  self.h_pTBChi.Fill(genBChi2.pt, genWeight)
-          self.h_pTBStop.Fill(genBStop.pt,genWeight)
-          self.h_etaBStop.Fill(genBStop.eta,genWeight)
-          self.h_etaBChi.Fill(genBChi1.eta, genWeight)
-	  self.h_etaBChi.Fill(genBChi2.eta, genWeight)
-          self.h_pTStop.Fill(genStop.pt,genWeight)
-          self.h_etaStop.Fill(genStop.eta,genWeight)
-          self.h_pTChi.Fill(genChi.pt,genWeight)
-          self.h_etaChi.Fill(genChi.eta,genWeight)
-          dEtaBChi = abs(genBStop.eta - genChi.eta)
-          self.h_dEtaBChi.Fill(dEtaBChi,genWeight)
-          self.h_dPhiBChi.Fill(abs(genBStop.p4().DeltaPhi(genChi.p4())),genWeight)
-          self.h_dRBChi.Fill(abs(genBStop.p4().DeltaR(genChi.p4())),genWeight)
-          dRChiMax = max(genBChi1.p4().DeltaR(genD.p4()),
-                                   genBChi1.p4().DeltaR(genBChi2.p4()),
-                                   genD.p4().DeltaR(genBChi2.p4()))
-          self.h_dRChiMax.Fill(dRChiMax,genWeight)
-          self.h_dRBB.Fill(genBChi1.p4().DeltaR(genBStop.p4()),genWeight)
-          self.h_dEtaBB.Fill(abs(genBChi1.eta - genBStop.eta),genWeight)
-          self.h_dPhiBB.Fill(abs(genBChi1.p4().DeltaPhi(genBStop.p4())),genWeight)
-          self.h_pTBVsChi.Fill(genChi.pt,genBStop.pt,genWeight)
-          self.h_dEtaVsPTStop.Fill(genChi.pt,abs(genChi.eta - genBStop.eta),genWeight)
-          self.h_dEtaVsPTStopRatio.Fill(genChi.pt / (genStop.p4().M() - genChi.p4().M()),abs(genChi.eta - genBStop.eta),genWeight)
-          self.h_passDijet.Fill(1 if (dRChiMax < 1.1 and dEtaBChi < 1.1) else 0,genWeight)
-
-=======
 	  if self.coupling == '312':
 		  self.h_pTStop.Fill(genStop.pt,genWeight)
 		  self.h_pTChi.Fill(genChi.pt,genWeight)
@@ -606,7 +486,6 @@ class ExampleAnalysis(Module):
 		  self.h_dEtaVsPTStopRatio.Fill(genChi.pt / (genStop.p4().M() - genChi.p4().M()),abs(genChi.eta - genBStop.eta),genWeight)
 		  self.h_passDijet.Fill(1 if (dRChiMax < 1.1 and dEtaBChi < 1.1) else 0,genWeight)
 		
->>>>>>> fc898d5c1291443da43d3bf989a583d5d2c126b6
           #pT and eta of the gen AK4 jets
           for i,j in enumerate(genAK4Jets):
             if i == 0:
@@ -816,34 +695,6 @@ class ExampleAnalysis(Module):
           elif i == 2: self.h_pTb3.Fill(b.pt,genWeight)
           elif i == 3: self.h_pTb4.Fill(b.pt,genWeight)
 
-<<<<<<< HEAD
-        if len(looseBs) >= 3: 
-          self.h_dEtabb12.Fill(abs(looseBs[0].eta - looseBs[1].eta),genWeight)
-          self.h_dEtabb13.Fill(abs(looseBs[0].eta - looseBs[2].eta),genWeight)
-          self.h_dEtabb23.Fill(abs(looseBs[1].eta - looseBs[2].eta),genWeight)	
-          self.h_dPhibb12.Fill(abs(looseBs[0].p4().DeltaPhi(looseBs[1].p4())),genWeight)
-          self.h_dPhibb13.Fill(abs(looseBs[0].p4().DeltaPhi(looseBs[2].p4())),genWeight)
-          self.h_dPhibb23.Fill(abs(looseBs[1].p4().DeltaPhi(looseBs[2].p4())),genWeight)
-          self.h_dRbb12.Fill(abs(looseBs[0].p4().DeltaR(looseBs[1].p4())),genWeight)
-          self.h_dRbb13.Fill(abs(looseBs[0].p4().DeltaR(looseBs[2].p4())),genWeight)
-          self.h_dRbb23.Fill(abs(looseBs[1].p4().DeltaR(looseBs[2].p4())),genWeight)
-	
-	bJetCombos2D = [[''.join(map(str, i)), ''.join(map(str, j))] for i, j in combinations(combinations([1, 2, 3], 2), 2)]
-
-	self.fill2DHists(['dEtabb{}Vs{}'.format(i, j) for [i, j] in bJetCombos2D],
-			 [abs(looseBs[int(i) - 1].eta - looseBs[int(j) - 1].eta) for i, j in [x[0] for x in bJetCombos2D]],
-			 [abs(looseBs[int(i) - 1].eta - looseBs[int(j) - 1].eta) for i, j in [x[1] for x in bJetCombos2D]],
-			 genWeight)
-	self.fill2DHists(['dPhibb{}Vs{}'.format(i, j) for [i, j] in bJetCombos2D],
-			 [abs(looseBs[int(i) - 1].p4().DeltaPhi(looseBs[int(j) - 1].p4())) for i, j in [x[0] for x in bJetCombos2D]],
-			 [abs(looseBs[int(i) - 1].p4().DeltaPhi(looseBs[int(j) - 1].p4())) for i, j in [x[1] for x in bJetCombos2D]],
-			 genWeight)
-	self.fill2DHists(['dRbb{}Vs{}'.format(i, j) for [i, j] in bJetCombos2D],
-			 [abs(looseBs[int(i) - 1].p4().DeltaR(looseBs[int(j) - 1].p4())) for i, j in [x[0] for x in bJetCombos2D]],
-			 [abs(looseBs[int(i) - 1].p4().DeltaR(looseBs[int(j) - 1].p4())) for i, j in [x[1] for x in bJetCombos2D]],
-			 genWeight)
-
-=======
         if len(mediumBs) >= 3: 
           self.h_dEtabb12.Fill(abs(mediumBs[0].eta - mediumBs[1].eta),genWeight)
           self.h_dEtabb13.Fill(abs(mediumBs[0].eta - mediumBs[2].eta),genWeight)
@@ -891,8 +742,6 @@ class ExampleAnalysis(Module):
 				self.h_bJetMatchingEff.Fill(0, genWeight)	
 		for bJet in mediumBs:
 			self.h_pTRecoB.Fill(bJet.pt, genWeight)
-		self.h_pTRecoBEffEstimate = self.h_pTRecoBMatchSuccess.Divide(self.h_pTRecoB)
->>>>>>> fc898d5c1291443da43d3bf989a583d5d2c126b6
 
         self.h_dEtaRecoComp.Fill(abs(sumJet3.Eta() - sumJet4.Eta()),genWeight)
         self.h_dPhiRecoComp.Fill(abs(sumJet3.DeltaPhi(sumJet4)),genWeight)
@@ -954,14 +803,10 @@ if args.sample == 'signal':
     print('ERROR: Invalid --points arguement format provided')
     sys.exit()
   for masses in points:
-<<<<<<< HEAD
-    files = glob.glob('/eos/uscms/store/user/dmahon/condor/RPVSingleStopMC313/NANOAOD-ALL/NANOAOD-{}.root'.format(masses))
-=======
     if args.coupling == '313':
     	files = glob.glob('/eos/uscms/store/user/dmahon/condor/RPVSingleStopMC313/NANOAOD-ALL/NANOAOD-{}.root'.format(masses))
     else:
 	files = glob.glob('/eos/uscms/store/user/dmahon/condor/RPVSingleStopMC/NANOAOD-ALL/NANOAOD-{}.root'.format(masses))
->>>>>>> fc898d5c1291443da43d3bf989a583d5d2c126b6
     #files = glob.glob('/eos/uscms/store/user/dmahon/condor/RPVSingleStopMC/NANOAOD/NANOAOD-{}-*.root'.format(masses))
     files = ['root://cmsxrootd.fnal.gov/' + x.replace('/eos/uscms','') for x in files]
     #files = ['file:/uscms_data/d3/dmahon/RPVSingleStopRun3Patched/NANOAOD/CMSSW_12_4_5/test_2000_100-1.root']
@@ -980,11 +825,7 @@ elif args.useskim:
   files = ['root://cmsxrootd.fnal.gov//store/user/ckapsiak/SingleStop/Skims/Skim_2023_23_03/{}.root'.format(args.sample)]
   if len(files) != 1: print('WARNING: Multiple files selected. All must be from the same MC campaign.')
   p = PostProcessor(".", files, cut='', branchsel=None,
-<<<<<<< HEAD
-                    modules=[ExampleAnalysis(isSignal=0,MCCampaign='UL2018',isSkimmed=True, coupling = args.coupling)],
-=======
                     modules=[ExampleAnalysis(isSignal=0,MCCampaign='UL2018',isSkimmed=True, coupling = args.coupling, bAlgo = args.bAlgo)],
->>>>>>> fc898d5c1291443da43d3bf989a583d5d2c126b6
                     noOut=True, histFileName='{}/{}-ALL.root'.format(outputPath,args.sample), histDirName="plots",
                     maxEntries=None)
   p.run()
@@ -1005,11 +846,7 @@ else:
     print('ERROR: Unable to determine MC campaign of {}'.format(files[0]))
     sys.exit()
   p = PostProcessor(".", files, cut=preselection, branchsel=None, 
-<<<<<<< HEAD
-                    modules=[ExampleAnalysis(isSignal=0,MCCampaign=MCCampaign,isSkimmed=False, coupling = args.coupling)], 
-=======
                     modules=[ExampleAnalysis(isSignal=0,MCCampaign=MCCampaign,isSkimmed=False, coupling = args.coupling, isQCD = (args.sample == 'QCD2018'), bAlgo = args.bAlgo)], 
->>>>>>> fc898d5c1291443da43d3bf989a583d5d2c126b6
                     noOut=True, histFileName='{}/{}-{}.root'.format(outputPath,args.sample,args.n), histDirName="plots",
                     maxEntries=None)
   p.run() 
