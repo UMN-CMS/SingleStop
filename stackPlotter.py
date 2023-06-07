@@ -17,24 +17,28 @@ TTFile = 'TT2018.root'
 
 ROOT.gStyle.SetPalette(ROOT.kRainBow)
 
-file1 = ROOT.TFile.Open('{}/{}'.format(signalPath, signalFiles[0]), "READ")
-files = {fname: ROOT.TFile.Open('{}/{}'.format(signalPath, fname), "READ") for fname in signalFiles}
+files = {}
+#file1 = ROOT.TFile.Open('{}/{}'.format(signalPath, signalFiles[0]), "READ")
+#files = {fname: ROOT.TFile.Open('{}/{}'.format(signalPath, fname), "READ") for fname in signalFiles}
 files.update( {QCDFile: ROOT.TFile.Open('{}/{}'.format(QCDPath, QCDFile), "READ") } )
 #files.update( {TTFile: ROOT.TFile.Open('{}/{}'.format(TTPath, TTFile), "READ") } )
 
-param_list = [key.GetName() for key in file1.GetListOfKeys()]
-#param_list = ['cutflow', 'dEtabb12', 'dEtabb13', 'dEtabb23', 'dPhibb12', 'dPhibb13', 'dPhibb23', 'dRbb12', 'dRbb13', 'dRbb23']
-#print(param_list)
-ROOT.TFile.Close(file1)
+#param_list = [key.GetName() for key in file1.GetListOfKeys()]
+#param_list = ['pTRecoB', 'pTRecoBMatchSuccess']
+#ROOT.TFile.Close(file1)
 #labels = {'QCD2018.root': 'QCD 2018', 'TT2018.root': r'$t \overline{t}$ 2018', 'signal_1000_400.root': r'$\tilde{t}$ = 1000, $\tilde{chi}^{\pm}$ = 400', 'signal_1500_900.root': r'$\tilde{t}$ = 1500, $\tilde{chi}^{\pm}$ = 900', 'signal_2000_1900.root': r'$\tilde{t}$ = 2000, $\tilde{chi}^{\pm}$ = 1900'}
+param_list = ['bJetMatchingEff', 'etaGenBQCD', 'genBMatchingRate', 'matchedPartonFlavour', 'nBsPerQCDEvent', 'phiGenBQCD', 'pTRecoBMatchSuccess', 'QCDGenpdgId']
 
 bb2DHists = []
 for param in param_list:
-	h_stack = ROOT.THStack(param, "{};{};Events".format(param, files['signal_2000_1900.root'].Get(param).GetXaxis().GetTitle()))
+	h_stack = ROOT.THStack(param, "{};{};Events".format(param, files['QCD2018.root'].Get(param).GetXaxis().GetTitle()))
 	legend = ROOT.TLegend(0.68, 0.89, 0.89, 0.65)
 	for i, f in enumerate(files):
 		newfile = files[f]
 		h_new = newfile.Get(param)
+		if 'pTRecoB' in param or 'pTGenB' in param:
+			h_new.SetLineWidth(3)
+			continue
 		#if 'bb' in param and h_new.InheritsFrom('TH2D'): bb2DHists.append(param)
 		if 'bb' not in param and h_new.InheritsFrom('TH2D'): bb2DHists.append(param)
 		if h_new == None or not (h_new.InheritsFrom('TH1F') or h_new.InheritsFrom('TH1D')): continue
@@ -46,14 +50,25 @@ for param in param_list:
 		h_stack.Add(h_new)
 		legend.AddEntry(h_new, f)
 	if h_new == None or h_new.InheritsFrom('TH2D') or h_new.GetEntries() == 0: continue
-#'''	
+#'''		
 	c1 = ROOT.TCanvas()
-	h_stack.Draw('HIST NOSTACK PLC')
+	h_stack.Draw('HIST E NOSTACK PLC')
 	if param == 'cutflow':
 		h_stack.SetMinimum(0)
 		h_stack.SetMaximum(1)
-	legend.Draw()
+	#legend.Draw()
 	c1.SaveAs('plots/QCDOverlaid/{}/{}.png'.format(bTags, param))
+
+files['QCD2018.root'].Get('pTRecoBMatchSuccess').Divide(files['QCD2018.root'].Get('pTRecoB'))
+files['QCD2018.root'].Get('pTRecoBMatchSuccess').Draw('HIST E PLC')
+files['QCD2018.root'].Get('pTRecoBMatchSuccess').SetYTitle("Matched Events / Total Events")
+c1.SaveAs('plots/QCDOverlaid/{}/pTRecoBMatchSuccess.png'.format(bTags))	
+
+files['QCD2018.root'].Get('pTGenBMatchSuccess').Divide(files['QCD2018.root'].Get('pTGenBQCD'))
+files['QCD2018.root'].Get('pTGenBMatchSuccess').Draw('HIST E PLC')
+files['QCD2018.root'].Get('pTGenBMatchSuccess').SetYTitle("Matched Events / Total Events")
+c1.SaveAs('plots/QCDOverlaid/{}/pTGenBMatchSuccess.png'.format(bTags))	
+
 '''
 bb2DHists = list(set(bb2DHists))
 print(bb2DHists)

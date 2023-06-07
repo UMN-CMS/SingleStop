@@ -1,4 +1,4 @@
-def bJetMatcher(genJets, recoJets, dR_match = 0.3, pT_match = 0.5):
+def bJetMatcher(genJets, recoJets, dR_match = 0.4, pT_match = 3):
 	def getp4(obj):
 		return obj.p4()
 	def dR(obj1, obj2):
@@ -13,7 +13,7 @@ def bJetMatcher(genJets, recoJets, dR_match = 0.3, pT_match = 0.5):
 		diff = lambda x: dR(j, genJets[x])
 		if remaining_idxs: 
 			smallest = min(remaining_idxs, key = diff)
-			if diff(smallest) < dR_match: # and ( (1 - pT_match) * pT(genJets[smallest]) < pT(j) < (1 + pT_match) * pT(genJets[smallest]) ):
+			if diff(smallest) < dR_match and ( (1 / pT_match) * pT(genJets[smallest]) < pT(j) < (pT_match) * pT(genJets[smallest]) ):
 				if smallest in used_idxs:
 					if dR(genJets[smallest], j) < dR(genJets[smallest], recoJets[reverse_matched[smallest]]):
 						matched.remove((reverse_matched[smallest], smallest))

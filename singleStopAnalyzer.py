@@ -275,7 +275,10 @@ class ExampleAnalysis(Module):
 	bins = array.array( 'f', [0.0, 100.0, 200.0, 300.0, 400.0, 500.0, 700.0, 1000.0, 1500.0] )
 	self.h_pTRecoBMatchSuccess 	= ROOT.TH1F('pTRecoBMatchSuccess', 	';pT [GeV]',	8, 	bins	)
 	self.h_pTRecoB 			= ROOT.TH1F('pTRecoB', 			';pT [GeV]',	8, 	bins	)
-	self.h_pTGenBQCD		= ROOT.TH1F('pTGenBQCD', 		';p_{T}^{b, gen, QCD} [GeV]', 	50, 	0, 	1500	)
+	self.h_pTGenBMatchSuccess 	= ROOT.TH1F('pTGenBMatchSuccess', 	';pT [GeV]',	8, 	bins	)
+	self.h_pTGenBQCD		= ROOT.TH1F('pTGenBQCD', 		';p_{T}^{b, gen, QCD} [GeV]', 	8, 	bins	)		
+	self.h_pTGenNonBMatchSuccess 	= ROOT.TH1F('pTGenNonBMatchSuccess', 	';pT [GeV]',	8, 	bins	)
+	self.h_pTGenNonB 		= ROOT.TH1F('pTGenNonB', 		';pT [GeV]',	8, 	bins	)
 	self.h_etaGenBQCD		= ROOT.TH1F('etaGenBQCD', 		';#eta_{b}^{gen, QCD}', 	50, 	0, 	5	)	
 	self.h_phiGenBQCD		= ROOT.TH1F('phiGenBQCD', 		';#phi_{b}^{gen, QCD}', 	50, 	0, 	5	)
 	self.h_genBMatchingRate		= ROOT.TH1F('genBMatchingRate',		';genBTrueMatch',		2, 	0, 	2	)
@@ -764,9 +767,10 @@ class ExampleAnalysis(Module):
 	if self.isQCD:
 		self.h_nPartons.Fill(len(gens), genWeight)
 		genQCDBs = filter(lambda x: abs(x.pdgId) == 5, gens)
+		genNonBs = filter(lambda x: abs(x.pdgId) != 5, gens)
 		genQCDGluons = filter(lambda x: x.pdgId == 21, gens)
 		for g in gens:
-			self.h_QCDGenpdgId.Fill(g.pdgId, genWeight)
+			self.h_QCDGenpdgId.Fill(abs(g.pdgId), genWeight)
 			self.h_nBsPerQCDEvent.Fill(len(filter(lambda x: abs(x.pdgId) == 5, gens)), genWeight)
 		for g in genQCDBs:
 			self.h_pTGenBQCD.Fill(g.pt, genWeight)
@@ -774,6 +778,7 @@ class ExampleAnalysis(Module):
 			self.h_phiGenBQCD.Fill(g.phi, genWeight)	
 		matches = [(numBJet, genAK4Jets[numGenJet].partonFlavour) for (numBJet, numGenJet) in bJetMatcher(genAK4Jets, mediumBs)]
 		genMatches = [(numGenB, numRecoB) for (numGenB, numRecoB) in bJetMatcher(genQCDBs, mediumBs)]	
+		mismatches = [(numNonB, numRecoB) for (numNonB, numRecoB) in bJetMatcher(genNonBs, mediumBs)]
 		for i in range(len(genMatches)): self.h_genBMatchingRate.Fill(1, genWeight)			
 		for i in range(len(genQCDBs) - len(genMatches)): self.h_genBMatchingRate.Fill(0, genWeight)
 		for (numB, genJetParton) in matches:
@@ -782,7 +787,14 @@ class ExampleAnalysis(Module):
 				self.h_bJetMatchingEff.Fill(1, genWeight)
 				self.h_pTRecoBMatchSuccess.Fill(mediumBs[numB].pt, genWeight)
 			else:
-				self.h_bJetMatchingEff.Fill(0, genWeight)	
+				self.h_bJetMatchingEff.Fill(0, genWeight)
+		for i, genQCDB in enumerate(genQCDBs):
+			if i in dict(genMatches).keys():
+				self.h_pTGenBMatchSuccess.Fill(genQCDB.pt, genWeight)			
+		for i, genNonB in enumerate(genNonBs):
+			if i in dict(mismatches).keys():
+				self.h_pTGenNonBMatchSuccess.Fill(genNonB.pt, genWeight)
+			self.h_pTGenNonB.Fill(genNonB.pt)			
 		for bJet in mediumBs:
 			self.h_pTRecoB.Fill(bJet.pt, genWeight)
 		self.h_nGluonsVsnBs.Fill(len(mediumBs), len(genQCDGluons), genWeight)
