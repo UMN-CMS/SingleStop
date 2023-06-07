@@ -3,7 +3,7 @@
 import os, sys, ROOT, argparse
 
 parser = argparse.ArgumentParser(description='MC Scaler')
-parser.add_argument('--sample',type=str,required=True,choices=['signal','signal313','TT2018','QCD2018','ZQQ2018','ST2018','WQQ2018','ZNuNu2018','Diboson2018'],help='Sample to scale')
+parser.add_argument('--sample',type=str,required=True,choices=['signal','signal313','TT2018','QCD2018','ZQQ2018','ST2018','WQQ2018','ZNuNu2018','Diboson2018','QCDInclusive2018'],help='Sample to scale')
 parser.add_argument('--input',type=str,required=True,help='Path to input files')
 parser.add_argument('--output',type=str,required=True,help='Path to output scaled file')
 args = parser.parse_args()
@@ -29,13 +29,14 @@ elif args.sample == 'ST2018':      sampleFile = 'STHadronic2018.txt'
 elif args.sample == 'WQQ2018':     sampleFile = 'WJetsToQQ2018.txt'
 elif args.sample == 'ZNuNu2018':   sampleFile = 'ZJetsToNuNu2018.txt'
 elif args.sample == 'Diboson2018': sampleFile = 'Diboson2018.txt'
+elif args.sample == 'QCDInclusive2018': sampleFile = 'QCDInclusive2018.txt'
 elif args.sample != 'signal' and args.sample != 'signal313': print('ERROR: Unexpected sample argument')
 
 #-------------------------------------------------
-# QCD
+# QCD (b-enriched)
 #-------------------------------------------------
 
-if 'QCD' in sample:
+if 'QCD' in sample and 'Inclusive' not in sample:
 
   SFs = {
   	# 2016preVFP
@@ -97,6 +98,87 @@ if 'QCD' in sample:
       else: print('ERROR: Data period could not be determined for {}'.format(line))
   
       if   '100to200' in line:   HT = 100	
+      elif '200to300' in line:   HT = 200    
+      elif '300to500' in line:   HT = 300    
+      elif '500to700' in line:   HT = 500    
+      elif '700to1000' in line:  HT = 700   
+      elif '1000to1500' in line: HT = 1000  
+      elif '1500to2000' in line: HT = 1500  
+      elif '2000toInf' in line:  HT = 2000
+      else: print('ERROR: HT range could not be determined for {}'.format(line))
+  
+      if period == -1 or HT == -1: sys.exit()
+      else: SF = SFs[(period,HT)]
+  
+      fTemp = ROOT.TFile.Open('{}/{}-{}-temp.root'.format(outputDir,sample,i + 1),'RECREATE')
+      f = ROOT.TFile.Open('{}/{}-{}.root'.format(inputDir,sample,i + 1))
+      plots = f.GetDirectory('plots')
+      keys = [key.GetName() for key in plots.GetListOfKeys()]
+      for key in keys:
+        h = plots.Get(key)
+        h.Scale(SF)
+        fTemp.WriteObject(h,h.GetName())
+  
+      fTemp.Write()
+      fTemp.Close()
+  
+  fileList = []
+  for j in range(i + 1):
+    fileList.append('{}/{}-{}-temp.root'.format(outputDir,sample,j + 1))
+  os.system('hadd -f {}/{}.root {}'.format(outputDir,sample,' '.join(fileList)))
+  os.system('rm {}/*temp.root'.format(outputDir))
+
+#-------------------------------------------------
+# QCD (inclusive)
+#-------------------------------------------------
+
+if sample == 'QCDInclusive2018':
+
+  SFs = {
+        # QCD 2016
+        (1,50)   : 59.8 * 186100000.0 * 1E3 / 35474117,
+        (1,100)  : 59.8 * 23630000.0  * 1E3 / 73506112,
+        (1,200)  : 59.8 * 1554000.0   * 1E3 / 43280518,
+        (1,300)  : 59.8 * 323800.0    * 1E3 / 46335846,
+        (1,500)  : 59.8 * 30280.0     * 1E3 / 52661606,
+        (1,700)  : 59.8 * 6392.0      * 1E3 / 41664730,
+        (1,1000) : 59.8 * 1118.0      * 1E3 / 12254238,
+        (1,1500) : 59.8 * 108.9       * 1E3 / 9376965,
+        (1,2000) : 59.8 * 21.93       * 1E3 / 4867995,
+        # QCD 2018
+        (3,50)   : 59.8 * 187300000.0 * 1E3 / 38599389,
+        (3,100)  : 59.8 * 23590000.0  * 1E3 / 84434559,
+        (3,200)  : 59.8 * 1555000.0   * 1E3 / 57336623,
+        (3,300)  : 59.8 * 324500.0    * 1E3 / 61609663,
+        (3,500)  : 59.8 * 30310.0     * 1E3 / 49184771,
+        (3,700)  : 59.8 * 6444.0      * 1E3 / 48506751,
+        (3,1000) : 59.8 * 1127.0      * 1E3 / 14394786,
+        (3,1500) : 59.8 * 109.8       * 1E3 / 10411831,
+        (3,2000) : 59.8 * 21.98       * 1E3 / 5374711,
+  }
+  
+  if scale2018toRun2:
+  
+    lumiTarget = 137.62
+    lumiSample = 59.8
+  
+    for key,value in SFs.items():
+      if key[0] == 3: SFs[key] *= lumiTarget / lumiSample
+  
+  with open('samples/{}'.format(sampleFile)) as f:
+    for i,line in enumerate(f):
+   
+      period = -1 
+      HT = -1
+
+      if   'preVFP' in line: period = 0
+      elif 'UL16' in line:   period = 1
+      elif 'UL17' in line:   period = 2
+      elif 'UL18' in line:   period = 3
+      else: print('ERROR: Data period could not be determined for {}'.format(line))
+
+      if   '50to100' in line:    HT = 50	
+      elif '100to200' in line:   HT = 100
       elif '200to300' in line:   HT = 200    
       elif '300to500' in line:   HT = 300    
       elif '500to700' in line:   HT = 500    
