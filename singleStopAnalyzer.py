@@ -15,11 +15,12 @@ ROOT.PyConfig.IgnoreCommandLineOptions = True
 
 class ExampleAnalysis(Module):
 
-    def __init__(self,isSignal,MCCampaign,isSkimmed):
+    def __init__(self,isData,isSignal,MCCampaign,isSkimmed):
         self.writeHistFile = True
         self.isSignal = isSignal
         self.MCCampaign = MCCampaign
         self.isSkimmed = isSkimmed
+        self.isData = isData
 
     def create2DHists(self,titles,labels,*args):
         for i,title in enumerate(titles):
@@ -242,7 +243,8 @@ class ExampleAnalysis(Module):
         dRMatch = 0.1
 
         # Get MC weight
-        genWeight = 1 if event.genWeight > 0 else -1
+        if not self.isData: genWeight = 1 if event.genWeight > 0 else -1
+        else: genWeight = 1
 
         # Fill histograms before selections (but after any pre-selections)
         self.h_nEventsPostPre.Fill(0,genWeight)
@@ -301,9 +303,10 @@ class ExampleAnalysis(Module):
           self.h_cutflow.Fill(4,genWeight)
           if not 2 < abs(jets[0].p4().DeltaR(jets[1].p4())) < 4: return False
           self.h_cutflow.Fill(5,genWeight)
-          if len(looseBs) < 2: return False
+          if not self.isData and len(looseBs) < 2: return False
+          elif self.isData and len(looseBs) != 0: return False
           self.h_cutflow.Fill(6,genWeight)
-          if abs(looseBs[0].p4().DeltaR(looseBs[1].p4())) < 1: return False
+          if not self.isData and abs(looseBs[0].p4().DeltaR(looseBs[1].p4())) < 1: return False
           self.h_cutflow.Fill(7,genWeight)
 
         try: 
@@ -591,7 +594,7 @@ class ExampleAnalysis(Module):
         return True
 
 parser = argparse.ArgumentParser(description='Single Stop Analyzer')
-parser.add_argument('--sample',type=str,default='signal',choices=['signal','TT','TT2018','QCD','QCD2018','ZQQ2018','ST2018','WQQ2018','ZNuNu2018','Diboson2018'],help='Sample to run over')
+parser.add_argument('--sample',type=str,default='signal',choices=['Data2018','signal','TT','TT2018','QCD','QCD2018','QCDInclusive2018','ZQQ2018','ST2018','WQQ2018','ZNuNu2018','Diboson2018'],help='Sample to run over')
 parser.add_argument('--tag',type=str,default='test',help='Tag for output label')
 parser.add_argument('-n',type=int,default=1,help='Sample index to run over for backgrounds')
 parser.add_argument('--points',type=str,default='all',help='Signal point(s) to run over, comma separated in MSTOP_MCHI format; "all" to run over all available points')
@@ -602,15 +605,17 @@ outputPath = 'output/{}'.format(args.tag)
 if not os.path.exists(outputPath):
   os.makedirs(outputPath)
 
-if   args.sample == 'TT':          sampleFile = 'TTToHadronic.txt'
-elif args.sample == 'TT2018':      sampleFile = 'TTToHadronic2018.txt'
-elif args.sample == 'QCD':         sampleFile = 'QCDBEnriched.txt'
-elif args.sample == 'QCD2018':     sampleFile = 'QCDBEnriched2018.txt'
-elif args.sample == 'ZQQ2018':     sampleFile = 'ZJetsToQQ2018.txt'
-elif args.sample == 'ST2018':      sampleFile = 'STHadronic2018.txt'
-elif args.sample == 'WQQ2018':     sampleFile = 'WJetsToQQ2018.txt'
-elif args.sample == 'ZNuNu2018':   sampleFile = 'ZJetsToNuNu2018.txt'
-elif args.sample == 'Diboson2018': sampleFile = 'Diboson2018.txt'
+if   args.sample == 'TT':               sampleFile = 'TTToHadronic.txt'
+elif args.sample == 'TT2018':           sampleFile = 'TTToHadronic2018.txt'
+elif args.sample == 'QCD':              sampleFile = 'QCDBEnriched.txt'
+elif args.sample == 'QCD2018':          sampleFile = 'QCDBEnriched2018.txt'
+elif args.sample == 'QCDInclusive2018': sampleFile = 'QCDInclusive2018.txt'
+elif args.sample == 'ZQQ2018':          sampleFile = 'ZJetsToQQ2018.txt'
+elif args.sample == 'ST2018':           sampleFile = 'STHadronic2018.txt'
+elif args.sample == 'WQQ2018':          sampleFile = 'WJetsToQQ2018.txt'
+elif args.sample == 'ZNuNu2018':        sampleFile = 'ZJetsToNuNu2018.txt'
+elif args.sample == 'Diboson2018':      sampleFile = 'Diboson2018.txt'
+elif args.sample == 'Data2018':         sampleFile = 'Data2018.txt'
 elif args.sample != 'signal': print('ERROR: Unexpected sample argument')
 
 preselection = (
@@ -619,7 +624,30 @@ preselection = (
 		'(HLT_PFHT1050 || HLT_AK8PFJet360_TrimMass30)'
                )
 
-if args.sample == 'signal':
+if args.sample == 'Data2018':
+
+  print('Running over {} files'.format(args.sample))
+  print('Blinding data, only using CR cuts (0 loose b\'s)')
+  print('Using UL 2018 campaign working points')
+
+  files = open('samples/{}'.format(sampleFile)).read().split('\n')
+  files = [['root://cmsxrootd.fnal.gov/' + x.replace('/eos/uscms','') for x in files][:-1][args.n - 1]]
+  if len(files) != 1: print('WARNING: Multiple files selected. All must be from the same MC campaign.')
+  if 'UL2016' in files[0]:
+    if 'preVFP' in files[0]:    MCCampaign = 'UL2016preVFP'
+    else:                       MCCampaign = 'UL2016postVFP'
+  elif 'UL2017' in files[0]:      MCCampaign = 'UL2017'
+  elif 'UL2018' in files[0]:      MCCampaign = 'UL2018'
+  else:
+    print('ERROR: Unable to determine campaign of {}'.format(files[0]))
+    sys.exit()
+  p = PostProcessor(".", files, cut=preselection, branchsel=None,
+                    modules=[ExampleAnalysis(isData=1,isSignal=0,MCCampaign=MCCampaign,isSkimmed=False)],
+                    noOut=True, histFileName='{}/{}-{}.root'.format(outputPath,args.sample,args.n), histDirName="plots",
+                    maxEntries=None)
+  p.run()
+
+elif args.sample == 'signal':
 
   allPoints = ['1000_400','1000_600','1000_900',
                '1200_400','1200_600','1200_1100',
@@ -645,7 +673,7 @@ if args.sample == 'signal':
     #files = ['file:/uscms_data/d3/dmahon/RPVSingleStopRun3Patched/NANOAOD/CMSSW_12_4_5/test_2000_100-1.root']
     #files = ['/uscms_data/d3/dmahon/RPVSingleStopRun3Patched/NANOAOD/files/NANOAOD-{}.root'.format(masses)]
     p = PostProcessor(".", files, cut=preselection, branchsel=None,
-                      modules=[ExampleAnalysis(isSignal=1,MCCampaign='UL2018',isSkimmed=False)],
+                      modules=[ExampleAnalysis(isData=0,isSignal=1,MCCampaign='UL2018',isSkimmed=False)],
                       noOut=True, histFileName='{}/{}_{}.root'.format(outputPath,args.sample,masses), histDirName="plots",
                       maxEntries=None)
     p.run()
@@ -658,7 +686,7 @@ elif args.useskim:
   files = ['root://cmsxrootd.fnal.gov//store/user/ckapsiak/SingleStop/Skims/Skim_2023_23_03/{}.root'.format(args.sample)]
   if len(files) != 1: print('WARNING: Multiple files selected. All must be from the same MC campaign.')
   p = PostProcessor(".", files, cut='', branchsel=None,
-                    modules=[ExampleAnalysis(isSignal=0,MCCampaign='UL2018',isSkimmed=True)],
+                    modules=[ExampleAnalysis(isData=0,isSignal=0,MCCampaign='UL2018',isSkimmed=True)],
                     noOut=True, histFileName='{}/{}-ALL.root'.format(outputPath,args.sample), histDirName="plots",
                     maxEntries=None)
   p.run()
@@ -679,7 +707,7 @@ else:
     print('ERROR: Unable to determine MC campaign of {}'.format(files[0]))
     sys.exit()
   p = PostProcessor(".", files, cut=preselection, branchsel=None, 
-                    modules=[ExampleAnalysis(isSignal=0,MCCampaign=MCCampaign,isSkimmed=False)], 
+                    modules=[ExampleAnalysis(isData=0,isSignal=0,MCCampaign=MCCampaign,isSkimmed=False)], 
                     noOut=True, histFileName='{}/{}-{}.root'.format(outputPath,args.sample,args.n), histDirName="plots",
                     maxEntries=None)
   p.run() 

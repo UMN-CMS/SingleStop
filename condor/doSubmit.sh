@@ -18,6 +18,8 @@ case $sample in
   "WQQ2018") sampleFile="WJetsToQQ2018.txt";;
   "ZNuNu2018") sampleFile="ZJetsToNuNu2018.txt";;
   "Diboson2018") sampleFile="Diboson2018.txt";;
+  "QCDInclusive2018") sampleFile="QCDInclusive2018.txt";;
+  "Data2018") sampleFile="Data2018.txt";;
   *) echo "ERROR: Invalid sample argument.";exit 1;;
 esac
 
