@@ -2,11 +2,13 @@
 
 if [ -z "$1" ]
   then
-    echo "ERROR: No sample argument supplied. Usage: ./doSubmit.sh [SAMPLE]"
+    echo "ERROR: No sample argument supplied. Usage: ./doSubmit.sh [SAMPLE] [COUPLING] [loose/medium]"
     exit 1
 fi
 
 sample=$1
+coupling=$2
+bAlgo=$3
 
 case $sample in
   "QCD") sampleFile="QCDBEnriched.txt";;
@@ -23,8 +25,11 @@ esac
 
 rm -rf job out err log samples
 mkdir -p job out err log samples
+rm bJetMatcher.py
+rm singleStopAnalyzer.py
 
 cp ../samples/"$sampleFile" samples
+cp ../bJetMatcher.py .
 cp ../singleStopAnalyzer.py .
 
 sed -i "2,4s/PhysicsTools.NanoAODTools.postprocessing.//g" singleStopAnalyzer.py
@@ -50,7 +55,7 @@ cd CMSSW_10_6_19_patch2/src/
 eval \`scramv1 runtime -sh\`
 echo \$CMSSW_BASE "is the CMSSW we created on the local worker node"
 cd \${_CONDOR_SCRATCH_DIR}
-python singleStopAnalyzer.py --sample $sample -n $i
+python singleStopAnalyzer.py --sample $sample -n $i --coupling $coupling --bAlgo $bAlgo
 echo "Running pwd:"
 pwd
 echo "Running ls -alrth:"
@@ -66,7 +71,7 @@ Executable	= job/submit_\$(ijobname).sh
 Output		= out/submit_\$(ijobname).out
 Error		= err/submit_\$(ijobname).err
 Log		= log/submit_\$(ijobname).log
-transfer_input_files = samples,framework,singleStopAnalyzer.py
+transfer_input_files = samples,framework,singleStopAnalyzer.py,bJetMatcher.py
 transfer_output_files = output
 should_transfer_files = YES
 when_to_transfer_output = ON_EXIT
