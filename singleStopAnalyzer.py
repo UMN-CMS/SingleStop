@@ -136,10 +136,11 @@ class ExampleAnalysis(Module):
         self.h_pT2          		= ROOT.TH1F('pT2',           	';p_{T,2} [GeV]',                    	75,	0,	1500 	)
         self.h_pT3          		= ROOT.TH1F('pT3',           	';p_{T,3} [GeV]',                    	75,	0,	1500 	)
         self.h_pT4          		= ROOT.TH1F('pT4',           	';p_{T,4} [GeV]',                    	75,	0,	1500 	)
-        self.h_pTb1                     = ROOT.TH1F('pTb1',             ';p_{T,b_{1}} (medium) [GeV]',           75,     0,      1500    )
-        self.h_pTb2                     = ROOT.TH1F('pTb2',             ';p_{T,b_{2}} (medium) [GeV]',           75,     0,      1500    )
-        self.h_pTb3                     = ROOT.TH1F('pTb3',             ';p_{T,b_{3}} (medium) [GeV]',           75,     0,      1500    )
-        self.h_pTb4                     = ROOT.TH1F('pTb4',             ';p_{T,b_{4}} (medium) [GeV]',           75,     0,      1500    )
+	self.h_pTbAll			= ROOT.TH1F('pTbAll',		';p_{T, b_{All}} (medium) [GeV]',	75,	0, 	1500	)
+        self.h_pTb1                     = ROOT.TH1F('pTb1',             ';p_{T,b_{1}} (medium) [GeV]',          75,     0,      1500    )
+        self.h_pTb2                     = ROOT.TH1F('pTb2',             ';p_{T,b_{2}} (medium) [GeV]',          75,     0,      1500    )
+        self.h_pTb3                     = ROOT.TH1F('pTb3',             ';p_{T,b_{3}} (medium) [GeV]',          75,     0,      1500    )
+        self.h_pTb4                     = ROOT.TH1F('pTb4',             ';p_{T,b_{4}} (medium) [GeV]',          75,     0,      1500    )
 	self.h_pTChiComp		= ROOT.TH1F('pTChiComp',	';p_{T,#tilde{#chi}^{#pm}} (compressed)',	75, 	0, 	2000	)
 	self.h_pTChiUncomp		= ROOT.TH1F('pTChiUncomp',	';p_{T,#tilde{#chi}^{#pm}} (uncompressed)',	75, 	0, 	2000	)
         self.h_eta1          		= ROOT.TH1F('eta1',       	';#eta_{1}',     			80,	-8,	8	)
@@ -270,14 +271,15 @@ class ExampleAnalysis(Module):
 	self.h_nPartons			= ROOT.TH1F('nPartons', 		';nPartons', 			10, 	0, 	10	)
 	self.h_bJetMatchingEff 		= ROOT.TH1F('bJetMatchingEff',		';bJetTrueMatch', 		2, 	0, 	2	)
 	self.h_nBsPerQCDEvent		= ROOT.TH1F('nBsPerQCDEvent', 		';nBs [gen Particles]',		10, 	0, 	10	)
-	self.h_matchedPartonFlavour	= ROOT.TH1F('matchedPartonFlavour', 	';pdgId [matched jets]', 	100, 	-50, 	50	)		
-	bins = array.array( 'f', [0.0, 50.0, 100.0, 150.0, 200.0, 250.0, 500.0, 750.0, 1000.0, 1250.0, 1500.0] )
-	self.h_pTRecoBMatchSuccess 	= ROOT.TH1F('pTRecoBMatchSuccess', 	';pT [GeV]',	10, 	bins	)
-	self.h_pTRecoB 			= ROOT.TH1F('pTRecoB', 			';pT [GeV]',	10, 	bins	)
-	self.h_pTRecoBEffEstimate	= ROOT.TH1F('pTRecoBEffEstimate', 	';p_{T}^{b, success/all} [GeV]', 	10, 	bins	)		
+	self.h_matchedPartonFlavour	= ROOT.TH1F('matchedPartonFlavour', 	';pdgId [matched jets]', 	25, 	0, 	25	)		
+	bins = array.array( 'f', [0.0, 100.0, 200.0, 300.0, 400.0, 500.0, 700.0, 1000.0, 1500.0] )
+	self.h_pTRecoBMatchSuccess 	= ROOT.TH1F('pTRecoBMatchSuccess', 	';pT [GeV]',	8, 	bins	)
+	self.h_pTRecoB 			= ROOT.TH1F('pTRecoB', 			';pT [GeV]',	8, 	bins	)
 	self.h_pTGenBQCD		= ROOT.TH1F('pTGenBQCD', 		';p_{T}^{b, gen, QCD} [GeV]', 	50, 	0, 	1500	)
 	self.h_etaGenBQCD		= ROOT.TH1F('etaGenBQCD', 		';#eta_{b}^{gen, QCD}', 	50, 	0, 	5	)	
 	self.h_phiGenBQCD		= ROOT.TH1F('phiGenBQCD', 		';#phi_{b}^{gen, QCD}', 	50, 	0, 	5	)
+	self.h_genBMatchingRate		= ROOT.TH1F('genBMatchingRate',		';genBTrueMatch',		2, 	0, 	2	)
+	self.h_nGluonsVsnBs		= ROOT.TH2F('nGluonsVsnBs', 		';n_{Bs} [medium];n_{Gluons} [Gen]', 6, 0, 6, 10, 0, 50	)
 
         # Add histograms to analysis object
         for h in list(vars(self)):
@@ -689,42 +691,80 @@ class ExampleAnalysis(Module):
                           genWeight)
 
         # b jets
-        for i,b in enumerate(mediumBs):
-          if i == 0: self.h_pTb1.Fill(b.pt,genWeight)
-          elif i == 1: self.h_pTb2.Fill(b.pt,genWeight)
-          elif i == 2: self.h_pTb3.Fill(b.pt,genWeight)
-          elif i == 3: self.h_pTb4.Fill(b.pt,genWeight)
+	if self.bAlgo == 'medium':
+		for i,b in enumerate(mediumBs):
+		  self.h_pTbAll.Fill(b.pt, genWeight)
+		  if i == 0: self.h_pTb1.Fill(b.pt,genWeight)
+		  elif i == 1: self.h_pTb2.Fill(b.pt,genWeight)
+		  elif i == 2: self.h_pTb3.Fill(b.pt,genWeight)
+		  elif i == 3: self.h_pTb4.Fill(b.pt,genWeight)
 
-        if len(mediumBs) >= 3: 
-          self.h_dEtabb12.Fill(abs(mediumBs[0].eta - mediumBs[1].eta),genWeight)
-          self.h_dEtabb13.Fill(abs(mediumBs[0].eta - mediumBs[2].eta),genWeight)
-          self.h_dEtabb23.Fill(abs(mediumBs[1].eta - mediumBs[2].eta),genWeight)	
-          self.h_dEtabb23.Fill(abs(mediumBs[1].eta - mediumBs[2].eta),genWeight)	
-          self.h_dPhibb12.Fill(abs(mediumBs[0].p4().DeltaPhi(mediumBs[1].p4())),genWeight)
-          self.h_dPhibb12.Fill(abs(mediumBs[0].p4().DeltaPhi(mediumBs[1].p4())),genWeight)
-          self.h_dPhibb13.Fill(abs(mediumBs[0].p4().DeltaPhi(mediumBs[2].p4())),genWeight)
-          self.h_dPhibb23.Fill(abs(mediumBs[1].p4().DeltaPhi(mediumBs[2].p4())),genWeight)
-          self.h_dRbb12.Fill(abs(mediumBs[0].p4().DeltaR(mediumBs[1].p4())),genWeight)
-          self.h_dRbb13.Fill(abs(mediumBs[0].p4().DeltaR(mediumBs[2].p4())),genWeight)
-          self.h_dRbb23.Fill(abs(mediumBs[1].p4().DeltaR(mediumBs[2].p4())),genWeight)
-	
-	  bJetCombos2D = [[''.join(map(str, i)), ''.join(map(str, j))] for i, j in combinations(combinations([1, 2, 3], 2), 2)]
+		if len(mediumBs) >= 3: 
+		  self.h_dEtabb12.Fill(abs(mediumBs[0].eta - mediumBs[1].eta),genWeight)
+		  self.h_dEtabb13.Fill(abs(mediumBs[0].eta - mediumBs[2].eta),genWeight)
+		  self.h_dEtabb23.Fill(abs(mediumBs[1].eta - mediumBs[2].eta),genWeight)	
+		  self.h_dEtabb23.Fill(abs(mediumBs[1].eta - mediumBs[2].eta),genWeight)	
+		  self.h_dPhibb12.Fill(abs(mediumBs[0].p4().DeltaPhi(mediumBs[1].p4())),genWeight)
+		  self.h_dPhibb12.Fill(abs(mediumBs[0].p4().DeltaPhi(mediumBs[1].p4())),genWeight)
+		  self.h_dPhibb13.Fill(abs(mediumBs[0].p4().DeltaPhi(mediumBs[2].p4())),genWeight)
+		  self.h_dPhibb23.Fill(abs(mediumBs[1].p4().DeltaPhi(mediumBs[2].p4())),genWeight)
+		  self.h_dRbb12.Fill(abs(mediumBs[0].p4().DeltaR(mediumBs[1].p4())),genWeight)
+		  self.h_dRbb13.Fill(abs(mediumBs[0].p4().DeltaR(mediumBs[2].p4())),genWeight)
+		  self.h_dRbb23.Fill(abs(mediumBs[1].p4().DeltaR(mediumBs[2].p4())),genWeight)
+		
+		  bJetCombos2D = [[''.join(map(str, i)), ''.join(map(str, j))] for i, j in combinations(combinations([1, 2, 3], 2), 2)]
 
-	  self.fill2DHists(['dEtabb{}Vs{}'.format(i, j) for [i, j] in bJetCombos2D],
-			 [abs(mediumBs[int(i) - 1].eta - mediumBs[int(j) - 1].eta) for i, j in [x[1] for x in bJetCombos2D]],
-			 [abs(mediumBs[int(i) - 1].eta - mediumBs[int(j) - 1].eta) for i, j in [x[0] for x in bJetCombos2D]],
-			 genWeight)
-	  self.fill2DHists(['dPhibb{}Vs{}'.format(i, j) for [i, j] in bJetCombos2D],
-			 [abs(mediumBs[int(i) - 1].p4().DeltaPhi(mediumBs[int(j) - 1].p4())) for i, j in [x[1] for x in bJetCombos2D]],
-			 [abs(mediumBs[int(i) - 1].p4().DeltaPhi(mediumBs[int(j) - 1].p4())) for i, j in [x[0] for x in bJetCombos2D]],
-			 genWeight)
-	  self.fill2DHists(['dRbb{}Vs{}'.format(i, j) for [i, j] in bJetCombos2D],
-			 [abs(mediumBs[int(i) - 1].p4().DeltaR(mediumBs[int(j) - 1].p4())) for i, j in [x[1] for x in bJetCombos2D]],
-			 [abs(mediumBs[int(i) - 1].p4().DeltaR(mediumBs[int(j) - 1].p4())) for i, j in [x[0] for x in bJetCombos2D]],
-			 genWeight)
+		  self.fill2DHists(['dEtabb{}Vs{}'.format(i, j) for [i, j] in bJetCombos2D],
+				 [abs(mediumBs[int(i) - 1].eta - mediumBs[int(j) - 1].eta) for i, j in [x[1] for x in bJetCombos2D]],
+				 [abs(mediumBs[int(i) - 1].eta - mediumBs[int(j) - 1].eta) for i, j in [x[0] for x in bJetCombos2D]],
+				 genWeight)
+		  self.fill2DHists(['dPhibb{}Vs{}'.format(i, j) for [i, j] in bJetCombos2D],
+				 [abs(mediumBs[int(i) - 1].p4().DeltaPhi(mediumBs[int(j) - 1].p4())) for i, j in [x[1] for x in bJetCombos2D]],
+				 [abs(mediumBs[int(i) - 1].p4().DeltaPhi(mediumBs[int(j) - 1].p4())) for i, j in [x[0] for x in bJetCombos2D]],
+				 genWeight)
+		  self.fill2DHists(['dRbb{}Vs{}'.format(i, j) for [i, j] in bJetCombos2D],
+				 [abs(mediumBs[int(i) - 1].p4().DeltaR(mediumBs[int(j) - 1].p4())) for i, j in [x[1] for x in bJetCombos2D]],
+				 [abs(mediumBs[int(i) - 1].p4().DeltaR(mediumBs[int(j) - 1].p4())) for i, j in [x[0] for x in bJetCombos2D]],
+				 genWeight)
+	else:
+		for i,b in enumerate(looseBs):
+		  self.h_pTbAll.Fill(b.pt, genWeight)
+		  if i == 0: self.h_pTb1.Fill(b.pt,genWeight)
+		  elif i == 1: self.h_pTb2.Fill(b.pt,genWeight)
+		  elif i == 2: self.h_pTb3.Fill(b.pt,genWeight)
+		  elif i == 3: self.h_pTb4.Fill(b.pt,genWeight)
+
+		if len(looseBs) >= 3: 
+		  self.h_dEtabb12.Fill(abs(looseBs[0].eta - looseBs[1].eta),genWeight)
+		  self.h_dEtabb13.Fill(abs(looseBs[0].eta - looseBs[2].eta),genWeight)
+		  self.h_dEtabb23.Fill(abs(looseBs[1].eta - looseBs[2].eta),genWeight)	
+		  self.h_dEtabb23.Fill(abs(looseBs[1].eta - looseBs[2].eta),genWeight)	
+		  self.h_dPhibb12.Fill(abs(looseBs[0].p4().DeltaPhi(looseBs[1].p4())),genWeight)
+		  self.h_dPhibb12.Fill(abs(looseBs[0].p4().DeltaPhi(looseBs[1].p4())),genWeight)
+		  self.h_dPhibb13.Fill(abs(looseBs[0].p4().DeltaPhi(looseBs[2].p4())),genWeight)
+		  self.h_dPhibb23.Fill(abs(looseBs[1].p4().DeltaPhi(looseBs[2].p4())),genWeight)
+		  self.h_dRbb12.Fill(abs(looseBs[0].p4().DeltaR(looseBs[1].p4())),genWeight)
+		  self.h_dRbb13.Fill(abs(looseBs[0].p4().DeltaR(looseBs[2].p4())),genWeight)
+		  self.h_dRbb23.Fill(abs(looseBs[1].p4().DeltaR(looseBs[2].p4())),genWeight)
+		
+		  bJetCombos2D = [[''.join(map(str, i)), ''.join(map(str, j))] for i, j in combinations(combinations([1, 2, 3], 2), 2)]
+
+		  self.fill2DHists(['dEtabb{}Vs{}'.format(i, j) for [i, j] in bJetCombos2D],
+				 [abs(looseBs[int(i) - 1].eta - looseBs[int(j) - 1].eta) for i, j in [x[1] for x in bJetCombos2D]],
+				 [abs(looseBs[int(i) - 1].eta - looseBs[int(j) - 1].eta) for i, j in [x[0] for x in bJetCombos2D]],
+				 genWeight)
+		  self.fill2DHists(['dPhibb{}Vs{}'.format(i, j) for [i, j] in bJetCombos2D],
+				 [abs(looseBs[int(i) - 1].p4().DeltaPhi(looseBs[int(j) - 1].p4())) for i, j in [x[1] for x in bJetCombos2D]],
+				 [abs(looseBs[int(i) - 1].p4().DeltaPhi(looseBs[int(j) - 1].p4())) for i, j in [x[0] for x in bJetCombos2D]],
+				 genWeight)
+		  self.fill2DHists(['dRbb{}Vs{}'.format(i, j) for [i, j] in bJetCombos2D],
+				 [abs(looseBs[int(i) - 1].p4().DeltaR(looseBs[int(j) - 1].p4())) for i, j in [x[1] for x in bJetCombos2D]],
+				 [abs(looseBs[int(i) - 1].p4().DeltaR(looseBs[int(j) - 1].p4())) for i, j in [x[0] for x in bJetCombos2D]],
+				 genWeight)
 	if self.isQCD:
 		self.h_nPartons.Fill(len(gens), genWeight)
 		genQCDBs = filter(lambda x: abs(x.pdgId) == 5, gens)
+		genQCDGluons = filter(lambda x: x.pdgId == 21, gens)
 		for g in gens:
 			self.h_QCDGenpdgId.Fill(g.pdgId, genWeight)
 			self.h_nBsPerQCDEvent.Fill(len(filter(lambda x: abs(x.pdgId) == 5, gens)), genWeight)
@@ -733,8 +773,11 @@ class ExampleAnalysis(Module):
 			self.h_etaGenBQCD.Fill(g.eta, genWeight)
 			self.h_phiGenBQCD.Fill(g.phi, genWeight)	
 		matches = [(numBJet, genAK4Jets[numGenJet].partonFlavour) for (numBJet, numGenJet) in bJetMatcher(genAK4Jets, mediumBs)]
+		genMatches = [(numGenB, numRecoB) for (numGenB, numRecoB) in bJetMatcher(genQCDBs, mediumBs)]	
+		for i in range(len(genMatches)): self.h_genBMatchingRate.Fill(1, genWeight)			
+		for i in range(len(genQCDBs) - len(genMatches)): self.h_genBMatchingRate.Fill(0, genWeight)
 		for (numB, genJetParton) in matches:
-			self.h_matchedPartonFlavour.Fill(genJetParton, genWeight)
+			self.h_matchedPartonFlavour.Fill(abs(genJetParton), genWeight)
 			if abs(genJetParton) == 5:
 				self.h_bJetMatchingEff.Fill(1, genWeight)
 				self.h_pTRecoBMatchSuccess.Fill(mediumBs[numB].pt, genWeight)
@@ -742,6 +785,7 @@ class ExampleAnalysis(Module):
 				self.h_bJetMatchingEff.Fill(0, genWeight)	
 		for bJet in mediumBs:
 			self.h_pTRecoB.Fill(bJet.pt, genWeight)
+		self.h_nGluonsVsnBs.Fill(len(mediumBs), len(genQCDGluons), genWeight)
 
         self.h_dEtaRecoComp.Fill(abs(sumJet3.Eta() - sumJet4.Eta()),genWeight)
         self.h_dPhiRecoComp.Fill(abs(sumJet3.DeltaPhi(sumJet4)),genWeight)
