@@ -15,12 +15,13 @@ ROOT.PyConfig.IgnoreCommandLineOptions = True
 
 class ExampleAnalysis(Module):
 
-    def __init__(self,isData,isSignal,MCCampaign,isSkimmed):
+    def __init__(self,isData,isSignal,MCCampaign,isSkimmed,makeSkim=False):
         self.writeHistFile = True
         self.isSignal = isSignal
         self.MCCampaign = MCCampaign
         self.isSkimmed = isSkimmed
         self.isData = isData
+        self.makeSkim=makeSkim
 
     def create2DHists(self,titles,labels,*args):
         for i,title in enumerate(titles):
@@ -31,6 +32,7 @@ class ExampleAnalysis(Module):
           getattr(self,'h_{}'.format(title)).Fill(xVals[i],yVals[i],genWeight)
 
     def beginJob(self, histFile=None, histDirName=None):
+        if self.makeSkim: return 
         Module.beginJob(self, histFile, histDirName)
 
         self.h_nEventsPostPre           = ROOT.TH1D('nEventsPostPre',   ';N_{events} (post-preselection)',      1,      0,      1       )
@@ -247,9 +249,11 @@ class ExampleAnalysis(Module):
         else: genWeight = 1
 
         # Fill histograms before selections (but after any pre-selections)
-        self.h_nEventsPostPre.Fill(0,genWeight)
-        try: self.h_HTLHE.Fill(event.LHE_HT,genWeight)
-        except RuntimeError: pass
+        if not self.makeSkim:
+            self.h_nEventsPostPre.Fill(0,genWeight)
+            try: self.h_HTLHE.Fill(event.LHE_HT,genWeight)
+            except RuntimeError: pass
+
 
         # Set b tagging WPs
         if   self.MCCampaign == 'UL2016preVFP': 	bTagWPs = [0.0508,0.2598,0.6502]
@@ -259,28 +263,30 @@ class ExampleAnalysis(Module):
 
         # Get event collections
         jets           = filter(lambda x: x.pt > 30 and abs(x.eta) < 2.4,list(Collection(event,"Jet")))
-        fatJets        = list(Collection(event,"FatJet"))
-        looseTs        = filter(lambda x: x.particleNet_TvsQCD > 0.58,fatJets)
-        mediumTs       = filter(lambda x: x.particleNet_TvsQCD > 0.80,fatJets)
-        tightTs        = filter(lambda x: x.particleNet_TvsQCD > 0.97,fatJets)
-        looseWs        = filter(lambda x: x.particleNet_WvsQCD > 0.70,fatJets)
-        mediumWs       = filter(lambda x: x.particleNet_WvsQCD > 0.94,fatJets)
-        tightWs        = filter(lambda x: x.particleNet_WvsQCD > 0.98,fatJets)
-        deepWP1Ts      = filter(lambda x: x.deepTag_TvsQCD > 0.436,fatJets)
-        deepWP2Ts      = filter(lambda x: x.deepTag_TvsQCD > 0.802,fatJets)
-        deepWP3Ts      = filter(lambda x: x.deepTag_TvsQCD > 0.922,fatJets)
-        deepWP4Ts      = filter(lambda x: x.deepTag_TvsQCD > 0.989,fatJets)
-        deepWP1Ws      = filter(lambda x: x.deepTag_WvsQCD > 0.458,fatJets)
-        deepWP2Ws      = filter(lambda x: x.deepTag_WvsQCD > 0.762,fatJets)
-        deepWP3Ws      = filter(lambda x: x.deepTag_WvsQCD > 0.918,fatJets)
-        deepWP4Ws      = filter(lambda x: x.deepTag_WvsQCD > 0.961,fatJets)
         looseBs        = filter(lambda x: x.btagDeepFlavB > bTagWPs[0],jets)
         mediumBs       = filter(lambda x: x.btagDeepFlavB > bTagWPs[1],jets)
         tightBs        = filter(lambda x: x.btagDeepFlavB > bTagWPs[2],jets)
-        MET            = ROOT.TVector2()
-        MET.SetMagPhi(event.MET_pt,event.MET_phi)
 
-        if self.isSignal:
+        if not self.makeSkim:
+            fatJets        = list(Collection(event,"FatJet"))
+            looseWs        = filter(lambda x: x.particleNet_WvsQCD > 0.70,fatJets)
+            mediumWs       = filter(lambda x: x.particleNet_WvsQCD > 0.94,fatJets)
+            tightWs        = filter(lambda x: x.particleNet_WvsQCD > 0.98,fatJets)
+            looseTs        = filter(lambda x: x.particleNet_TvsQCD > 0.58,fatJets)
+            mediumTs       = filter(lambda x: x.particleNet_TvsQCD > 0.80,fatJets)
+            tightTs        = filter(lambda x: x.particleNet_TvsQCD > 0.97,fatJets)
+            deepWP1Ts      = filter(lambda x: x.deepTag_TvsQCD > 0.436,fatJets)
+            deepWP2Ts      = filter(lambda x: x.deepTag_TvsQCD > 0.802,fatJets)
+            deepWP3Ts      = filter(lambda x: x.deepTag_TvsQCD > 0.922,fatJets)
+            deepWP4Ts      = filter(lambda x: x.deepTag_TvsQCD > 0.989,fatJets)
+            deepWP1Ws      = filter(lambda x: x.deepTag_WvsQCD > 0.458,fatJets)
+            deepWP2Ws      = filter(lambda x: x.deepTag_WvsQCD > 0.762,fatJets)
+            deepWP3Ws      = filter(lambda x: x.deepTag_WvsQCD > 0.918,fatJets)
+            deepWP4Ws      = filter(lambda x: x.deepTag_WvsQCD > 0.961,fatJets)
+            MET            = ROOT.TVector2()
+            MET.SetMagPhi(event.MET_pt,event.MET_phi)
+
+        if self.isSignal and not self.makeSkim:
           genParts       = list(Collection(event,"GenPart"))
           genAK4Jets     = list(Collection(event,"GenJet"))
           # Get only outgoing particles of the hardest subprocess
@@ -292,22 +298,33 @@ class ExampleAnalysis(Module):
 
         # Cuts
         if not self.isSkimmed:
-          self.h_cutflow.Fill(0,genWeight)
+          if not self.makeSkim: self.h_cutflow.Fill(0,genWeight)
+
           if not (event.HLT_PFHT1050 or event.HLT_AK8PFJet360_TrimMass30): return False
-          self.h_cutflow.Fill(1,genWeight)
+          if not self.makeSkim: self.h_cutflow.Fill(1,genWeight)
+
           if len(jets) > 0 and not jets[0].pt > 300: return False
-          self.h_cutflow.Fill(2,genWeight)
+          if not self.makeSkim: self.h_cutflow.Fill(2,genWeight)
+
           if len(jets) < 4 or len(jets) > 6: return False
-          self.h_cutflow.Fill(3,genWeight)
+          if not self.makeSkim: self.h_cutflow.Fill(3,genWeight)
+
           if len(goodElectrons) != 0 or len(goodMuons) != 0: return False
-          self.h_cutflow.Fill(4,genWeight)
+          if not self.makeSkim: self.h_cutflow.Fill(4,genWeight)
+
           if not 2 < abs(jets[0].p4().DeltaR(jets[1].p4())) < 4: return False
-          self.h_cutflow.Fill(5,genWeight)
+          if not self.makeSkim: self.h_cutflow.Fill(5,genWeight)
+
           if not self.isData and len(looseBs) < 2: return False
           elif self.isData and len(looseBs) != 0: return False
-          self.h_cutflow.Fill(6,genWeight)
+
+          if not self.makeSkim: self.h_cutflow.Fill(6,genWeight)
           if not self.isData and abs(looseBs[0].p4().DeltaR(looseBs[1].p4())) < 1: return False
-          self.h_cutflow.Fill(7,genWeight)
+
+          if not self.makeSkim: self.h_cutflow.Fill(7,genWeight)
+
+        if self.makeSkim:
+            return True
 
         try: 
           self.h_nQLHE.Fill(event.LHE_Nuds + event.LHE_Nc + event.LHE_Nb,genWeight)
@@ -598,10 +615,12 @@ parser.add_argument('--sample',type=str,default='signal',choices=['Data2018','si
 parser.add_argument('--tag',type=str,default='test',help='Tag for output label')
 parser.add_argument('-n',type=int,default=1,help='Sample index to run over for backgrounds')
 parser.add_argument('--points',type=str,default='all',help='Signal point(s) to run over, comma separated in MSTOP_MCHI format; "all" to run over all available points')
+parser.add_argument('--make-skim',default=False, action='store_true',help='Instead of running the analyzer just produce skims.')
 parser.add_argument('--useskim',action='store_true',default=False,help='Flag to use NANOAODs skimmed with the nominal selections')
 args = parser.parse_args()
 
-outputPath = 'output/{}'.format(args.tag)
+base_out_path = "output" if not args.make_skim else "skims"
+outputPath = '{}/{}'.format(base_out_path,args.tag)
 if not os.path.exists(outputPath):
   os.makedirs(outputPath)
 
@@ -619,10 +638,33 @@ elif args.sample == 'Data2018':         sampleFile = 'Data2018.txt'
 elif args.sample != 'signal': print('ERROR: Unexpected sample argument')
 
 preselection = (
-		'(Jet_pt[3] > 30) &&'
-		'(Jet_pt[0] > 300) &&'
+		'(Jet_pt[3] > 30) && '
+		'(Jet_pt[0] > 300) && '
 		'(HLT_PFHT1050 || HLT_AK8PFJet360_TrimMass30)'
                )
+
+
+
+def createProcessor(files,campaign, hist_file_name, outpath, is_data, is_signal, make_skim = False):
+    if not make_skim:
+        p = PostProcessor(".", files, cut=preselection, branchsel=None,
+                    modules=[ExampleAnalysis(isData=is_data,isSignal=is_signal,MCCampaign=campaign,isSkimmed=False)],
+                    noOut=True, histFileName=hist_file_name, histDirName='plots', maxEntries=None)
+    else:
+        p = PostProcessor(outpath, files,
+                      cut=preselection,
+                      modules=[ExampleAnalysis(isData=is_data,isSignal=is_signal,MCCampaign=campaign,isSkimmed=False, makeSkim=True)],
+                      compression="LZMA:9",
+                      noOut=False,
+                      justcount=False,
+                      prefetch=True,
+                      longTermCache=False, 
+                      outputbranchsel="keep_and_drop_output.txt",
+                      branchsel="keep_and_drop_input.txt"
+                      )
+    return p
+
+
 
 if args.sample == 'Data2018':
 
@@ -641,10 +683,11 @@ if args.sample == 'Data2018':
   else:
     print('ERROR: Unable to determine campaign of {}'.format(files[0]))
     sys.exit()
-  p = PostProcessor(".", files, cut=preselection, branchsel=None,
-                    modules=[ExampleAnalysis(isData=1,isSignal=0,MCCampaign=MCCampaign,isSkimmed=False)],
-                    noOut=True, histFileName='{}/{}-{}.root'.format(outputPath,args.sample,args.n), histDirName="plots",
-                    maxEntries=None)
+  #p = PostProcessor(".", files, cut=preselection, branchsel=None,
+  #                  modules=[ExampleAnalysis(isData=1,isSignal=0,MCCampaign=MCCampaign,isSkimmed=False)],
+  #                  noOut=True, histFileName='{}/{}-{}.root'.format(outputPath,args.sample,args.n), histDirName="plots",
+  #                  maxEntries=None)
+  p = createProcessor(files, MCCampaign, '{}/{}-{}.root'.format(outputPath,args.sample,args.n),outputPath, 1, 0, args.make_skim)
   p.run()
 
 elif args.sample == 'signal':
@@ -672,10 +715,11 @@ elif args.sample == 'signal':
     files = ['root://cmsxrootd.fnal.gov/' + x.replace('/eos/uscms','') for x in files]
     #files = ['file:/uscms_data/d3/dmahon/RPVSingleStopRun3Patched/NANOAOD/CMSSW_12_4_5/test_2000_100-1.root']
     #files = ['/uscms_data/d3/dmahon/RPVSingleStopRun3Patched/NANOAOD/files/NANOAOD-{}.root'.format(masses)]
-    p = PostProcessor(".", files, cut=preselection, branchsel=None,
-                      modules=[ExampleAnalysis(isData=0,isSignal=1,MCCampaign='UL2018',isSkimmed=False)],
-                      noOut=True, histFileName='{}/{}_{}.root'.format(outputPath,args.sample,masses), histDirName="plots",
-                      maxEntries=None)
+    #p = PostProcessor(".", files, cut=preselection, branchsel=None,
+    #                  modules=[ExampleAnalysis(isData=0,isSignal=1,MCCampaign='UL2018',isSkimmed=False)],
+    #                  noOut=True, histFileName='{}/{}_{}.root'.format(outputPath,args.sample,masses), histDirName="plots",
+    #                  maxEntries=None)
+    p = createProcessor(files, 'UL2018', '{}/{}-{}.root'.format(outputPath,args.sample,masses),outputPath, 0, 1, args.make_skim)
     p.run()
 
 elif args.useskim: 
@@ -706,8 +750,9 @@ else:
   else: 
     print('ERROR: Unable to determine MC campaign of {}'.format(files[0]))
     sys.exit()
-  p = PostProcessor(".", files, cut=preselection, branchsel=None, 
-                    modules=[ExampleAnalysis(isData=0,isSignal=0,MCCampaign=MCCampaign,isSkimmed=False)], 
-                    noOut=True, histFileName='{}/{}-{}.root'.format(outputPath,args.sample,args.n), histDirName="plots",
-                    maxEntries=None)
+  #p = PostProcessor(".", files, cut=preselection, branchsel=None, 
+  #                  modules=[ExampleAnalysis(isData=0,isSignal=0,MCCampaign=MCCampaign,isSkimmed=False)], 
+  #                  noOut=True, histFileName='{}/{}-{}.root'.format(outputPath,args.sample,args.n), histDirName="plots",
+  #                  maxEntries=None)
+  p = createProcessor(files, MCCampaign, '{}/{}-{}.root'.format(outputPath,args.sample,args.n),outputPath, 0, 0, args.make_skim)
   p.run() 
