@@ -1,0 +1,10 @@
+# this is a comment
+#keep *
+#drop *
+drop HTXS*
+drop boostedTau*
+drop IsoTrack*
+drop LowPtElectron*
+drop Photon*
+drop HLT*
+drop L1*
