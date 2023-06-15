@@ -58,7 +58,7 @@ cd CMSSW_10_6_19_patch2/src/
 eval \`scramv1 runtime -sh\`
 echo \$CMSSW_BASE "is the CMSSW we created on the local worker node"
 cd \${_CONDOR_SCRATCH_DIR}
-python  nano_postproc.py --prefetch --bi=keep_and_drop_input.txt  --bo=keep_and_drop_output.txt --output "output" --sample $sample -n $i
+python  singleStopAnalyzer.py --sample $sample -n $i --make-skim
 echo "Running pwd:"
 pwd
 echo "Running ls -alrth:"
@@ -74,7 +74,7 @@ Executable	= job/submit_\$(ijobname).sh
 Output		= out/submit_\$(ijobname).out
 Error		= err/submit_\$(ijobname).err
 Log		= log/submit_\$(ijobname).log
-transfer_input_files = samples,framework,nano_postproc.py,keep_and_drop.txt,keep_and_drop_input.txt,keep_and_drop_output.txt
+transfer_input_files = samples,framework,singleStopAnalyzer.py,keep_and_drop.txt,keep_and_drop_input.txt,keep_and_drop_output.txt
 transfer_output_files = output
 should_transfer_files = YES
 when_to_transfer_output = ON_EXIT
