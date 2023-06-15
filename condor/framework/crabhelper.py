@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 import os
-from postprocessor import *
+from .postprocessor import *
 import sys
 import re
 import PSet

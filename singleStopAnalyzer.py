@@ -278,7 +278,6 @@ class ExampleAnalysis(Module):
         # Cuts
         if len(jets) < 4 or len(jets) > 5: return False
         if not jets[0].pt > 300: return False
-        if not (event.HLT_PFHT1050 or event.HLT_AK8PFJet360_TrimMass30): return False
         if len(goodElectrons) != 0: return False
         if len(goodMuons) != 0 : return False
         if len(looseBs) < 2: return False
@@ -583,11 +582,8 @@ elif args.sample == 'ZNuNu2018':   sampleFile = 'ZJetsToNuNu2018.txt'
 elif args.sample == 'Diboson2018': sampleFile = 'Diboson2018.txt'
 elif args.sample != 'signal': print('ERROR: Unexpected sample argument')
 
-preselection = (
-		'(Jet_pt[3] > 30) &&'
-		'(Jet_pt[0] > 300) &&'
-		'(HLT_PFHT1050 || HLT_AK8PFJet360_TrimMass30)'
-               )
+preselection = ( '(Jet_pt[3] > 30) &&'
+		'(Jet_pt[0] > 300) ')
 
 if args.sample == 'signal':
 
@@ -619,14 +615,8 @@ else:
   files = open('samples/{}'.format(sampleFile)).read().split('\n')
   files = [['root://cmsxrootd.fnal.gov/' + x.replace('/eos/uscms','') for x in files][:-1][args.n - 1]]
   if len(files) != 1: print('WARNING: Multiple files selected. All must be from the same MC campaign.')
-  if 'UL16' in files[0]: 
-    if 'preVFP' in files[0]:	MCCampaign = 'UL2016preVFP'
-    else: 			MCCampaign = 'UL2016postVFP'
-  elif 'UL17' in files[0]: 	MCCampaign = 'UL2017'
-  elif 'UL18' in files[0]:	MCCampaign = 'UL2018'
-  else: 
-    print('ERROR: Unable to determine MC campaign of {}'.format(files[0]))
-    sys.exit()
+  files = ["SkimmedBackgrounds/{}.root".format(args.sample)]
+  MCCampaign = 'UL2018'
   p = PostProcessor(".", files, cut=preselection, branchsel=None, modules=[
                   ExampleAnalysis(isSignal=0,MCCampaign=MCCampaign)], noOut=True, histFileName='{}/{}-{}.root'.format(outputPath,args.sample,args.n), histDirName="plots",
                   maxEntries=None)

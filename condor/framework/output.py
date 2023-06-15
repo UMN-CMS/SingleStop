@@ -1,4 +1,4 @@
-from treeReaderArrayTools import setExtraBranch
+from .treeReaderArrayTools import setExtraBranch
 from array import array
 import ROOT
 ROOT.PyConfig.IgnoreCommandLineOptions = True

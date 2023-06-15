@@ -74,7 +74,7 @@ def haddNano(ofname, files, scale_func):
         if isTree:
             obj = obj.CloneTree(-1, "fast" if goFast else "")
             if scale_func and obj.GetName() == "Events":
-                addBranchToTree(obj, "EventWeight", scale_func(fileHandles[0][0]))
+                addBranchToTree(obj, "MCScaleWeight", scale_func(fileHandles[0][0]))
             branchNames = set([x.GetName() for x in obj.GetListOfBranches()])
 
         for fht in fileHandles[1:]:
@@ -85,7 +85,7 @@ def haddNano(ofname, files, scale_func):
             inputs.Add(otherObj)
             if isTree and obj.GetName() == "Events":
                 if scale_func:
-                    addBranchToTree(otherObj, "EventWeight", scale_func(fn))
+                    addBranchToTree(otherObj, "MCScaleWeight", scale_func(fn))
                 otherObj.SetAutoFlush(0)
                 otherBranches = set([x.GetName() for x in otherObj.GetListOfBranches()])
                 missingBranches = list(branchNames - otherBranches)
@@ -251,7 +251,7 @@ def scaleQCD(fname):
 
 
 def scaleTT(fname):
-    lumiTarget = 137.62
+    lumiTarget = 59.8
     lumiSample = 331506194 / (831.8 * 0.457) * 1e-3
     SF = lumiTarget / lumiSample
     return SF
@@ -288,7 +288,8 @@ def scaleSignal(fname):
         2000: lumiTarget * 1600 * lambdapp312**2 / NEventsGen,
     }
 
-    mStop = int(fname.split("_")[0])
+    part = fname.split("-")[1]
+    mStop = int(part.split("_")[0])
     return SFs[mStop]
 
 
@@ -506,6 +507,8 @@ if __name__ == "__main__":
     input_dir = args.input_dir
     output = args.output
 
+    is_signal = False
+
     if args.sample == "TT":
         sample_file = "TTToHadronic.txt"
     elif args.sample == "TT2018":
@@ -523,6 +526,7 @@ if __name__ == "__main__":
     elif args.sample == "Diboson2018":
         sample_file = "Diboson2018.txt"
     elif args.sample == "signal":
+        is_signal = True
         sample_file = "RPV.txt"
 
     sample_file = "{}/{}".format(args.sample_dir, sample_file)
@@ -532,9 +536,15 @@ if __name__ == "__main__":
     except OSError:
         pass
 
-    afiles = associateFiles(sample_file, input_dir)
-    f = sf_funcs[sample]
-    sf_func = translate_files(afiles)(f)
+    sf_func = sf_funcs[sample]
     sf_func = scaled_lumi(137.62, 59.8)(sf_func)
-    raw_files = [f for f in afiles]
-    haddNano(output, raw_files, sf_func)
+    if is_signal:
+        raw_files = glob.glob("{}/*.root".format(input_dir))
+        for f in raw_files:
+            p = os.path.split(f)[-1].split('-')[1]
+            haddNano(os.path.join(output, "signal_{}".format(p)), [f], sf_func)
+    else:
+        afiles = associateFiles(sample_file, input_dir)
+        sf_func = translate_files(afiles)(sf_func)
+        raw_files = [f for f in afiles]
+        haddNano(output, raw_files, sf_func)

@@ -1,10 +1,10 @@
 #!/usr/bin/env python
-from jobreport import JobReport
-from preskimming import preSkim
-from output import FriendOutput, FullOutput
-from eventloop import eventLoop
-from datamodel import InputTree
-from branchselection import BranchSelection
+from .jobreport import JobReport
+from .preskimming import preSkim
+from .output import FriendOutput, FullOutput
+from .eventloop import eventLoop
+from .datamodel import InputTree
+from .branchselection import BranchSelection
 import os
 import time
 import hashlib
@@ -175,6 +175,10 @@ class PostProcessor:
                     if toBeDeleted:
                         os.unlink(ftoread)
                 continue
+            elif elist and elist.GetN() == 0:
+                    # stop processing if no entries got pre-selected
+                    print('Pre-select 0 entries out of %s (0.00%%)' % (nEntries))
+                    continue
             else:
                 print('Pre-select %d entries out of %s (%.2f%%)' % (elist.GetN() if elist else nEntries, nEntries, (elist.GetN() if elist else nEntries) / (0.01 * nEntries) if nEntries else 0))
                 inAddFiles = []
@@ -193,21 +197,28 @@ class PostProcessor:
                     inTree.SetEntryList(elist)
             else:
                 # initialize reader
-                inTree = InputTree(inTree, elist)
+                if elist:
+                    inTree = InputTree(inTree, elist)
+                else:
+                    inTree = InputTree(inTree)
 
             # prepare output file
             if not self.noOut:
                 outFileName = os.path.join(self.outputDir, os.path.basename(
                     fname).replace(".root", outpostfix + ".root"))
+                print("Creating output file {}".format(outFileName))
                 outFile = ROOT.TFile.Open(
                     outFileName, "RECREATE", "", compressionLevel)
+                print("Created root output file")
                 outFileNames.append(outFileName)
+                print("Using compression level {}".format(compressionLevel))
                 if compressionLevel:
                     outFile.SetCompressionAlgorithm(compressionAlgo)
                 # prepare output tree
                 if self.friend:
                     outTree = FriendOutput(inFile, inTree, outFile)
                 else:
+                    firstEntry = 0 if fullClone and elist else self.firstEntry
                     outTree = FullOutput(
                         inFile,
                         inTree,
@@ -216,7 +227,7 @@ class PostProcessor:
                         outputbranchSelection=self.outputbranchsel,
                         fullClone=fullClone,
                         maxEntries=self.maxEntries,
-                        firstEntry=self.firstEntry,
+                        firstEntry=firstEntry,
                         jsonFilter=jsonFilter,
                         provenance=self.provenance)
             else:
@@ -242,7 +253,6 @@ class PostProcessor:
             if not self.noOut:
                 outTree.write()
                 outFile.Close()
-                print("Done %s" % outFileName)
             if self.jobReport:
                 self.jobReport.addInputFile(fname, nall)
             if self.prefetch:
@@ -255,6 +265,7 @@ class PostProcessor:
         print("Total time %.1f sec. to process %i events. Rate = %.1f Hz." % ((time.time() - t0), totEntriesRead, totEntriesRead / (time.time() - t0)))
 
         if self.haddFileName:
+            print("Hadding files")
             haddnano = "./haddnano.py" if os.path.isfile(
                 "./haddnano.py") else "haddnano.py"
             os.system("%s %s %s" %

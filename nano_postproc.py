@@ -6,6 +6,7 @@ from importlib import import_module
 import os
 import sys
 import ROOT
+import glob
 ROOT.gROOT.SetBatch(True)
 ROOT.PyConfig.IgnoreCommandLineOptions = True
 
@@ -57,7 +58,8 @@ class ExampleAnalysis(Module):
         # Cuts
         if len(jets) < 4 or len(jets) > 5: return False
         if not jets[0].pt > 300: return False
-        if not (event.HLT_PFHT1050 or event.HLT_AK8PFJet360_TrimMass30): return False
+        if not self.isSignal:
+            if not (event.HLT_PFHT1050 or event.HLT_AK8PFJet360_TrimMass30): return False
         if len(goodElectrons) != 0: return False
         if len(goodMuons) != 0 : return False
         if len(looseBs) < 2: return False
@@ -126,10 +128,17 @@ if __name__ == "__main__":
     elif args.sample == 'Diboson2018': sampleFile = 'Diboson2018.txt'
     elif args.sample == 'signal': sampleFile = 'RPV.txt'
     elif args.sample != 'signal': print('ERROR: Unexpected sample argument')
+    files = []
+    if args.sample == 'signal':
+        points = ['1000_400','1000_900','1500_600','1500_1400','2000_900','2000_1900','1000_600','1500_400','2000_400','2000_1400','1500_900','2000_600']
+        for masses in points:
+            globbed = glob.glob('/eos/uscms/store/user/dmahon/condor/RPVSingleStopMC/NANOAOD-ALL/NANOAOD-{}.root'.format(masses))
+            files += ['root://cmsxrootd.fnal.gov/' + x.replace('/eos/uscms','') for x in globbed]
+    else:
+        files = open('samples/{}'.format(sampleFile)).read().split('\n') 
+        files = [['root://cmsxrootd.fnal.gov/' + x.replace('/eos/uscms','') for x in files][:-1][args.n - 1]]
 
-    files = open('samples/{}'.format(sampleFile)).read().split('\n') 
-    #files = ['root://cmsxrootd.fnal.gov/' + x.replace('/eos/uscms','') for x in files]
-    files = [['root://cmsxrootd.fnal.gov/' + x.replace('/eos/uscms','') for x in files][:-1][args.n - 1]]
+    print(files)
 
     modules = []
     for mod, names in args.imports:
@@ -156,17 +165,19 @@ if __name__ == "__main__":
       if 'preVFP' in files[0]:    MCCampaign = 'UL2016preVFP'
       else:                      MCCampaign = 'UL2016postVFP'
     elif 'UL17' in files[0]:      MCCampaign = 'UL2017'
-    elif 'UL18' in files[0]:      MCCampaign = 'UL2018'
+    elif 'UL18' in files[0] or args.sample == 'signal':      MCCampaign = 'UL2018'
     else:
       print('ERROR: Unable to determine MC campaign of {}'.format(files[0]))
       sys.exit()
-    modules.append(ExampleAnalysis(isSignal=0,MCCampaign=MCCampaign))
+    modules.append(ExampleAnalysis(isSignal=(args.sample == 'signal'),MCCampaign=MCCampaign))
     outputPath = 'output/{}/'.format(args.sample)
     print(outputPath)
     preselection = ( '(Jet_pt[3] > 30) &&'
-                    '(Jet_pt[0] > 300) &&'
-                    '(HLT_PFHT1050 || HLT_AK8PFJet360_TrimMass30)'
+                     '(Jet_pt[0] > 300)'
                    )
+    if not args.sample == 'signal':
+        preselection += '&& (HLT_PFHT1050 || HLT_AK8PFJet360_TrimMass30)'
+
     p = PostProcessor(outputPath, files,
                       cut=preselection,
                       branchsel=args.branchsel_in,

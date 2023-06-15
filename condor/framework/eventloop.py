@@ -1,8 +1,9 @@
-from datamodel import Event
-from treeReaderArrayTools import clearExtraBranches
+from .datamodel import Event
+from .treeReaderArrayTools import clearExtraBranches
 import sys
 import time
 import ROOT
+import cProfile,pstats,StringIO
 
 
 class Module(object):

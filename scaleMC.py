@@ -497,5 +497,3 @@ if sample == 'ST2018':
   for j in range(i + 1):
     fileList.append('{}/{}-{}-temp.root'.format(outputDir,sample,j + 1))
   os.system('hadd -f {}/{}.root {}'.format(outputDir,sample,' '.join(fileList)))
-  os.system('rm {}/*temp.root'.format(outputDir))
-

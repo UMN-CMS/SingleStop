@@ -30,8 +30,10 @@ cp ../nano_postproc.py .
 cp ../keep_and_drop.txt .
 cp ../keep_and_drop_output.txt .
 cp ../keep_and_drop_input.txt .
+cp -r ../../framework .
 
 sed -i "2,4s/PhysicsTools.NanoAODTools.postprocessing.//g" singleStopAnalyzer.py
+sed -i "2,4s/PhysicsTools.NanoAODTools.postprocessing.//g" nano_postproc.py
 
 i=1
 while read file; do
@@ -54,7 +56,7 @@ cd CMSSW_10_6_19_patch2/src/
 eval \`scramv1 runtime -sh\`
 echo \$CMSSW_BASE "is the CMSSW we created on the local worker node"
 cd \${_CONDOR_SCRATCH_DIR}
-python  nano_postproc.py --bi=keep_and_drop_input.txt  --bo=keep_and_drop_output.txt --output "output" --sample $sample -n $i
+python  nano_postproc.py --prefetch --bi=keep_and_drop_input.txt  --bo=keep_and_drop_output.txt --output "output" --sample $sample -n $i
 echo "Running pwd:"
 pwd
 echo "Running ls -alrth:"
