@@ -23,10 +23,13 @@ case $sample in
   *) echo "ERROR: Invalid sample argument.";exit 1;;
 esac
 
-rm -rf job out err log samples
-mkdir -p job out err log samples
 
-cp ../samples/"$sampleFile" samples
+echo "Sample is $sample"
+echo "Sample file is $sampleFile"
+rm -rf "job/$sample" "out/$sample" "err/$sample" "log/$sample" samples/$sample/samples
+mkdir -p "job/$sample" "out/$sample" "err/$sample" "log/$sample" samples/$sample/samples
+
+cp ../samples/$sampleFile samples
 cp ../singleStopAnalyzer.py .
 cp ../nano_postproc.py .
 cp ../keep_and_drop.txt .
@@ -39,7 +42,7 @@ i=1
 while read file; do
 #if (($i > 2)); then continue; fi
 
-jobfilename=job/submit_${i}.sh
+jobfilename=job/$sample/submit_${i}.sh
 
 cat << EOT >> ${jobfilename} 
 #!/bin/bash
@@ -66,11 +69,11 @@ EOT
 i=$((i+1))
 done <samples/"$sampleFile"
 
-submitfilename=job/submit.sub
+submitfilename=job/$sample/submit.sub
 cat << EOT >> $submitfilename
-Executable	= job/submit_\$(ijobname).sh
-Output		= out/submit_\$(ijobname).out
-Error		= err/submit_\$(ijobname).err
+Executable	= job/$sample/submit_\$(ijobname).sh
+Output		= out/$sample/submit_\$(ijobname).out
+Error		= err/$sample/submit_\$(ijobname).err
 Log		= log/submit_\$(ijobname).log
 transfer_input_files = samples,framework,singleStopAnalyzer.py,keep_and_drop.txt,keep_and_drop_input.txt,keep_and_drop_output.txt
 transfer_output_files = skims
