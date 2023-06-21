@@ -25,10 +25,8 @@ case $sample in
   *) echo "ERROR: Invalid sample argument.";exit 1;;
 esac
 
-rm -rf job out err log samples
+rm -rf job out err log samples output
 mkdir -p job out err log samples
-rm bJetMatcher.py
-rm singleStopAnalyzer.py
 
 cp ../samples/"$sampleFile" samples
 cp ../bJetMatcher.py .

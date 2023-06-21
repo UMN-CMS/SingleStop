@@ -18,7 +18,7 @@ ROOT.PyConfig.IgnoreCommandLineOptions = True
 
 class ExampleAnalysis(Module):
 
-    def __init__(self,isSignal,MCCampaign,isSkimmed,coupling,isQCD,bAlgo):
+    def __init__(self,isSignal,MCCampaign,isSkimmed,coupling,isQCD,bAlgo,isData):
         self.writeHistFile = True
         self.isSignal = isSignal
         self.MCCampaign = MCCampaign
@@ -26,6 +26,7 @@ class ExampleAnalysis(Module):
 	self.coupling = coupling
 	self.isQCD = isQCD
 	self.bAlgo = bAlgo
+	self.isData = isData
 
     def create2DHists(self,titles,labels,*args):
         for i,title in enumerate(titles):
@@ -330,12 +331,13 @@ class ExampleAnalysis(Module):
         MET            = ROOT.TVector2()
         MET.SetMagPhi(event.MET_pt,event.MET_phi)
 
-        genParts       = list(Collection(event,"GenPart"))
-        genAK4Jets     = list(Collection(event,"GenJet"))
+	if not self.isData:
+          genParts       = list(Collection(event,"GenPart"))
+          genAK4Jets     = list(Collection(event,"GenJet"))
         if self.isSignal:
   	  # Get only outgoing particles of the hardest subprocess
           gens = filter(lambda x: (((x.statusFlags >> 13) & 1) and ((x.statusFlags >> 8) & 1)) and not (((abs(x.pdgId) == 1) or (abs(x.pdgId) == 5)) and ((x.statusFlags >> 11) & 1)), genParts)
-	if self.isQCD:
+	elif self.isQCD:
 	  # 7: FromHardProcess, 13: IsLastCopy (gen Bs)
 	  gens = filter(lambda x: (x.statusFlags >> 13) & 1, genParts)
         if not self.isSkimmed:
@@ -355,17 +357,19 @@ class ExampleAnalysis(Module):
           self.h_cutflow.Fill(4,genWeight)
           if not 2 < abs(jets[0].p4().DeltaR(jets[1].p4())) < 4: return False
           self.h_cutflow.Fill(5,genWeight)
-	  if self.bAlgo == 'medium':
+	  if self.isData:
+		if len(looseBs) != 0: return False
+		self.h_cutflow.Fill(6, genWeight)
+	  elif self.bAlgo == 'medium':
           	if len(mediumBs) < 3: return False
           	self.h_cutflow.Fill(6,genWeight)
-	  	if abs(mediumBs[0].p4().DeltaR(mediumBs[1].p4())) < 1: return False
+	  	if len(mediumBs) > 1 and abs(mediumBs[0].p4().DeltaR(mediumBs[1].p4())) < 1: return False
 	  	self.h_cutflow.Fill(7, genWeight)
 	  elif self.bAlgo == 'loose':
-		if len(looseBs) < 3: return False
+		if len(looseBs) != 0: return False
 		self.h_cutflow.Fill(6, genWeight)
-		if abs(looseBs[0].p4().DeltaR(looseBs[1].p4())) < 1: return False
+		if len(looseBs) > 1 and abs(looseBs[0].p4().DeltaR(looseBs[1].p4())) < 1: return False
 	 	self.h_cutflow.Fill(7, genWeight)
-
         try: 
           self.h_nQLHE.Fill(event.LHE_Nuds + event.LHE_Nc + event.LHE_Nb,genWeight)
           self.h_nGLHE.Fill(event.LHE_Nglu,genWeight)
@@ -860,7 +864,7 @@ if args.sample == 'Data2018':
     print('ERROR: Unable to determine campaign of {}'.format(files[0]))
     sys.exit()
   p = PostProcessor(".", files, cut=preselection, branchsel=None,
-                    modules=[ExampleAnalysis(isData=1,isSignal=0,MCCampaign=MCCampaign,isSkimmed=False)],
+                    modules=[ExampleAnalysis(isData=1,isSignal=0,MCCampaign=MCCampaign,isSkimmed=False, coupling = args.coupling, bAlgo = args.bAlgo, isQCD = 0)],
                     noOut=True, histFileName='{}/{}-{}.root'.format(outputPath,args.sample,args.n), histDirName="plots",
                     maxEntries=None)
   p.run()
@@ -894,7 +898,7 @@ elif args.sample == 'signal':
     #files = ['file:/uscms_data/d3/dmahon/RPVSingleStopRun3Patched/NANOAOD/CMSSW_12_4_5/test_2000_100-1.root']
     #files = ['/uscms_data/d3/dmahon/RPVSingleStopRun3Patched/NANOAOD/files/NANOAOD-{}.root'.format(masses)]
     p = PostProcessor(".", files, cut=preselection, branchsel=None,
-                      modules=[ExampleAnalysis(isSignal=1,MCCampaign='UL2018',isSkimmed=False, coupling = args.coupling, isQCD = 0, bAlgo = args.bAlgo)],
+                      modules=[ExampleAnalysis(isSignal=1,MCCampaign='UL2018',isSkimmed=False, coupling = args.coupling, isQCD = 0, bAlgo = args.bAlgo, isData = 0)],
                       noOut=True, histFileName='{}/{}_{}.root'.format(outputPath,args.sample,masses), histDirName="plots",
                       maxEntries=None)
     p.run()
@@ -907,7 +911,7 @@ elif args.useskim:
   files = ['root://cmsxrootd.fnal.gov//store/user/ckapsiak/SingleStop/Skims/Skim_2023_23_03/{}.root'.format(args.sample)]
   if len(files) != 1: print('WARNING: Multiple files selected. All must be from the same MC campaign.')
   p = PostProcessor(".", files, cut='', branchsel=None,
-                    modules=[ExampleAnalysis(isSignal=0,MCCampaign='UL2018',isSkimmed=True, coupling = args.coupling, bAlgo = args.bAlgo)],
+                    modules=[ExampleAnalysis(isSignal=0,MCCampaign='UL2018',isSkimmed=True, coupling = args.coupling, bAlgo = args.bAlgo, isData = 0)],
                     noOut=True, histFileName='{}/{}-ALL.root'.format(outputPath,args.sample), histDirName="plots",
                     maxEntries=None)
   p.run()
@@ -928,7 +932,7 @@ else:
     print('ERROR: Unable to determine MC campaign of {}'.format(files[0]))
     sys.exit()
   p = PostProcessor(".", files, cut=preselection, branchsel=None, 
-                    modules=[ExampleAnalysis(isSignal=0,MCCampaign=MCCampaign,isSkimmed=False, coupling = args.coupling, isQCD = (args.sample == 'QCD2018'), bAlgo = args.bAlgo)], 
+                    modules=[ExampleAnalysis(isSignal=0,MCCampaign=MCCampaign,isSkimmed=False, coupling = args.coupling, isQCD = (args.sample == 'QCD2018' or args.sample == 'QCDInclusive2018'), bAlgo = args.bAlgo, isData = 0)], 
                     noOut=True, histFileName='{}/{}-{}.root'.format(outputPath,args.sample,args.n), histDirName="plots",
                     maxEntries=None)
   p.run() 
