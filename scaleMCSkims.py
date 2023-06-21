@@ -177,7 +177,7 @@ def translate_files(mapping):
     return decorator
 
 
-def scaleQCD(fname):
+def scaleQCDBEnchriched(fname):
     SFs = {
         # 2016preVFP
         (0, 100): 19.5 * 1.122e06 * 1e3 / 17657456,
@@ -249,6 +249,54 @@ def scaleQCD(fname):
     SF = SFs[(period, HT)]
     return SF
 
+def scaleQCDInclusive(fname):
+    SFs = {
+        # QCD 2016
+        (1,50)   : 59.8 * 186100000.0 * 1E3 / 35474117,
+        (1,100)  : 59.8 * 23630000.0  * 1E3 / 73506112,
+        (1,200)  : 59.8 * 1554000.0   * 1E3 / 43280518,
+        (1,300)  : 59.8 * 323800.0    * 1E3 / 46335846,
+        (1,500)  : 59.8 * 30280.0     * 1E3 / 52661606,
+        (1,700)  : 59.8 * 6392.0      * 1E3 / 41664730,
+        (1,1000) : 59.8 * 1118.0      * 1E3 / 12254238,
+        (1,1500) : 59.8 * 108.9       * 1E3 / 9376965,
+        (1,2000) : 59.8 * 21.93       * 1E3 / 4867995,
+        # QCD 2018
+        (3,50)   : 59.8 * 187300000.0 * 1E3 / 38599389,
+        (3,100)  : 59.8 * 23590000.0  * 1E3 / 84434559,
+        (3,200)  : 59.8 * 1555000.0   * 1E3 / 57336623,
+        (3,300)  : 59.8 * 324500.0    * 1E3 / 61609663,
+        (3,500)  : 59.8 * 30310.0     * 1E3 / 49184771,
+        (3,700)  : 59.8 * 6444.0      * 1E3 / 48506751,
+        (3,1000) : 59.8 * 1127.0      * 1E3 / 14394786,
+        (3,1500) : 59.8 * 109.8       * 1E3 / 10411831,
+        (3,2000) : 59.8 * 21.98       * 1E3 / 5374711,
+    }
+    period = -1 
+    HT = -1
+
+    if   'preVFP' in fname: period = 0
+    elif 'UL16' in fname:   period = 1
+    elif 'UL17' in fname:   period = 2
+    elif 'UL18' in fname:   period = 3
+    else: print('ERROR: Data period could not be determined for {}'.format(fname))
+
+    if   '50to100' in fname:    HT = 50	
+    elif '100to200' in fname:   HT = 100
+    elif '200to300' in fname:   HT = 200    
+    elif '300to500' in fname:   HT = 300    
+    elif '500to700' in fname:   HT = 500    
+    elif '700to1000' in fname:  HT = 700   
+    elif '1000to1500' in fname: HT = 1000  
+    elif '1500to2000' in fname: HT = 1500  
+    elif '2000toInf' in fname:  HT = 2000
+    else: print('ERROR: HT range could not be determined for {}'.format(fname))
+    
+    if period == -1 or HT == -1: sys.exit()
+    else: SF = SFs[(period,HT)]
+    return SF
+
+
 
 def scaleTT(fname):
     lumiTarget = 59.8
@@ -263,29 +311,43 @@ def scaleTT(fname):
 
 
 def scaleSignal(fname):
-    points = [
-        "1000_400",
-        "1000_900",
-        "1500_600",
-        "1500_1400",
-        "2000_900",
-        "2000_1900",
-        "1000_600",
-        "1500_400",
-        "2000_400",
-        "2000_1400",
-        "1500_900",
-        "2000_600",
-    ]
+    points = ['1000_400','1000_600','1000_900',
+              '1200_400','1200_600','1200_1100',
+              '1300_400','1300_600','1300_1200',
+              '1400_400','1400_600','1400_1300',
+              '1500_400','1500_600','1500_900','1500_1400',
+              '2000_400','2000_600','2000_900','2000_1400','2000_1900'] 
 
     lumiTarget = 59.8
     NEventsGen = 10000
-    lambdapp312 = 0.1
+    lambdapp = 0.1
+    
+    SFs = {
+      1000:lumiTarget * 48000 * lambdapp**2 / NEventsGen,
+      1200:lumiTarget * 21000 * lambdapp**2 / NEventsGen,
+      1300:lumiTarget * 15000 * lambdapp**2 / NEventsGen,
+      1400:lumiTarget * 10000 * lambdapp**2 / NEventsGen,
+      1500:lumiTarget * 7300  * lambdapp**2 / NEventsGen,
+      2000:lumiTarget * 1600  * lambdapp**2 / NEventsGen,
+    }
+
+
+    part = fname.split("-")[1]
+    mStop = int(part.split("_")[0])
+    return SFs[mStop]
+
+def scaleSignal313(fname):
+    lumiTarget = 59.8
+    NEventsGen = 10000
+    lambdapp = 0.1
+    points = ['1000_400','1000_600','1000_900',
+              '1500_400','1500_600','1500_900','1500_1400',
+              '2000_400','2000_600','2000_900','2000_1400','2000_1900']
 
     SFs = {
-        1000: lumiTarget * 47000 * lambdapp312**2 / NEventsGen,
-        1500: lumiTarget * 7200 * lambdapp312**2 / NEventsGen,
-        2000: lumiTarget * 1600 * lambdapp312**2 / NEventsGen,
+      1000:lumiTarget * 27000 * lambdapp**2 / NEventsGen,
+      1500:lumiTarget * 3800  * lambdapp**2 / NEventsGen,
+      2000:lumiTarget * 760   * lambdapp**2 / NEventsGen,
     }
 
     part = fname.split("-")[1]
@@ -477,8 +539,9 @@ def scaleST(fname):
 
 
 sf_funcs = {
-    "QCD2018": scaleQCD,
-    "QCDBEnriched2018": scaleQCD,
+    "QCD2018": scaleQCDBEnchriched,
+    "QCDBEnriched2018": scaleQCDBEnchriched,
+    "QCDInclusive2018": scaleQCDInclusive,
     "TT2018": scaleTT,
     "ZQQ2018": scaleZQQ,
     "ZJetsToQQ2018": scaleZQQ,
@@ -515,6 +578,8 @@ if __name__ == "__main__":
         sample_file = "TTToHadronic2018.txt"
     elif args.sample == "QCD2018":
         sample_file = "QCDBEnriched2018.txt"
+    elif args.sample == "QCDInclusive2018":
+        sample_file = "QCDInclusive2018.txt"
     elif args.sample == "ZQQ2018":
         sample_file = "ZJetsToQQ2018.txt"
     elif args.sample == "ST2018":
@@ -528,6 +593,8 @@ if __name__ == "__main__":
     elif args.sample == "signal":
         is_signal = True
         sample_file = "RPV.txt"
+    else:
+        raise ValueError("Cannot scale {}".format(args.sample))
 
     sample_file = "{}/{}".format(args.sample_dir, sample_file)
 
