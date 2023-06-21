@@ -231,8 +231,20 @@ class ExampleAnalysis(Module):
         self.h_dPhiRecoUncomp           = ROOT.TH1F('dPhiRecoUncomp',   ';|#Delta#phi_{#tilde{t},#tilde{#chi}^{#pm}}| (uncompressed)',50,     0,      5       )
         self.h_dRRecoUncomp             = ROOT.TH1F('dRRecoUncomp',     ';#Delta R_{#tilde{t},#tilde{#chi}^{#pm}} (uncompressed)',    35,     0,      7       )
 
-        self.h_m3Vsm4			= ROOT.TH2F('m3Vsm4',		';m_{4j} [GeV];m_{3j} [GeV]',		     150,0,3000,150,0,3000   )
-        self.h_m3NoLeadVsm4		= ROOT.TH2F('m3NoLeadVsm4',     ';m_{4j} [GeV];m_{3j} (excl. leading) [GeV]',150,0,3000,150,0,3000)
+        self.h_m3Vsm4			= ROOT.TH2F('m3Vsm4',		 ';m_{4j} [GeV];m_{3j} [GeV]',150,0,3000,150,0,3000)
+        self.h_m3NoLeadVsm4		= ROOT.TH2F('m3NoLeadVsm4',      ';m_{4j} [GeV];m_{3j} (excl. leading) [GeV]',150,0,3000,150,0,3000)
+        self.h_m3Fracm4Vsm4             = ROOT.TH2F('m3Fracm4Vsm4',      ';m_{4j} [GeV];m_{3j} / m_{4j} [GeV]',150,0,3000,50,0,1)
+        self.h_m3NoLeadFracm4Vsm4       = ROOT.TH2F('m3NoLeadFracm4Vsm4',';m_{4j} [GeV];m_{3j} (excl. leading) / m_{4j} [GeV]',150,0,3000,50,0,1)
+
+        self.h_m3VsPTOther              = ROOT.TH2F('m3VsPTOther',             ';p_{T,j} (excluded jet) [GeV]; m_{3j} [GeV]',75,0,1500,150,0,3000)
+        self.h_m3VsDEtaOther            = ROOT.TH2F('m3VsDEtaOther',           ';#Delta#eta_{3j,other j}; m_{3j} [GeV]',50,0,5,150,0,3000)
+        self.h_m3VsDPhiOther            = ROOT.TH2F('m3VsDPhiOther',           ';#Delta#phi_{3j,other j}; m_{3j} [GeV]',50,0,5,150,0,3000)
+        self.h_m3VsDROther              = ROOT.TH2F('m3VsDROther',             ';#Delta R_{3j,other j}; m_{3j} [GeV]',35,0,7,150,0,3000)
+        self.h_m3NoLeadVsPTOther        = ROOT.TH2F('m3NoLeadVsPTOther',       ';p_{T,j} (excluded jet) [GeV]; m_{3j} (excl. leading) [GeV]',75,0,1500,150,0,3000)
+        self.h_m3NoLeadVsDEtaOther      = ROOT.TH2F('m3NoLeadVsDEtaOther',     ';#Delta#eta_{3j,other j}; m_{3j} (excl. leading) [GeV]',50,0,5,150,0,3000)
+        self.h_m3NoLeadVsDPhiOther      = ROOT.TH2F('m3NoLeadVsDPhiOther',     ';#Delta#phi_{3j,other j}; m_{3j} (excl. leading) [GeV]',50,0,5,150,0,3000)
+        self.h_m3NoLeadVsDROther        = ROOT.TH2F('m3NoLeadVsDROther',       ';#Delta R_{3j,other j}; m_{3j} (excl. leading) [GeV]',35,0,7,150,0,3000)
+
 
         # Add histograms to analysis object
         for h in list(vars(self)):
@@ -511,6 +523,16 @@ class ExampleAnalysis(Module):
           self.h_m3NoLead.Fill(sumJet3NoLead.M(),genWeight)
           self.h_m3Vsm4.Fill(sumJet4.M(),sumJet3.M(),genWeight)
           self.h_m3NoLeadVsm4.Fill(sumJet4.M(),sumJet3NoLead.M(),genWeight)
+          self.h_m3Fracm4Vsm4.Fill(sumJet4.M(),sumJet3.M() / sumJet4.M(),genWeight)
+          self.h_m3NoLeadFracm4Vsm4.Fill(sumJet4.M(),sumJet3NoLead.M() / sumJet4.M(),genWeight)
+          self.h_m3VsPTOther.Fill(jets[3].pt,sumJet3.M(),genWeight)
+          self.h_m3VsDEtaOther.Fill(abs(jets[3].eta - sumJet3.Eta()),sumJet3.M(),genWeight)
+          self.h_m3VsDPhiOther.Fill(abs(jets[3].p4().DeltaPhi(sumJet3)),sumJet3.M(),genWeight)      
+          self.h_m3VsDROther.Fill(abs(jets[3].p4().DeltaR(sumJet3)),sumJet3.M(),genWeight)
+          self.h_m3NoLeadVsPTOther.Fill(jets[0].pt,sumJet3NoLead.M(),genWeight)
+          self.h_m3NoLeadVsDEtaOther.Fill(abs(jets[0].eta - sumJet3NoLead.Eta()),sumJet3NoLead.M(),genWeight)
+          self.h_m3NoLeadVsDPhiOther.Fill(abs(jets[0].p4().DeltaPhi(sumJet3NoLead)),sumJet3NoLead.M(),genWeight)
+          self.h_m3NoLeadVsDROther.Fill(abs(jets[0].p4().DeltaR(sumJet3NoLead)),sumJet3NoLead.M(),genWeight)
           self.h_dEta14.Fill(abs(jets[0].eta - jets[3].eta),genWeight)
           self.h_dPhi14.Fill(abs(jets[0].p4().DeltaPhi(jets[3].p4())),genWeight)
           self.h_dR14.Fill(abs(jets[0].p4().DeltaR(jets[3].p4())),genWeight)

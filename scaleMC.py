@@ -6,9 +6,8 @@ parser = argparse.ArgumentParser(description='MC Scaler')
 parser.add_argument('--sample',type=str,required=True,choices=['signal','signal313','TT2018','QCD2018','ZQQ2018','ST2018','WQQ2018','ZNuNu2018','Diboson2018','QCDInclusive2018'],help='Sample to scale')
 parser.add_argument('--input',type=str,required=True,help='Path to input files')
 parser.add_argument('--output',type=str,required=True,help='Path to output scaled file')
+parser.add_argument('--noRun2Scaling',action='store_true',default=False,help='Turn off scaling to full Run 2 lumi')
 args = parser.parse_args()
-
-scale2018toRun2 = True if '2018' in args.sample else False
 
 sample = args.sample
 inputDir = args.input
@@ -77,7 +76,7 @@ if 'QCD' in sample and 'Inclusive' not in sample:
         (3,2000): 59.8 * 6.984e-01 * 1E3 / 1357334,
   }
   
-  if scale2018toRun2:
+  if not args.noRun2Scaling:
   
     lumiTarget = 137.62
     lumiSample = 59.8
@@ -157,7 +156,7 @@ if sample == 'QCDInclusive2018':
         (3,2000) : 59.8 * 21.98       * 1E3 / 5374711,
   }
   
-  if scale2018toRun2:
+  if not args.noRun2Scaling:
   
     lumiTarget = 137.62
     lumiSample = 59.8
@@ -215,7 +214,7 @@ if sample == 'QCDInclusive2018':
 
 if sample == 'TT2018':
 
-  lumiTarget = 137.62 if scale2018toRun2 else 59.8
+  lumiTarget = 137.62 if not args.noRun2Scaling else 59.8
   lumiSample = 331506194 / (831.8 * 0.457) * 1E-3
 
   SF = lumiTarget / lumiSample
@@ -303,7 +302,7 @@ if sample == 'ZQQ2018':
         (3,800): 59.8 * 12.99  * 1E3 / 9681521,
   }
   
-  if scale2018toRun2:
+  if not args.noRun2Scaling:
   
     lumiTarget = 137.62
     lumiSample = 59.8
@@ -367,7 +366,7 @@ if sample == 'ZNuNu2018':
         (3,2500): 59.8 * 0.005614 * 1.1347 * 1E3 / 268224,
   }
   
-  if scale2018toRun2:
+  if not args.noRun2Scaling:
   
     lumiTarget = 137.62
     lumiSample = 59.8
@@ -431,7 +430,7 @@ if sample == 'WQQ2018':
         (3,800): 59.8 * 28.75  * 1E3 / 13581343,
   }
   
-  if scale2018toRun2:
+  if not args.noRun2Scaling:
   
     lumiTarget = 137.62
     lumiSample = 59.8
@@ -491,7 +490,7 @@ if sample == 'Diboson2018':
         (3,'ZZ'): 59.8 * 16.523 * 1E3 / 3526000,
   }
   
-  if scale2018toRun2:
+  if not args.noRun2Scaling:
   
     lumiTarget = 137.62
     lumiSample = 59.8
@@ -552,7 +551,7 @@ if sample == 'ST2018':
         (3,'tW_top'):            59.8 * 35.85         * 1E3 / 7955614,
   }
   
-  if scale2018toRun2:
+  if not args.noRun2Scaling:
   
     lumiTarget = 137.62
     lumiSample = 59.8
