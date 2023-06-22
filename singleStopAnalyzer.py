@@ -1,7 +1,7 @@
 #!/usr/bin/env python
-from PhysicsTools.NanoAODTools.postprocessing.framework.eventloop import Module
-from PhysicsTools.NanoAODTools.postprocessing.framework.datamodel import Collection
-from PhysicsTools.NanoAODTools.postprocessing.framework.postprocessor import PostProcessor
+from framework.eventloop import Module
+from framework.datamodel import Collection
+from framework.postprocessor import PostProcessor
 from importlib import import_module
 import os
 import sys
@@ -347,7 +347,7 @@ class ExampleAnalysis(Module):
         # Cuts
         if not self.isSkimmed:
           self.h_cutflow.Fill(0,genWeight)
-          if not (event.HLT_PFHT1050 or event.HLT_AK8PFJet360_TrimMass30): return False
+          if not (event.HLT_PFHT1050 or event.HLT_AK8PFJet400_TrimMass30): return False
           self.h_cutflow.Fill(1,genWeight)
           if len(jets) > 0 and jets[0].pt < 300: return False
           self.h_cutflow.Fill(2,genWeight)

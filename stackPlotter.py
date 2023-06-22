@@ -29,16 +29,16 @@ file1 = ROOT.TFile.Open('{}/{}'.format(signalPath, signalFiles[0]), "READ")
 files = {fname: ROOT.TFile.Open('{}/{}'.format(signalPath, fname), "READ") for fname in signalFiles}
 #files.update( { QCDFile: ROOT.TFile.Open('{}/{}'.format(QCDPath, QCDFile), "READ") } )
 #files.update( { TTFile: ROOT.TFile.Open('{}/{}'.format(TTPath, TTFile), "READ") } )
-files.update( { 'QCDInclusive2018.root': ROOT.TFile.Open('QCD2018Inc_{}/output/QCDInclusive2018.root'.format(bTags), "READ") } )
+files.update( { 'QCDInclusive2018.root': ROOT.TFile.Open('QCDInc2018_{}/output/QCDInclusive2018.root'.format(bTags), "READ") } )
 files.update( { 'Data2018.root': ROOT.TFile.Open('Data2018_{}/output/Data2018.root'.format(bTags), "READ") } )
 
-#param_list = [key.GetName() for key in file1.GetListOfKeys()]
+param_list = [key.GetName() for key in file1.GetListOfKeys()]
 #ROOT.TFile.Close(file1)
-param_list = ['m3', 'm4', 'm3NoLead']
+#param_list = ['m3', 'm4', 'm3NoLead']
 #param_list = ['HT', 'pT1']
 #labels = {'QCD2018.root': 'QCD 2018', 'TT2018.root': r'$t \overline{t}$ 2018', 'signal_1000_400.root': r'$\tilde{t}$ = 1000, $\tilde{chi}^{\pm}$ = 400', 'signal_1500_900.root': r'$\tilde{t}$ = 1500, $\tilde{chi}^{\pm}$ = 900', 'signal_2000_1900.root': r'$\tilde{t}$ = 2000, $\tilde{chi}^{\pm}$ = 1900'}
 #param_list = ['bJetMatchingEff', 'etaGenBQCD', 'genBMatchingRate', 'matchedPartonFlavour', 'nBsPerQCDEvent', 'phiGenBQCD', 'pTRecoBMatchSuccess', 'QCDGenpdgId']
-
+'''
 bb2DHists = []
 for param in param_list:
 	h_stack = ROOT.THStack(param, "{};{};Events".format(param, files['signal_2000_1900.root'].Get(param).GetXaxis().GetTitle()))
@@ -72,7 +72,8 @@ for param in param_list:
 			h_stack.SetMaximum(10**7)
 			h_stack.SetMinimum(10**0)
 		c1.SaveAs('plots/QCDOverlaid/{}/313/{}.png'.format(bTags, param))
-
+'''
+'''
 for param in ['m3', 'm4', 'm3NoLead']:
 	for f in signalFiles:
 		legend = ROOT.TLegend(0.68, 0.89, 0.89, 0.75)
@@ -89,29 +90,45 @@ for param in ['m3', 'm4', 'm3NoLead']:
 		h_signal.Rebin(4)
 		legend.Draw()
 		c1.SaveAs('plots/QCDOverlaid/{}/313/{}Significance_{}.png'.format(bTags, param, f[7:-5]))	
-for param in ['HT', 'pT1']:
-	for f in signalFiles:
-		legend = ROOT.TLegend(0.68, 0.89, 0.89, 0.65)
+'''
 
-		h_signal = files[f].Get(param)
-		h_background = files['QCDInclusive2018.root'].Get(param)
-		h_background.Add(h_signal)
-		h_data = files['Data2018.root'].Get(param)
+for param in param_list:
+	legend = ROOT.TLegend(0.68, 0.89, 0.89, 0.65)
 
-		h_stack = ROOT.THStack(param, "{} (Data Vs. MC {});{};Events".format(param, f[7:-5], files[f].Get(param).GetXaxis().GetTitle()))
-		h_stack.Add(h_background)
-		h_stack.Add(h_data)
-		legend.AddEntry(h_background, 'MC ({})'.format(f[7:-5]))
-		legend.AddEntry(h_data, 'Data2018')
+	h_background = files['QCDInclusive2018.root'].Get(param)
+	h_data = files['Data2018.root'].Get(param)
+	h_background.SetLineWidth(3)
+	h_data.SetLineWidth(3)	
+	if h_data == None or h_data.InheritsFrom('TH2F') or h_data.InheritsFrom('TH2D') or h_data.GetEntries() == 0: continue	
+	if param == 'cutflow': 
+		h_data.Scale(1 / h_data.GetMaximum())
+		h_background.Scale(1 / h_background.GetMaximum())
+		h_data.Fill(7, h_data.GetBinContent(7))
+		h_data.SetBinError(8, h_data.GetBinError(7))		
 
+	h_stack = ROOT.THStack(param, "{} (PT400 Trigger);{};Events".format(param, files['Data2018.root'].Get(param).GetXaxis().GetTitle()))
+	h_stack.Add(h_background)
+	h_stack.Add(h_data)	
+	legend.AddEntry(h_background, 'MC (QCD Inclusive 2018)')
+	legend.AddEntry(h_data, 'Data2018')
+	
 
-		c1 = ROOT.TCanvas()
-		h_stack.Draw('HIST E NOSTACK PLC')
+	c1 = ROOT.TCanvas()
+	h_stack.Draw('HIST E NOSTACK PLC')
+	if param != 'cutflow':
 		ROOT.gPad.SetLogy()
-		h_stack.SetMaximum(10**7)
+		h_stack.SetMaximum(1.05 * h_background.GetMaximum())
 		h_stack.SetMinimum(10**0)
-		legend.Draw()
-		c1.SaveAs('plots/QCDOverlaid/{}/313/{}DataVsMC_{}.png'.format(bTags, param, f[7:-5]))
+	legend.Draw()
+	if param == 'cutflow':
+		h_stack.GetXaxis().SetBinLabel(1, "Triggers")
+		h_stack.GetXaxis().SetBinLabel(2, "pT1 > 300")
+		h_stack.GetXaxis().SetBinLabel(3, "4 < nJets < 6")
+		h_stack.GetXaxis().SetBinLabel(4, "No electrons or muons")
+		h_stack.GetXaxis().SetBinLabel(5, "2 < dR12 < 4")
+		h_stack.GetXaxis().SetBinLabel(6, "0 loose bs".format(bTags))
+		h_stack.GetXaxis().SetBinLabel(7, "dRbb12 < 1")
+	c1.SaveAs('plots/QCDOverlaid/{}/313/{}_DataVsMC.png'.format(bTags, param))
 
 '''
 c1 = ROOT.TCanvas()
@@ -126,6 +143,7 @@ files['QCD2018.root'].Get('pTGenBMatchSuccess').SetYTitle("Matched Events / Tota
 c1.SaveAs('plots/QCDOverlaid/{}/pTGenBMatchSuccess.png'.format(bTags))	
 '''
 
+'''
 if args.TH2:
 	bb2DHists = list(set(bb2DHists))
 	print(bb2DHists)
@@ -140,3 +158,4 @@ if args.TH2:
 			c1.SetRightMargin(0.15)
 			h_new.Draw('COLZ1')
 			c1.SaveAs('plots/QCDOverlaid/{}/{}_{}.png'.format(bTags, param, f[:len(f) - 5]))
+'''
