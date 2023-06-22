@@ -2,8 +2,8 @@
 
 import os, sys, ROOT, argparse
 
-parser = argparse.ArgumentParser(description='MC Scaler')
-parser.add_argument('--sample',type=str,required=True,choices=['signal','signal313','TT2018','QCD2018','ZQQ2018','ST2018','WQQ2018','ZNuNu2018','Diboson2018','QCDInclusive2018'],help='Sample to scale')
+parser = argparse.ArgumentParser(description='Scale and hadd MC and data files')
+parser.add_argument('--sample',type=str,required=True,choices=['signal','signal313','TT2018','QCD2018','ZQQ2018','ST2018','WQQ2018','ZNuNu2018','Diboson2018','QCDInclusive2018','Data2018'],help='Sample to scale')
 parser.add_argument('--input',type=str,required=True,help='Path to input files')
 parser.add_argument('--output',type=str,required=True,help='Path to output scaled file')
 parser.add_argument('--noRun2Scaling',action='store_true',default=False,help='Turn off scaling to full Run 2 lumi')
@@ -29,6 +29,7 @@ elif args.sample == 'WQQ2018':     sampleFile = 'WJetsToQQ2018.txt'
 elif args.sample == 'ZNuNu2018':   sampleFile = 'ZJetsToNuNu2018.txt'
 elif args.sample == 'Diboson2018': sampleFile = 'Diboson2018.txt'
 elif args.sample == 'QCDInclusive2018': sampleFile = 'QCDInclusive2018.txt'
+elif args.sample == 'Data2018':    sampleFile = 'Data2018.txt'
 elif args.sample != 'signal' and args.sample != 'signal313': print('ERROR: Unexpected sample argument')
 
 #-------------------------------------------------
@@ -599,3 +600,35 @@ if sample == 'ST2018':
   os.system('hadd -f {}/{}.root {}'.format(outputDir,sample,' '.join(fileList)))
   os.system('rm {}/*temp.root'.format(outputDir))
 
+#-------------------------------------------------
+# Data
+#-------------------------------------------------
+
+if 'Data' in sample:
+
+  if '2016preVFP' in sample:    SF = 137.62 / 19.5
+  elif '2016postVFP' in sample: SF = 137.62 / 16.8
+  elif '2017' in sample:        SF = 137.62 / 41.5
+  elif '2018' in sample:        SF = 137.62 / 59.8
+  else: print('ERROR: Invalid data period')
+
+  with open('samples/{}'.format(sampleFile)) as f:
+    for i,line in enumerate(f):
+
+      fTemp = ROOT.TFile.Open('{}/{}-{}-temp.root'.format(outputDir,sample,i + 1),'RECREATE')
+      f = ROOT.TFile.Open('{}/{}-{}.root'.format(inputDir,sample,i + 1))
+      plots = f.GetDirectory('plots')
+      keys = [key.GetName() for key in plots.GetListOfKeys()]
+      for key in keys:
+        h = plots.Get(key)
+        if not args.noRun2Scaling: h.Scale(SF)
+        fTemp.WriteObject(h,h.GetName())
+
+      fTemp.Write()
+      fTemp.Close()
+
+  fileList = []
+  for j in range(i + 1):
+    fileList.append('{}/{}-{}-temp.root'.format(outputDir,sample,j + 1))
+  os.system('hadd -f {}/{}.root {}'.format(outputDir,sample,' '.join(fileList)))
+  os.system('rm {}/*temp.root'.format(outputDir))

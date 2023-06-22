@@ -15,12 +15,13 @@ ROOT.PyConfig.IgnoreCommandLineOptions = True
 
 class ExampleAnalysis(Module):
 
-    def __init__(self,isData,isSignal,MCCampaign,isSkimmed):
+    def __init__(self,isData,isSignal,MCCampaign,isSkimmed,isCR0b):
         self.writeHistFile = True
         self.isSignal = isSignal
         self.MCCampaign = MCCampaign
         self.isSkimmed = isSkimmed
         self.isData = isData
+        self.isCR0b = isCR0b
 
     def create2DHists(self,titles,labels,*args):
         for i,title in enumerate(titles):
@@ -174,7 +175,6 @@ class ExampleAnalysis(Module):
         self.h_pT4FracChiUncomp         = ROOT.TH1F('pT4FracChiUncomp', ';p_{T,4} / H_{T,#tilde{#chi}^{#pm}} (uncompressed)',40,     0,      2       )
         self.h_pT5FracChiUncomp         = ROOT.TH1F('pT5FracChiUncomp', ';p_{T,5} / H_{T,#tilde{#chi}^{#pm}} (uncompressed)',40,     0,      2       )
 
-
         self.h_pTMeanComp               = ROOT.TH1F('pTMeanComp',       	';#mu(p_{T,1},p_{T,2},p_{T,3}) [GeV]',               50,    0,      1000    )
         self.h_pTSDComp                 = ROOT.TH1F('pTSDComp',     		';#sigma(p_{T,1},p_{T,2},p_{T,3}) [GeV]',            50,    0,      1000    )
         self.h_pTSDMeanFracComp         = ROOT.TH1F('pTSDMeanFracComp', 	';#frac{#sigma}{#mu}(p_{T,1},p_{T,2},p_{T,3})',      30,    0,      1.5     )
@@ -230,6 +230,12 @@ class ExampleAnalysis(Module):
         self.h_dEtaRecoUncomp           = ROOT.TH1F('dEtaRecoUncomp',   ';|#Delta#eta_{#tilde{t},#tilde{#chi}^{#pm}}| (uncompressed)',50,     0,      5       )
         self.h_dPhiRecoUncomp           = ROOT.TH1F('dPhiRecoUncomp',   ';|#Delta#phi_{#tilde{t},#tilde{#chi}^{#pm}}| (uncompressed)',50,     0,      5       )
         self.h_dRRecoUncomp             = ROOT.TH1F('dRRecoUncomp',     ';#Delta R_{#tilde{t},#tilde{#chi}^{#pm}} (uncompressed)',    35,     0,      7       )
+
+        # Fat jets (AK8)
+        self.h_pTFat1                   = ROOT.TH1F('pTFat1',           ';p_{T,FatJet 1} [GeV]',                100,    0,      2000    )
+        self.h_mSoftFat1                = ROOT.TH1F('mSoftFat1',        ';m_{soft,FatJet 1} [GeV]',             100,    0,      2000    )
+
+        # 2D plots
 
         self.h_m3Vsm4			= ROOT.TH2F('m3Vsm4',		 ';m_{4j} [GeV];m_{3j} [GeV]',150,0,3000,150,0,3000)
         self.h_m3NoLeadVsm4		= ROOT.TH2F('m3NoLeadVsm4',      ';m_{4j} [GeV];m_{3j} (excl. leading) [GeV]',150,0,3000,150,0,3000)
@@ -305,7 +311,7 @@ class ExampleAnalysis(Module):
         # Cuts
         if not self.isSkimmed:
           self.h_cutflow.Fill(0,genWeight)
-          if not (event.HLT_PFHT1050 or event.HLT_AK8PFJet360_TrimMass30): return False
+          if not (event.HLT_PFHT1050 or event.HLT_AK8PFJet400_TrimMass30): return False
           self.h_cutflow.Fill(1,genWeight)
           if len(jets) > 0 and not jets[0].pt > 300: return False
           self.h_cutflow.Fill(2,genWeight)
@@ -315,11 +321,14 @@ class ExampleAnalysis(Module):
           self.h_cutflow.Fill(4,genWeight)
           if not 2 < abs(jets[0].p4().DeltaR(jets[1].p4())) < 4: return False
           self.h_cutflow.Fill(5,genWeight)
-          if not self.isData and len(looseBs) < 2: return False
-          elif self.isData and len(looseBs) != 0: return False
+          if not self.isCR0b: 
+            if not self.isData and len(looseBs) < 2: return False
+            elif self.isData and len(looseBs) != 0: return False
+            self.h_cutflow.Fill(6,genWeight)
+            if not self.isData and abs(looseBs[0].p4().DeltaR(looseBs[1].p4())) < 1: return False
+            self.h_cutflow.Fill(7,genWeight)
+          elif len(looseBs) != 0: return False
           self.h_cutflow.Fill(6,genWeight)
-          if not self.isData and abs(looseBs[0].p4().DeltaR(looseBs[1].p4())) < 1: return False
-          self.h_cutflow.Fill(7,genWeight)
 
         try: 
           self.h_nQLHE.Fill(event.LHE_Nuds + event.LHE_Nc + event.LHE_Nb,genWeight)
@@ -613,6 +622,11 @@ class ExampleAnalysis(Module):
         self.h_dPhiRecoUncomp.Fill(abs(sumJet3NoLead.DeltaPhi(sumJet4)),genWeight)
         self.h_dRRecoUncomp.Fill(abs(sumJet3NoLead.DeltaR(sumJet4)),genWeight)
 
+        # Fat jets (AK8)
+        if len(fatJets) >= 1: 
+          self.h_pTFat1.Fill(fatJets[0].pt)
+          self.h_mSoftFat1.Fill(fatJets[0].msoftdrop)
+
         return True
 
 parser = argparse.ArgumentParser(description='Single Stop Analyzer')
@@ -621,6 +635,7 @@ parser.add_argument('--tag',type=str,default='test',help='Tag for output label')
 parser.add_argument('-n',type=int,default=1,help='Sample index to run over for backgrounds')
 parser.add_argument('--points',type=str,default='all',help='Signal point(s) to run over, comma separated in MSTOP_MCHI format; "all" to run over all available points')
 parser.add_argument('--useskim',action='store_true',default=False,help='Flag to use NANOAODs skimmed with the nominal selections')
+parser.add_argument('--CR0b',action='store_true',default=False,help='Flag to use the 0b CR selection')
 args = parser.parse_args()
 
 outputPath = 'output/{}'.format(args.tag)
@@ -643,7 +658,7 @@ elif args.sample != 'signal': print('ERROR: Unexpected sample argument')
 preselection = (
 		'(Jet_pt[3] > 30) &&'
 		'(Jet_pt[0] > 300) &&'
-		'(HLT_PFHT1050 || HLT_AK8PFJet360_TrimMass30)'
+		'(HLT_PFHT1050 || HLT_AK8PFJet400_TrimMass30)'
                )
 
 if args.sample == 'Data2018':
@@ -664,7 +679,11 @@ if args.sample == 'Data2018':
     print('ERROR: Unable to determine campaign of {}'.format(files[0]))
     sys.exit()
   p = PostProcessor(".", files, cut=preselection, branchsel=None,
-                    modules=[ExampleAnalysis(isData=1,isSignal=0,MCCampaign=MCCampaign,isSkimmed=False)],
+                    modules=[ExampleAnalysis(isData=1,
+                             isSignal=0,
+                             MCCampaign=MCCampaign,
+                             isSkimmed=False,
+                             isCR0b=args.CR0b)],
                     noOut=True, histFileName='{}/{}-{}.root'.format(outputPath,args.sample,args.n), histDirName="plots",
                     maxEntries=None)
   p.run()
@@ -695,7 +714,11 @@ elif args.sample == 'signal':
     #files = ['file:/uscms_data/d3/dmahon/RPVSingleStopRun3Patched/NANOAOD/CMSSW_12_4_5/test_2000_100-1.root']
     #files = ['/uscms_data/d3/dmahon/RPVSingleStopRun3Patched/NANOAOD/files/NANOAOD-{}.root'.format(masses)]
     p = PostProcessor(".", files, cut=preselection, branchsel=None,
-                      modules=[ExampleAnalysis(isData=0,isSignal=1,MCCampaign='UL2018',isSkimmed=False)],
+                      modules=[ExampleAnalysis(isData=0,
+                                               isSignal=1,
+                                               MCCampaign='UL2018',
+                                               isSkimmed=False,
+                                               isCR0b=args.CR0b)],
                       noOut=True, histFileName='{}/{}_{}.root'.format(outputPath,args.sample,masses), histDirName="plots",
                       maxEntries=None)
     p.run()
@@ -708,7 +731,11 @@ elif args.useskim:
   files = ['root://cmsxrootd.fnal.gov//store/user/ckapsiak/SingleStop/Skims/Skim_2023_23_03/{}.root'.format(args.sample)]
   if len(files) != 1: print('WARNING: Multiple files selected. All must be from the same MC campaign.')
   p = PostProcessor(".", files, cut='', branchsel=None,
-                    modules=[ExampleAnalysis(isData=0,isSignal=0,MCCampaign='UL2018',isSkimmed=True)],
+                    modules=[ExampleAnalysis(isData=0,
+                                             isSignal=0,
+                                             MCCampaign='UL2018',
+                                             isSkimmed=True,
+                                             isCR0b=args.CR0b)],
                     noOut=True, histFileName='{}/{}-ALL.root'.format(outputPath,args.sample), histDirName="plots",
                     maxEntries=None)
   p.run()
@@ -729,7 +756,11 @@ else:
     print('ERROR: Unable to determine MC campaign of {}'.format(files[0]))
     sys.exit()
   p = PostProcessor(".", files, cut=preselection, branchsel=None, 
-                    modules=[ExampleAnalysis(isData=0,isSignal=0,MCCampaign=MCCampaign,isSkimmed=False)], 
+                    modules=[ExampleAnalysis(isData=0,
+                                             isSignal=0,
+                                             MCCampaign=MCCampaign,
+                                             isSkimmed=False,
+                                             isCR0b=args.CR0b)], 
                     noOut=True, histFileName='{}/{}-{}.root'.format(outputPath,args.sample,args.n), histDirName="plots",
                     maxEntries=None)
   p.run() 
