@@ -18,7 +18,7 @@ ROOT.PyConfig.IgnoreCommandLineOptions = True
 
 class ExampleAnalysis(Module):
 
-    def __init__(self,isSignal,MCCampaign,isSkimmed,coupling,isQCD,bAlgo,isData):
+    def __init__(self,isSignal,MCCampaign,isSkimmed,coupling,isQCD,bAlgo,isData,isCR0b):
         self.writeHistFile = True
         self.isSignal = isSignal
         self.MCCampaign = MCCampaign
@@ -27,6 +27,7 @@ class ExampleAnalysis(Module):
 	self.isQCD = isQCD
 	self.bAlgo = bAlgo
 	self.isData = isData
+        self.isCR0b = isCR0b
 
     def create2DHists(self,titles,labels,*args):
         for i,title in enumerate(titles):
@@ -191,7 +192,6 @@ class ExampleAnalysis(Module):
         self.h_pT4FracChiUncomp         = ROOT.TH1F('pT4FracChiUncomp', ';p_{T,4} / H_{T,#tilde{#chi}^{#pm}} (uncompressed)',40,     0,      2       )
         self.h_pT5FracChiUncomp         = ROOT.TH1F('pT5FracChiUncomp', ';p_{T,5} / H_{T,#tilde{#chi}^{#pm}} (uncompressed)',40,     0,      2       )
 
-
         self.h_pTMeanComp               = ROOT.TH1F('pTMeanComp',       	';#mu(p_{T,1},p_{T,2},p_{T,3}) [GeV]',               50,    0,      1000    )
         self.h_pTSDComp                 = ROOT.TH1F('pTSDComp',     		';#sigma(p_{T,1},p_{T,2},p_{T,3}) [GeV]',            50,    0,      1000    )
         self.h_pTSDMeanFracComp         = ROOT.TH1F('pTSDMeanFracComp', 	';#frac{#sigma}{#mu}(p_{T,1},p_{T,2},p_{T,3})',      30,    0,      1.5     )
@@ -264,8 +264,26 @@ class ExampleAnalysis(Module):
         self.h_dPhiRecoUncomp           = ROOT.TH1F('dPhiRecoUncomp',   ';|#Delta#phi_{#tilde{t},#tilde{#chi}^{#pm}}| (uncompressed)',50,     0,      5       )
         self.h_dRRecoUncomp             = ROOT.TH1F('dRRecoUncomp',     ';#Delta R_{#tilde{t},#tilde{#chi}^{#pm}} (uncompressed)',    35,     0,      7       )
 
-        self.h_m3Vsm4			= ROOT.TH2F('m3Vsm4',		';m_{4j} [GeV];m_{3j} [GeV]',		     150,0,3000,150,0,3000   )
-        self.h_m3NoLeadVsm4		= ROOT.TH2F('m3NoLeadVsm4',     ';m_{4j} [GeV];m_{3j} (excl. leading) [GeV]',150,0,3000,150,0,3000)
+        # Fat jets (AK8)
+        self.h_pTFat1                   = ROOT.TH1F('pTFat1',           ';p_{T,FatJet 1} [GeV]',                100,    0,      2000    )
+        self.h_mSoftFat1                = ROOT.TH1F('mSoftFat1',        ';m_{soft,FatJet 1} [GeV]',             100,    0,      2000    )
+
+        # 2D plots
+
+        self.h_m3Vsm4			= ROOT.TH2F('m3Vsm4',		 ';m_{4j} [GeV];m_{3j} [GeV]',150,0,3000,150,0,3000)
+        self.h_m3NoLeadVsm4		= ROOT.TH2F('m3NoLeadVsm4',      ';m_{4j} [GeV];m_{3j} (excl. leading) [GeV]',150,0,3000,150,0,3000)
+        self.h_m3Fracm4Vsm4             = ROOT.TH2F('m3Fracm4Vsm4',      ';m_{4j} [GeV];m_{3j} / m_{4j} [GeV]',150,0,3000,50,0,1)
+        self.h_m3NoLeadFracm4Vsm4       = ROOT.TH2F('m3NoLeadFracm4Vsm4',';m_{4j} [GeV];m_{3j} (excl. leading) / m_{4j} [GeV]',150,0,3000,50,0,1)
+
+        self.h_m3VsPTOther              = ROOT.TH2F('m3VsPTOther',             ';p_{T,j} (excluded jet) [GeV]; m_{3j} [GeV]',75,0,1500,150,0,3000)
+        self.h_m3VsDEtaOther            = ROOT.TH2F('m3VsDEtaOther',           ';#Delta#eta_{3j,other j}; m_{3j} [GeV]',50,0,5,150,0,3000)
+        self.h_m3VsDPhiOther            = ROOT.TH2F('m3VsDPhiOther',           ';#Delta#phi_{3j,other j}; m_{3j} [GeV]',50,0,5,150,0,3000)
+        self.h_m3VsDROther              = ROOT.TH2F('m3VsDROther',             ';#Delta R_{3j,other j}; m_{3j} [GeV]',35,0,7,150,0,3000)
+        self.h_m3NoLeadVsPTOther        = ROOT.TH2F('m3NoLeadVsPTOther',       ';p_{T,j} (excluded jet) [GeV]; m_{3j} (excl. leading) [GeV]',75,0,1500,150,0,3000)
+        self.h_m3NoLeadVsDEtaOther      = ROOT.TH2F('m3NoLeadVsDEtaOther',     ';#Delta#eta_{3j,other j}; m_{3j} (excl. leading) [GeV]',50,0,5,150,0,3000)
+        self.h_m3NoLeadVsDPhiOther      = ROOT.TH2F('m3NoLeadVsDPhiOther',     ';#Delta#phi_{3j,other j}; m_{3j} (excl. leading) [GeV]',50,0,5,150,0,3000)
+        self.h_m3NoLeadVsDROther        = ROOT.TH2F('m3NoLeadVsDROther',       ';#Delta R_{3j,other j}; m_{3j} (excl. leading) [GeV]',35,0,7,150,0,3000)
+
 
 	# QCD gen matching plots
 	self.h_QCDGenpdgId		= ROOT.TH1F('QCDGenpdgId', 		';pdgId',			100, 	-50, 	50	)	
@@ -357,19 +375,16 @@ class ExampleAnalysis(Module):
           self.h_cutflow.Fill(4,genWeight)
           if not 2 < abs(jets[0].p4().DeltaR(jets[1].p4())) < 4: return False
           self.h_cutflow.Fill(5,genWeight)
-	  if self.isData:
-		if len(looseBs) != 0: return False
-		self.h_cutflow.Fill(6, genWeight)
-	  elif self.bAlgo == 'medium':
-          	if len(mediumBs) < 3: return False
-          	self.h_cutflow.Fill(6,genWeight)
-	  	if len(mediumBs) > 1 and abs(mediumBs[0].p4().DeltaR(mediumBs[1].p4())) < 1: return False
-	  	self.h_cutflow.Fill(7, genWeight)
-	  elif self.bAlgo == 'loose':
-		if len(looseBs) != 0: return False
-		self.h_cutflow.Fill(6, genWeight)
-		if len(looseBs) > 1 and abs(looseBs[0].p4().DeltaR(looseBs[1].p4())) < 1: return False
-	 	self.h_cutflow.Fill(7, genWeight)
+          if not self.isCR0b: 
+            if not self.isData and self.bAlgo == 'loose' and len(looseBs) < 2: return False
+	    elif not self.isData and self.bAlgo == 'medium' and len(mediumBs) < 2: return False
+            elif self.isData and len(looseBs) != 0: return False
+            self.h_cutflow.Fill(6,genWeight)
+            if not self.isData and self.bAlgo == 'loose' and abs(looseBs[0].p4().DeltaR(looseBs[1].p4())) < 1: return False
+            elif not self.isData and self.bAlgo == 'medium' and abs(mediumBs[0].p4().DeltaR(mediumBs[1].p4())) < 1: return False
+            self.h_cutflow.Fill(7,genWeight)
+          elif len(looseBs) != 0: return False
+          self.h_cutflow.Fill(6,genWeight)
         try: 
           self.h_nQLHE.Fill(event.LHE_Nuds + event.LHE_Nc + event.LHE_Nb,genWeight)
           self.h_nGLHE.Fill(event.LHE_Nglu,genWeight)
@@ -612,6 +627,16 @@ class ExampleAnalysis(Module):
           self.h_m3NoLead.Fill(sumJet3NoLead.M(),genWeight)
           self.h_m3Vsm4.Fill(sumJet4.M(),sumJet3.M(),genWeight)
           self.h_m3NoLeadVsm4.Fill(sumJet4.M(),sumJet3NoLead.M(),genWeight)
+          self.h_m3Fracm4Vsm4.Fill(sumJet4.M(),sumJet3.M() / sumJet4.M(),genWeight)
+          self.h_m3NoLeadFracm4Vsm4.Fill(sumJet4.M(),sumJet3NoLead.M() / sumJet4.M(),genWeight)
+          self.h_m3VsPTOther.Fill(jets[3].pt,sumJet3.M(),genWeight)
+          self.h_m3VsDEtaOther.Fill(abs(jets[3].eta - sumJet3.Eta()),sumJet3.M(),genWeight)
+          self.h_m3VsDPhiOther.Fill(abs(jets[3].p4().DeltaPhi(sumJet3)),sumJet3.M(),genWeight)      
+          self.h_m3VsDROther.Fill(abs(jets[3].p4().DeltaR(sumJet3)),sumJet3.M(),genWeight)
+          self.h_m3NoLeadVsPTOther.Fill(jets[0].pt,sumJet3NoLead.M(),genWeight)
+          self.h_m3NoLeadVsDEtaOther.Fill(abs(jets[0].eta - sumJet3NoLead.Eta()),sumJet3NoLead.M(),genWeight)
+          self.h_m3NoLeadVsDPhiOther.Fill(abs(jets[0].p4().DeltaPhi(sumJet3NoLead)),sumJet3NoLead.M(),genWeight)
+          self.h_m3NoLeadVsDROther.Fill(abs(jets[0].p4().DeltaR(sumJet3NoLead)),sumJet3NoLead.M(),genWeight)
           self.h_dEta14.Fill(abs(jets[0].eta - jets[3].eta),genWeight)
           self.h_dPhi14.Fill(abs(jets[0].p4().DeltaPhi(jets[3].p4())),genWeight)
           self.h_dR14.Fill(abs(jets[0].p4().DeltaR(jets[3].p4())),genWeight)
@@ -811,6 +836,11 @@ class ExampleAnalysis(Module):
         self.h_dPhiRecoUncomp.Fill(abs(sumJet3NoLead.DeltaPhi(sumJet4)),genWeight)
         self.h_dRRecoUncomp.Fill(abs(sumJet3NoLead.DeltaR(sumJet4)),genWeight)
 
+        # Fat jets (AK8)
+        if len(fatJets) >= 1: 
+          self.h_pTFat1.Fill(fatJets[0].pt)
+          self.h_mSoftFat1.Fill(fatJets[0].msoftdrop)
+
         return True
 
 parser = argparse.ArgumentParser(description='Single Stop Analyzer')
@@ -821,8 +851,7 @@ parser.add_argument('--points',type=str,default='all',help='Signal point(s) to r
 parser.add_argument('--useskim',action='store_true',default=False,help='Flag to use NANOAODs skimmed with the nominal selections')
 parser.add_argument('--coupling', type = str, default = '313', choices = ['312', '313'])
 parser.add_argument('--bAlgo', type = str, default = 'medium', choices = ['loose', 'medium'])
-args = parser.parse_args()
-
+parser.add_argument('--CR0b',action='store_true',default=False,help='Flag to use the 0b CR selection')
 outputPath = 'output/{}'.format(args.tag)
 if not os.path.exists(outputPath):
   os.makedirs(outputPath)
@@ -842,8 +871,8 @@ elif args.sample != 'signal': print('ERROR: Unexpected sample argument')
 
 preselection = (
 		'(Jet_pt[3] > 30) &&'
-		'(Jet_pt[0] > 300) && '
-		'(HLT_PFHT1050 || HLT_AK8PFJet360_TrimMass30)'
+		'(Jet_pt[0] > 300) &&'
+		'(HLT_PFHT1050 || HLT_AK8PFJet400_TrimMass30)'
                )
 
 if args.sample == 'Data2018':
@@ -864,7 +893,7 @@ if args.sample == 'Data2018':
     print('ERROR: Unable to determine campaign of {}'.format(files[0]))
     sys.exit()
   p = PostProcessor(".", files, cut=preselection, branchsel=None,
-                    modules=[ExampleAnalysis(isData=1,isSignal=0,MCCampaign=MCCampaign,isSkimmed=False, coupling = args.coupling, bAlgo = args.bAlgo, isQCD = 0)],
+                    modules=[ExampleAnalysis(isData=1,isSignal=0,MCCampaign=MCCampaign,isSkimmed=False, coupling = args.coupling, bAlgo = args.bAlgo, isQCD = 0, isCR0b = args.CR0b)],
                     noOut=True, histFileName='{}/{}-{}.root'.format(outputPath,args.sample,args.n), histDirName="plots",
                     maxEntries=None)
   p.run()
@@ -898,8 +927,16 @@ elif args.sample == 'signal':
     #files = ['file:/uscms_data/d3/dmahon/RPVSingleStopRun3Patched/NANOAOD/CMSSW_12_4_5/test_2000_100-1.root']
     #files = ['/uscms_data/d3/dmahon/RPVSingleStopRun3Patched/NANOAOD/files/NANOAOD-{}.root'.format(masses)]
     p = PostProcessor(".", files, cut=preselection, branchsel=None,
-                      modules=[ExampleAnalysis(isSignal=1,MCCampaign='UL2018',isSkimmed=False, coupling = args.coupling, isQCD = 0, bAlgo = args.bAlgo, isData = 0)],
+                      modules=[ExampleAnalysis(isCR0b = args.CR0b,isSignal=1,MCCampaign='UL2018',isSkimmed=False, coupling = args.coupling, isQCD = 0, bAlgo = args.bAlgo, isData = 0)],
                       noOut=True, histFileName='{}/{}_{}.root'.format(outputPath,args.sample,masses), histDirName="plots",
+                      maxEntries=None)
+    p.run()
+
+elif args.useskim: 
+
+  print('Running over skimmed {} files'.format(args.sample))
+  print('Using UL 2018 MC campaign working points')
+
                       maxEntries=None)
     p.run()
 
@@ -911,7 +948,7 @@ elif args.useskim:
   files = ['root://cmsxrootd.fnal.gov//store/user/ckapsiak/SingleStop/Skims/Skim_2023_23_03/{}.root'.format(args.sample)]
   if len(files) != 1: print('WARNING: Multiple files selected. All must be from the same MC campaign.')
   p = PostProcessor(".", files, cut='', branchsel=None,
-                    modules=[ExampleAnalysis(isSignal=0,MCCampaign='UL2018',isSkimmed=True, coupling = args.coupling, bAlgo = args.bAlgo, isData = 0)],
+                    modules=[ExampleAnalysis(isCR0b = args.CR0b, isSignal=0,MCCampaign='UL2018',isSkimmed=True, coupling = args.coupling, bAlgo = args.bAlgo, isData = 0)],
                     noOut=True, histFileName='{}/{}-ALL.root'.format(outputPath,args.sample), histDirName="plots",
                     maxEntries=None)
   p.run()
@@ -932,7 +969,8 @@ else:
     print('ERROR: Unable to determine MC campaign of {}'.format(files[0]))
     sys.exit()
   p = PostProcessor(".", files, cut=preselection, branchsel=None, 
-                    modules=[ExampleAnalysis(isSignal=0,MCCampaign=MCCampaign,isSkimmed=False, coupling = args.coupling, isQCD = (args.sample == 'QCD2018' or args.sample == 'QCDInclusive2018'), bAlgo = args.bAlgo, isData = 0)], 
-                    noOut=True, histFileName='{}/{}-{}.root'.format(outputPath,args.sample,args.n), histDirName="plots",
-                    maxEntries=None)
+                    modules=[ExampleAnalysis(isSignal=0,MCCampaign=MCCampaign,isSkimmed=False, coupling = args.coupling, 
+		    isQCD = (args.sample == 'QCD2018' or args.sample == 'QCDInclusive2018'), bAlgo = args.bAlgo, isData = 0)],
+		    noOut=True, histFileName= '{}/{}-{}.root'.format(outputPath,args.sample,args.n), histDirName = "plots",
+   		    maxEntries = None)
   p.run() 
