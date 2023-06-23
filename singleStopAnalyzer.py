@@ -383,8 +383,9 @@ class ExampleAnalysis(Module):
 					if not self.isData and self.bAlgo == 'loose' and abs(looseBs[0].p4().DeltaR(looseBs[1].p4())) < 1: return False
 					elif not self.isData and self.bAlgo == 'medium' and abs(mediumBs[0].p4().DeltaR(mediumBs[1].p4())) < 1: return False
 					self.h_cutflow.Fill(7,genWeight)
-				elif len(looseBs) != 0: return False
-				self.h_cutflow.Fill(6,genWeight)
+				elif len(looseBs) != 0: 
+					return False
+					self.h_cutflow.Fill(6,genWeight)
 			try: 
 				self.h_nQLHE.Fill(event.LHE_Nuds + event.LHE_Nc + event.LHE_Nb,genWeight)
 				self.h_nGLHE.Fill(event.LHE_Nglu,genWeight)
