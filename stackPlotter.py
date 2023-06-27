@@ -25,15 +25,16 @@ if not os.path.exists('plots/QCDOverlaid/{}/312'.format(bTags)): os.makedirs('pl
 
 ROOT.gStyle.SetPalette(ROOT.kRainBow)
 
-files = {fname: ROOT.TFile.Open('{}/{}'.format(signalPath, fname), "READ") for fname in signalFiles}
+files = {}
+#files = {fname: ROOT.TFile.Open('{}/{}'.format(signalPath, fname), "READ") for fname in signalFiles}
 #files.update( { QCDFile: ROOT.TFile.Open('{}/{}'.format(QCDPath, QCDFile), "READ") } )
 #files.update( { TTFile: ROOT.TFile.Open('{}/{}'.format(TTPath, TTFile), "READ") } )
 files.update( { 'QCDInclusive2018.root': ROOT.TFile.Open('QCD2018Inc_{}/output/QCDInclusive2018.root'.format(bTags), "READ") } )
-#files.update( { 'Data2018.root': ROOT.TFile.Open('Data2018_{}/output/Data2018.root'.format(bTags), "READ") } )
+files.update( { 'Data2018.root': ROOT.TFile.Open('Data2018_{}/output/Data2018.root'.format(bTags), "READ") } )
 
 param_list = [key.GetName() for key in files['QCDInclusive2018.root'].GetListOfKeys()]
-param_list = ['cutflow']
 bb2DHists = []
+'''
 for param in param_list:
 	h_stack = ROOT.THStack(param, "{};{};Events".format(param, files['QCDInclusive2018.root'].Get(param).GetXaxis().GetTitle()))
 	legend = ROOT.TLegend(0.68, 0.89, 0.89, 0.65)
@@ -49,7 +50,7 @@ for param in param_list:
 		if param == 'cutflow': 
 			print(f, h_new.GetBinContent(6), h_new.GetBinContent(7), 1 - h_new.GetBinContent(7) / h_new.GetBinContent(6))				
 			h_new.Scale(1 / h_new.GetMaximum())
-		#elif h_new.Integral() != 0: h_new.Scale(1 / h_new.Integral())
+		#elif param != 'cutflow' and h_new.Integral() != 0: h_new.Scale(1 / h_new.Integral())
 		h_new.SetLineWidth(3)
 		h_stack.Add(h_new)
 		legend.AddEntry(h_new, f[:-5])
@@ -66,6 +67,8 @@ for param in param_list:
 			h_stack.SetMaximum(10**7)
 			h_stack.SetMinimum(10**0)
 		c1.SaveAs('plots/QCDOverlaid/{}/312/{}.png'.format(bTags, param))
+'''
+
 '''
 for param in ['m3', 'm4', 'm3NoLead']:
 	for f in signalFiles:
@@ -84,8 +87,9 @@ for param in ['m3', 'm4', 'm3NoLead']:
 		legend.Draw()
 		c1.SaveAs('plots/QCDOverlaid/{}/312/{}Significance_{}.png'.format(bTags, param, f[7:-5]))	
 '''
+
 '''
-for param in ['HT', 'pTFat1']:
+for param in ['HT', 'pTFat1', 'mSoftFat1']:
 	h_data = files['Data2018.root'].Get(param)
 	h_background = files['QCDInclusive2018.root'].Get(param)
 	for i in range(h_background.GetNcells()):
@@ -99,7 +103,8 @@ for param in ['HT', 'pTFat1']:
 	h_data.Draw('HIST E')
 	c1.SaveAs('plots/QCDOverlaid/{}/312/{}_DataOverMCRatio.png'.format(bTags, param))	
 '''
-'''
+
+
 for param in param_list:
 	legend = ROOT.TLegend(0.68, 0.89, 0.89, 0.65)
 
@@ -114,7 +119,7 @@ for param in param_list:
 		h_data.Fill(7, h_data.GetBinContent(7))
 		h_data.SetBinError(8, h_data.GetBinError(7))		
 
-	h_stack = ROOT.THStack(param, "{} (Only PT400 Trigger);{};Events".format(param, files['Data2018.root'].Get(param).GetXaxis().GetTitle()))
+	h_stack = ROOT.THStack(param, "{} (Data vs. MC);{};Events".format(param, files['Data2018.root'].Get(param).GetXaxis().GetTitle()))
 	h_stack.Add(h_background)
 	h_stack.Add(h_data)	
 	legend.AddEntry(h_background, 'MC (QCD Inclusive 2018)')
@@ -137,7 +142,8 @@ for param in param_list:
 		h_stack.GetXaxis().SetBinLabel(6, "0 loose bs".format(bTags))
 		h_stack.GetXaxis().SetBinLabel(7, "dRbb12 < 1")
 	c1.SaveAs('plots/QCDOverlaid/{}/312/{}_DataVsMC.png'.format(bTags, param))
-'''
+
+
 '''
 c1 = ROOT.TCanvas()
 files['QCD2018.root'].Get('pTRecoBMatchSuccess').Divide(files['QCD2018.root'].Get('pTRecoB'))
@@ -145,7 +151,7 @@ files['QCD2018.root'].Get('pTRecoBMatchSuccess').Draw('HIST E PLC')
 files['QCD2018.root'].Get('pTRecoBMatchSuccess').SetYTitle("Matched Events / Total Events")
 c1.SaveAs('plots/QCDOverlaid/{}/pTRecoBMatchSuccess.png'.format(bTags))	
 
-files['QCD2018.root'].Get('pTGenBMatchSuccess').Divide(files['QCD2018.root'].Get('pTGenBQCD'))
+files['QCD2018.root'].Get('pTGenBMatchSuccess').Divide(files['QCD2018.root'].Get('pTGenB'))
 files['QCD2018.root'].Get('pTGenBMatchSuccess').Draw('HIST E PLC')
 files['QCD2018.root'].Get('pTGenBMatchSuccess').SetYTitle("Matched Events / Total Events")
 c1.SaveAs('plots/QCDOverlaid/{}/pTGenBMatchSuccess.png'.format(bTags))	

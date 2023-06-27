@@ -295,6 +295,7 @@ class ExampleAnalysis(Module):
 			self.h_pTRecoBMatchSuccess 	= ROOT.TH1F('pTRecoBMatchSuccess', 	';pT [GeV]',	8, 	bins	)
 			self.h_pTRecoB 			= ROOT.TH1F('pTRecoB', 			';pT [GeV]',	8, 	bins	)
 			self.h_pTGenBMatchSuccess 	= ROOT.TH1F('pTGenBMatchSuccess', 	';pT [GeV]',	8, 	bins	)
+			self.h_pTGenB								= ROOT.TH1F('pTGenB',			';pT [GeV]',	8,	bins)
 			self.h_pTGenBQCD		= ROOT.TH1F('pTGenBQCD', 		';p_{T}^{b, gen, QCD} [GeV]', 	8, 	bins	)		
 			self.h_pTGenNonBMatchSuccess 	= ROOT.TH1F('pTGenNonBMatchSuccess', 	';pT [GeV]',	8, 	bins	)
 			self.h_pTGenNonB 		= ROOT.TH1F('pTGenNonB', 		';pT [GeV]',	8, 	bins	)
@@ -358,6 +359,7 @@ class ExampleAnalysis(Module):
 			elif self.isQCD:
 				# 7: FromHardProcess, 13: IsLastCopy (gen Bs)
 				gens = filter(lambda x: (x.statusFlags >> 13) & 1, genParts)
+				genBJets = filter(lambda x: abs(x.partonFlavour) == 5, genAK4Jets)
 			if not self.isSkimmed:
 				goodElectrons  = filter(lambda x: x.cutBased == 4 and x.miniPFRelIso_all < 0.1 and x.pt > 30 and abs(x.eta) < 2.4,list(Collection(event,"Electron")))
 				goodMuons      = filter(lambda x: x.mediumId and x.miniPFRelIso_all < 0.2 and x.pt > 30 and abs(x.eta) < 2.4,list(Collection(event,"Muon")))
@@ -377,11 +379,11 @@ class ExampleAnalysis(Module):
 				self.h_cutflow.Fill(5,genWeight)
 				if not self.isCR0b: 
 					if not self.isData and self.bAlgo == 'loose' and len(looseBs) < 2: return False
-					elif not self.isData and self.bAlgo == 'medium' and len(mediumBs) < 2: return False
+					elif not self.isData and self.bAlgo == 'medium' and len(mediumBs) < 3: return False
 					elif self.isData and len(looseBs) != 0: return False
 					self.h_cutflow.Fill(6,genWeight)
-					if not self.isData and self.bAlgo == 'loose' and abs(looseBs[0].p4().DeltaR(looseBs[1].p4())) < 1: return False
-					elif not self.isData and self.bAlgo == 'medium' and abs(mediumBs[0].p4().DeltaR(mediumBs[1].p4())) < 1: return False
+					if not self.isData and self.bAlgo == 'loose' and len(looseBs) > 1 and abs(looseBs[0].p4().DeltaR(looseBs[1].p4())) < 1: return False
+					elif not self.isData and self.bAlgo == 'medium' and len(mediumBs) > 1 and abs(mediumBs[0].p4().DeltaR(mediumBs[1].p4())) < 1: return False
 					self.h_cutflow.Fill(7,genWeight)
 				elif len(looseBs) != 0: 
 					return False
@@ -794,7 +796,7 @@ class ExampleAnalysis(Module):
 			if self.isQCD:
 				self.h_nPartons.Fill(len(gens), genWeight)
 				genQCDBs = filter(lambda x: abs(x.pdgId) == 5, gens)
-				genNonBs = filter(lambda x: abs(x.pdgId) != 5, gens)
+				genNonBs = filter(lambda x: abs(x.partonFlavour) != 5, genAK4Jets)
 				genQCDGluons = filter(lambda x: x.pdgId == 21, gens)
 				for g in gens:
 					self.h_QCDGenpdgId.Fill(abs(g.pdgId), genWeight)
@@ -803,8 +805,10 @@ class ExampleAnalysis(Module):
 					self.h_pTGenBQCD.Fill(g.pt, genWeight)
 					self.h_etaGenBQCD.Fill(g.eta, genWeight)
 					self.h_phiGenBQCD.Fill(g.phi, genWeight)	
+				for b in genBJets:
+					self.h_pTGenB.Fill(b.pt, genWeight)	
 				matches = [(numBJet, genAK4Jets[numGenJet].partonFlavour) for (numBJet, numGenJet) in bJetMatcher(genAK4Jets, mediumBs)]
-				genMatches = [(numGenB, numRecoB) for (numGenB, numRecoB) in bJetMatcher(genQCDBs, mediumBs)]	
+				genMatches = [(numGenB, numRecoB) for (numGenB, numRecoB) in bJetMatcher(genBJets, mediumBs)]	
 				mismatches = [(numNonB, numRecoB) for (numNonB, numRecoB) in bJetMatcher(genNonBs, mediumBs)]
 				for i in range(len(genMatches)): self.h_genBMatchingRate.Fill(1, genWeight)			
 				for i in range(len(genQCDBs) - len(genMatches)): self.h_genBMatchingRate.Fill(0, genWeight)
@@ -815,9 +819,9 @@ class ExampleAnalysis(Module):
 						self.h_pTRecoBMatchSuccess.Fill(mediumBs[numB].pt, genWeight)
 					else:
 						self.h_bJetMatchingEff.Fill(0, genWeight)
-				for i, genQCDB in enumerate(genQCDBs):
+				for i, genBJet in enumerate(genBJets):
 					if i in dict(genMatches).keys():
-						self.h_pTGenBMatchSuccess.Fill(genQCDB.pt, genWeight)			
+						self.h_pTGenBMatchSuccess.Fill(genBJet.pt, genWeight)			
 				for i, genNonB in enumerate(genNonBs):
 					if i in dict(mismatches).keys():
 						self.h_pTGenNonBMatchSuccess.Fill(genNonB.pt, genWeight)
