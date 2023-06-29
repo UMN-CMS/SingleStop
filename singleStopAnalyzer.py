@@ -11,7 +11,35 @@ import argparse
 from math import sqrt,fabs,copysign
 from numpy import mean,std
 from itertools import combinations
+import pandas as pd
 ROOT.PyConfig.IgnoreCommandLineOptions = True
+
+def jetMatcher(genJets, recoJets, dR_match = 0.4, pT_match = 3):
+  def getp4(obj):
+  	return obj.p4()
+  def dR(obj1, obj2):
+  	return obj1.p4().DeltaR(obj2.p4())
+  def pT(obj):
+  	return obj.p4().Pt()
+  matched = []
+  remaining_idxs = set(range(len(genJets)))
+  used_idxs = set()
+  reverse_matched = {}
+  for i, j in enumerate(recoJets):
+  	diff = lambda x: dR(j, genJets[x])
+  	if remaining_idxs: 
+  		smallest = min(remaining_idxs, key = diff)
+  		if diff(smallest) < dR_match and ( abs(pT(j) - pT(genJets[smallest])) / pT(genJets[smallest]) ) <  pT_match:
+  			if smallest in used_idxs:
+  				if dR(genJets[smallest], j) < dR(genJets[smallest], recoJets[reverse_matched[smallest]]):
+  					matched.remove((reverse_matched[smallest], smallest))
+  					matched.append((i, smallest))
+  					reverse_matched[smallest] = i
+  			used_idxs.add(smallest)
+  			matched.append((i, smallest))
+  			reverse_matched[smallest] = i
+  	else: matched.append((None, None))
+  return matched
 
 class ExampleAnalysis(Module):
 
@@ -23,238 +51,8 @@ class ExampleAnalysis(Module):
         self.isData = isData
         self.isCR0b = isCR0b
 
-    def create2DHists(self,titles,labels,*args):
-        for i,title in enumerate(titles):
-          setattr(self,'h_{}'.format(title),ROOT.TH2D(title,'{}'.format(labels[i]),*args))
-
-    def fill2DHists(self,titles,xVals,yVals,genWeight):
-        for i,title in enumerate(titles):
-          getattr(self,'h_{}'.format(title)).Fill(xVals[i],yVals[i],genWeight)
-
     def beginJob(self, histFile=None, histDirName=None):
         Module.beginJob(self, histFile, histDirName)
-
-        self.h_nEventsPostPre           = ROOT.TH1D('nEventsPostPre',   ';N_{events} (post-preselection)',      1,      0,      1       )
-        self.h_cutflow                  = ROOT.TH1D('cutflow',    	';Cut',      				10,     0,      10      )
-
-        #-----------------------------------------------------------------------
-        # GEN
-        #-----------------------------------------------------------------------
-
-        # Gen-level (before parton showering)
-        self.h_HTLHE                    = ROOT.TH1F('HTLHE',            ';H_{T,LHE} [GeV]',                     150,    0,      3000    )
-        self.h_nQLHE                    = ROOT.TH1D('nQLHE',            ';N_{q} (LHE)',                         7,      0,      7       )
-        self.h_nGLHE                    = ROOT.TH1D('nGLHE',            ';N_{g} (LHE)',                         7,      0,      7       )
-        self.h_nJLHE                    = ROOT.TH1D('nJLHE',            ';N_{j} (LHE)',                         7,      0,      7       )
-
-        # Jet kinematics
-        self.h_pT1Gen          		= ROOT.TH1F('pT1Gen',		';p_{T,1}^{gen} [GeV]',			75,	0, 	1500 	)
-        self.h_pT2Gen          		= ROOT.TH1F('pT2Gen',		';p_{T,2}^{gen} [GeV]',			75,	0,     	1500 	)
-        self.h_pT3Gen            	= ROOT.TH1F('pT3GEn',		';p_{T,3}^{gen} [GeV]',			75,	0,     	1500 	)
-        self.h_pT4Gen            	= ROOT.TH1F('pT4Gen',		';p_{T,4}^{gen} [GeV]',			75,	0,     	1500 	)
-        self.h_eta1Gen     	       	= ROOT.TH1F('eta1Gen',		';#eta_{1}^{gen}',			80,	-8,	8	)
-        self.h_eta2Gen  	       	= ROOT.TH1F('eta2Gen',		';#eta_{2}^{gen}',			80,	-8,    	8	)
-        self.h_eta3Gen		       	= ROOT.TH1F('eta3Gen',		';#eta_{3}^{gen}',			80,	-8,   	8	)
-        self.h_eta4Gen       		= ROOT.TH1F('eta4Gen',		';#eta_{4}^{gen}',			80,	-8,   	8	)
-
-        # SUSY particle kinematics
-        self.h_pTStop              	= ROOT.TH1F('pTStop', 		';p_{T,#tilde{t}}  [GeV]',		75,	0,    	1500	)
-        self.h_pTStopPlus          	= ROOT.TH1F('pTStopPlus', 	';p_{T,#tilde{t}^{+2/3}}  [GeV]',	75,	0,    	1500	)
-        self.h_pTStopMinus         	= ROOT.TH1F('pTStopMinus', 	';p_{T,#tilde{t}^{-2/3}} [GeV]',	75,	0,    	1500	)
-        self.h_pTChi               	= ROOT.TH1F('pTChi',		';p_{T,#tilde{#chi}^{#pm}}  [GeV]',     75,	0,    	1500	)
-        self.h_pTChiPlus           	= ROOT.TH1F('pTChiPlus', 	';p_{T,#chi^{+}} [GeV]',		75,	0,    	1500	)
-        self.h_pTChiMinus          	= ROOT.TH1F('pTChiMinus', 	';p_{T,#chi^{-}} [GeV]',		75,	0,    	1500	)
-        self.h_pTBStop             	= ROOT.TH1F('pTBStop', 		';p_{T,b from #tilde{t}}  [GeV]',	75,	0,    	1500	)
-        self.h_pTBStopPlus         	= ROOT.TH1F('pTBStopPlus', 	';p_{T,b from #tilde{t}^{+2/3}} [GeV]',	75,	0, 	1500	)
-        self.h_pTBStopMinus    	   	= ROOT.TH1F('pTBStopMinus', 	';p_{T,b from #tilde{t}^{-2/3}} [GeV]',	75,	0, 	1500	)
-        self.h_pTBChi              	= ROOT.TH1F('pTBChi', 		';p_{T,b from #tilde{#chi}^{#pm}}  [GeV]',75,	0, 	1500	)
-        self.h_pTBChiPlus          	= ROOT.TH1F('pTBChiPlus', 	';p_{T,b from #chi^{+}} [GeV]',		75,	0, 	1500	)
-        self.h_pTBChiMinus         	= ROOT.TH1F('pTBChiMinus', 	';p_{T,b from #chi^{-}} [GeV]',		75,	0, 	1500	) 
-
-        self.h_etaStop             	= ROOT.TH1F('etaStop', 		';#eta_{#tilde{t}}',			80,	-8,	8	)
-        self.h_etaStopPlus         	= ROOT.TH1F('etaStopPlus', 	';#eta_{#tilde{t}^{+2/3}}',		80,	-8,	8	)
-        self.h_etaStopMinus        	= ROOT.TH1F('etaStopMinus', 	';eta_{#tilde{t}^{-2/3}}',		80,	-8,	8	) 
-        self.h_etaChi              	= ROOT.TH1F('etaChi', 		';#eta_{#tilde{#chi}^{#pm}}',		80,	-8,	8	)
-        self.h_etaChiPlus          	= ROOT.TH1F('etaChiPlus',	';#eta_{#chi^{+}}',			80,	-8,	8	)
-        self.h_etaChiMinus         	= ROOT.TH1F('etaChiMinus',	';#eta_{#chi^{-}}',			80,	-8,	8	)
-        self.h_etaBStop            	= ROOT.TH1F('etaBStop',		';eta_{b from #tilde{t}}',		80,	-8,	8	)       
-        self.h_etaBStopPlus        	= ROOT.TH1F('etaBStopPlus',	';eta_{b from #tilde{t}^{+2/3}}',	80,	-8,	8	)
-        self.h_etaBStopMinus       	= ROOT.TH1F('etaBStopMinus',	';eta_{b from #tilde{t}^{-2/3}}',	80,	-8,	8	)
-        self.h_etaBChi             	= ROOT.TH1F('etaBChi' , 	';eta_{b from #tilde{#chi}^{#pm}}',	80,	-8,	8	)
-        self.h_etaBChiPlus         	= ROOT.TH1F('etaBChiPlus', 	';eta_{b from #chi^{+}}',		80,	-8,	8	)
-        self.h_etaBChiMinus        	= ROOT.TH1F('etaBChiMinus', 	';eta_{b from #chi^{-}}',		80,	-8,	8	)
-
-        self.h_dEtaBChi         	= ROOT.TH1F('dEtaBChi',		';|#Delta#eta_{b,#tilde{#chi}^{#pm}}|',	50,	0,	5.0   	)
-        self.h_dPhiBChi         	= ROOT.TH1F('dPhiBChi',		';|#Delta#phi_{b,#tilde{#chi}^{#pm}}|',	50,	0,	5.0   	)
-        self.h_nJetsChiMerged   	= ROOT.TH1D('nJetsChiMerged',	';N_{j} matched with #tilde{#chi}^{#pm}',4,	0,	4   	)
-        self.h_dRBB             	= ROOT.TH1F('dRBB',		';#DeltaR_{b,b}',			35,	0,	7    	)
-        self.h_dEtaBB           	= ROOT.TH1F('dEtaBB',		';|#Delta#eta_{b,b}|',			50,	0,	5.0   	)
-        self.h_dPhiBB           	= ROOT.TH1F('dPhiBB',		';|#Delta#phi_{b,b}|',			50,	0,	5.0   	)
-        self.h_passDijet        	= ROOT.TH1D('passDijet',	';Pass Dijet Search Requirements',	2,	0,	2	)
-        self.h_dEtaWJs			= ROOT.TH1F('dEtaWJs',		';|#Delta#eta_{j,j}| (wide jets)',	50,	0,	5.0	)
-        self.h_mWJs			= ROOT.TH1F('mWJs',		';m_jj (wide jets) [GeV]',		150,    0,      3000    )	
-        self.h_dRChiMax         	= ROOT.TH1F('dRChiMax',		';#Delta R_{#tilde{#chi}^{#pm},max}',	40,	0,	8   	)
-        self.h_dRBChi         		= ROOT.TH1F('dRBChi',		';#Delta R_{b,#tilde{#chi}^{#pm}}',	35,	0,	7  	)
-
-        self.h_pTBVsChi		 	= ROOT.TH2F('pTBVsChi',		';p_{T,#tilde{#tilde{#chi}^{#pm}}} [GeV];p_{T,b} [GeV]',	75,	0,	1500,	75,	0,	1500	)
-        self.h_dEtaVsPTStop      	= ROOT.TH2F('dEtaVsPTStop',	';p_{T,#tilde{t}} [GeV];|#Delta#eta_{b,#tilde{#chi}^{#pm}}|',	75,	0,	1500,	80,	0,	8	)
-        self.h_dEtaVsPTStopRatio 	= ROOT.TH2F('dEtaVsPTStopRatio',';p_{T,#tilde{t}} / #Delta m_{#tilde{t},#tilde{#chi}^{#pm}};|#Delta#eta_{b,#tilde{#chi}^{#pm}}|',40,0,2,80,0,8)
-
-        # Trigger
-        self.h_L1_HTT450er	 	= ROOT.TH1D('L1_HTT450er',	';L1_HTT450er',				2,	0,	2	)
-
-        #-----------------------------------------------------------------------
-        # RECO
-        #-----------------------------------------------------------------------
-        
-        self.h_HT 			= ROOT.TH1F('HT',	 	';H_{T} [GeV]',			  	60,	0,	3000	)
-        self.h_MET                      = ROOT.TH1F('MET',              ';p^{miss}_{T} [GeV]',                  50,     0,      1000    )
-        self.h_nJets	  		= ROOT.TH1D('nJets',  	  	';N_{j}',  				20, 	0,	20  	)
-        self.h_nbLoose 			= ROOT.TH1D('nbLoose', 	  	';n_{b} (loose)',  			7,	0,	7  	)
-        self.h_nbMedium                 = ROOT.TH1D('nbMedium',         ';n_{b} (medium)',                      7,      0,      7       )
-        self.h_nbTight                  = ROOT.TH1D('nbTight',          ';n_{b} (tight)',                       7,      0,      7       )
-        self.h_ntLoose                  = ROOT.TH1D('ntLoose',          ';n_{t} (loose)',                       7,      0,      7       )
-        self.h_ntMedium                 = ROOT.TH1D('ntMedium',         ';n_{t} (medium)',                      7,      0,      7       )
-        self.h_ntTight                  = ROOT.TH1D('ntTight',          ';n_{t} (tight)',                       7,      0,      7       )
-        self.h_nWLoose                  = ROOT.TH1D('nWLoose',          ';n_{W} (loose)',                       7,      0,      7       )
-        self.h_nWMedium                 = ROOT.TH1D('nWMedium',         ';n_{W} (medium)',                      7,      0,      7       )
-        self.h_nWTight                  = ROOT.TH1D('nWTight',          ';n_{W} (tight)',                       7,      0,      7       )
-        self.h_ntDeepWP1                = ROOT.TH1D('ntDeepWP1',        ';n_{t} (DeepJet WP 1)',                7,      0,      7       )
-        self.h_ntDeepWP2                = ROOT.TH1D('ntDeepWP2',        ';n_{t} (DeepJet WP 2)',                7,      0,      7       )
-        self.h_ntDeepWP3                = ROOT.TH1D('ntDeepWP3',        ';n_{t} (DeepJet WP 3)',                7,      0,      7       )
-        self.h_ntDeepWP4                = ROOT.TH1D('ntDeepWP4',        ';n_{t} (DeepJet WP 4)',                7,      0,      7       )
-        self.h_nWDeepWP1                = ROOT.TH1D('nWDeepWP1',        ';n_{W} (DeepJet WP 1)',                7,      0,      7       )
-        self.h_nWDeepWP2                = ROOT.TH1D('nWDeepWP2',        ';n_{W} (DeepJet WP 2)',                7,      0,      7       )
-        self.h_nWDeepWP3                = ROOT.TH1D('nWDeepWP3',        ';n_{W} (DeepJet WP 3)',                7,      0,      7       )
-        self.h_nWDeepWP4                = ROOT.TH1D('nWDeepWP4',        ';n_{W} (DeepJet WP 4)',                7,      0,      7       )
-        self.h_mAll             	= ROOT.TH1F('mAll',       	';m_{#sum j} [GeV]',                   	60,	0,	3000	)
-        self.h_m4   			= ROOT.TH1F('m4',   	  	';m_{4j} [GeV]',   			60,	0,	3000	)
-        self.h_m3   			= ROOT.TH1F('m3',   	  	';m_{3j} [GeV]',   			60,	0,	3000	)
-        self.h_m3NoLead                 = ROOT.TH1F('m3NoLead',         ';m_{3j} (excl. leading) [GeV]',        60,     0,      3000    )
-        self.h_m3NoLeadOrSub            = ROOT.TH1F('m3NoLeadOrSub',    ';m_{3j} (excl. lead and sub) [GeV]',   60,     0,      3000    )
-        self.h_pT1          		= ROOT.TH1F('pT1',           	';p_{T,1} [GeV]',                    	75,	0,	1500 	)
-        self.h_pT2          		= ROOT.TH1F('pT2',           	';p_{T,2} [GeV]',                    	75,	0,	1500 	)
-        self.h_pT3          		= ROOT.TH1F('pT3',           	';p_{T,3} [GeV]',                    	75,	0,	1500 	)
-        self.h_pT4          		= ROOT.TH1F('pT4',           	';p_{T,4} [GeV]',                    	75,	0,	1500 	)
-        self.h_pTb1                     = ROOT.TH1F('pTb1',             ';p_{T,b_{1}} (loose) [GeV]',           75,     0,      1500    )
-        self.h_pTb2                     = ROOT.TH1F('pTb2',             ';p_{T,b_{2}} (loose) [GeV]',           75,     0,      1500    )
-        self.h_pTb3                     = ROOT.TH1F('pTb3',             ';p_{T,b_{3}} (loose) [GeV]',           75,     0,      1500    )
-        self.h_pTb4                     = ROOT.TH1F('pTb4',             ';p_{T,b_{4}} (loose) [GeV]',           75,     0,      1500    )
-        self.h_eta1          		= ROOT.TH1F('eta1',       	';#eta_{1}',     			80,	-8,	8	)
-        self.h_eta2          		= ROOT.TH1F('eta2',       	';#eta_{2}',     			80,	-8,	8	)
-        self.h_eta3          		= ROOT.TH1F('eta3',       	';#eta_{3}',     			80,	-8,	8	)
-        self.h_eta4          		= ROOT.TH1F('eta4',       	';#eta_{4}',     			80,	-8,	8	)
-
-        self.h_pT1Frac                  = ROOT.TH1F('pT1Frac',          ';p_{T,1} / H_{T}',                     20,     0,      1       )
-        self.h_pT2Frac                  = ROOT.TH1F('pT2Frac',          ';p_{T,2} / H_{T}',                     20,     0,      1       )
-        self.h_pT3Frac                  = ROOT.TH1F('pT3Frac',          ';p_{T,3} / H_{T}',                     20,     0,      1       )
-        self.h_pT4Frac                  = ROOT.TH1F('pT4Frac',          ';p_{T,4} / H_{T}',                     20,     0,      1       )
-        self.h_pT5Frac                  = ROOT.TH1F('pT5Frac',          ';p_{T,5} / H_{T}',                     20,     0,      1       )
-
-        self.h_pT1ETFracComp           = ROOT.TH1F('pT1ETFracComp',   ';p_{T,1} / E_{T,#tilde{#chi}^{#pm}} (compressed)',    60,     0,      3       )
-        self.h_pT2ETFracComp           = ROOT.TH1F('pT2ETFracComp',   ';p_{T,2} / E_{T,#tilde{#chi}^{#pm}} (compressed)',    60,     0,      3       )
-        self.h_pT3ETFracComp           = ROOT.TH1F('pT3ETFracComp',   ';p_{T,3} / E_{T,#tilde{#chi}^{#pm}} (compressed)',    60,     0,      3       )
-        self.h_pT4ETFracComp           = ROOT.TH1F('pT4ETFracComp',   ';p_{T,4} / E_{T,#tilde{#chi}^{#pm}} (compressed)',    60,     0,      3       )
-        self.h_pT5ETFracComp           = ROOT.TH1F('pT5ETFracComp',   ';p_{T,5} / E_{T,#tilde{#chi}^{#pm}} (compressed)',    60,     0,      3       )
-
-        self.h_pT1ETFracUncomp         = ROOT.TH1F('pT1ETFracUncomp', ';p_{T,1} / E_{T,#tilde{#chi}^{#pm}} (uncompressed)',  60,     0,      3       )
-        self.h_pT2ETFracUncomp         = ROOT.TH1F('pT2ETFracUncomp', ';p_{T,2} / E_{T,#tilde{#chi}^{#pm}} (uncompressed)',  60,     0,      3       )
-        self.h_pT3ETFracUncomp         = ROOT.TH1F('pT3ETFracUncomp', ';p_{T,3} / E_{T,#tilde{#chi}^{#pm}} (uncompressed)',  60,     0,      3       )
-        self.h_pT4ETFracUncomp         = ROOT.TH1F('pT4ETFracUncomp', ';p_{T,4} / E_{T,#tilde{#chi}^{#pm}} (uncompressed)',  60,     0,      3       )
-        self.h_pT5ETFracUncomp         = ROOT.TH1F('pT5ETFracUncomp', ';p_{T,5} / E_{T,#tilde{#chi}^{#pm}} (uncompressed)',  60,     0,      3       )
-
-        self.h_pT1FracChiComp           = ROOT.TH1F('pT1FracChiComp',   ';p_{T,1} / H_{T,#tilde{#chi}^{#pm}} (compressed)',  40,     0,      2       )
-        self.h_pT2FracChiComp           = ROOT.TH1F('pT2FracChiComp',   ';p_{T,2} / H_{T,#tilde{#chi}^{#pm}} (compressed)',  40,     0,      2       )
-        self.h_pT3FracChiComp           = ROOT.TH1F('pT3FracChiComp',   ';p_{T,3} / H_{T,#tilde{#chi}^{#pm}} (compressed)',  40,     0,      2       )
-        self.h_pT4FracChiComp           = ROOT.TH1F('pT4FracChiComp',   ';p_{T,4} / H_{T,#tilde{#chi}^{#pm}} (compressed)',  40,     0,      2       )
-        self.h_pT5FracChiComp           = ROOT.TH1F('pT5FracChiComp',   ';p_{T,5} / H_{T,#tilde{#chi}^{#pm}} (compressed)',  40,     0,      2       )
-
-        self.h_pT1FracChiUncomp         = ROOT.TH1F('pT1FracChiUncomp', ';p_{T,1} / H_{T,#tilde{#chi}^{#pm}} (uncompressed)',40,     0,      2       )
-        self.h_pT2FracChiUncomp         = ROOT.TH1F('pT2FracChiUncomp', ';p_{T,2} / H_{T,#tilde{#chi}^{#pm}} (uncompressed)',40,     0,      2       )
-        self.h_pT3FracChiUncomp         = ROOT.TH1F('pT3FracChiUncomp', ';p_{T,3} / H_{T,#tilde{#chi}^{#pm}} (uncompressed)',40,     0,      2       )
-        self.h_pT4FracChiUncomp         = ROOT.TH1F('pT4FracChiUncomp', ';p_{T,4} / H_{T,#tilde{#chi}^{#pm}} (uncompressed)',40,     0,      2       )
-        self.h_pT5FracChiUncomp         = ROOT.TH1F('pT5FracChiUncomp', ';p_{T,5} / H_{T,#tilde{#chi}^{#pm}} (uncompressed)',40,     0,      2       )
-
-        self.h_pTMeanComp               = ROOT.TH1F('pTMeanComp',       	';#mu(p_{T,1},p_{T,2},p_{T,3}) [GeV]',               50,    0,      1000    )
-        self.h_pTSDComp                 = ROOT.TH1F('pTSDComp',     		';#sigma(p_{T,1},p_{T,2},p_{T,3}) [GeV]',            50,    0,      1000    )
-        self.h_pTSDMeanFracComp         = ROOT.TH1F('pTSDMeanFracComp', 	';#frac{#sigma}{#mu}(p_{T,1},p_{T,2},p_{T,3})',      30,    0,      1.5     )
-        self.h_pTMeanUncomp             = ROOT.TH1F('pTMeanUncomp',     	';#mu(p_{T,2},p_{T,3},p_{T,4}) [GeV]',               50,    0,      1000    )
-        self.h_pTSDUncomp               = ROOT.TH1F('pTSDUncomp',   		';#sigma(p_{T,2},p_{T,3},p_{T,4}) [GeV]',            50,    0,      1000    )
-        self.h_pTSDMeanFracUncomp       = ROOT.TH1F('pTSDMeanFracUncomp',	';#frac{#sigma}{#mu}(p_{T,2},p_{T,3},p_{T,4})',      30,    0,      1.5     )
-
-        self.h_dEta12			= ROOT.TH1F('dEta12',           ';|#Delta#eta_{1,2}|',                  50,     0,     	5     	)
-        self.h_dEta13                   = ROOT.TH1F('dEta13',           ';|#Delta#eta_{1,3}|',                  50,     0,      5       )
-        self.h_dEta14                   = ROOT.TH1F('dEta14',           ';|#Delta#eta_{1,4}|',                  50,     0,      5       )
-        self.h_dEta15                   = ROOT.TH1F('dEta15',           ';|#Delta#eta_{1,5}|',                  50,     0,      5       )
-        self.h_dEta23                   = ROOT.TH1F('dEta23',           ';|#Delta#eta_{2,3}|',                  50,     0,      5       )
-        self.h_dEta24                   = ROOT.TH1F('dEta24',           ';|#Delta#eta_{2,4}|',                  50,     0,      5       )
-        self.h_dEta25                   = ROOT.TH1F('dEta25',           ';|#Delta#eta_{2,5}|',                  50,     0,      5       )
-        self.h_dEta34                   = ROOT.TH1F('dEta34',           ';|#Delta#eta_{3,4}|',                  50,     0,      5       )
-        self.h_dEta35                   = ROOT.TH1F('dEta35',           ';|#Delta#eta_{3,5}|',                  50,     0,      5       )
-        self.h_dEta45                   = ROOT.TH1F('dEta45',           ';|#Delta#eta_{4,5}|',                  50,     0,      5       )
-
-        self.h_dPhi12			= ROOT.TH1F('dPhi12',           ';|#Delta#phi_{1,2}|',                  50,     0,      5     	)
-        self.h_dPhi13                   = ROOT.TH1F('dPhi13',           ';|#Delta#phi_{1,3}|',                  50,     0,      5       )
-        self.h_dPhi14                   = ROOT.TH1F('dPhi14',           ';|#Delta#phi_{1,4}|',                  50,     0,      5       )
-        self.h_dPhi15                   = ROOT.TH1F('dPhi15',           ';|#Delta#phi_{1,5}|',                  50,     0,      5       )
-        self.h_dPhi23                   = ROOT.TH1F('dPhi23',           ';|#Delta#phi_{2,3}|',                  50,     0,      5       )
-        self.h_dPhi24                   = ROOT.TH1F('dPhi24',           ';|#Delta#phi_{2,4}|',                  50,     0,      5       )
-        self.h_dPhi25                   = ROOT.TH1F('dPhi25',           ';|#Delta#phi_{2,5}|',                  50,     0,      5       )
-        self.h_dPhi34                   = ROOT.TH1F('dPhi34',           ';|#Delta#phi_{3,4}|',                  50,     0,      5       )
-        self.h_dPhi35                   = ROOT.TH1F('dPhi35',           ';|#Delta#phi_{3,5}|',                  50,     0,      5       )
-        self.h_dPhi45                   = ROOT.TH1F('dPhi45',           ';|#Delta#phi_{4,5}|',                  50,     0,      5       )
-
-        jetCombos2D = [[''.join(map(str,i)),''.join(map(str,j))] for i,j in combinations(combinations([1,2,3,4],2),2)]
-        self.create2DHists(['dPhi{}Vs{}'.format(i,j) for [i,j] in jetCombos2D],
-                           [';|#Delta#phi_{{{}}}|;|#Delta#phi_{{{}}}|'.format(j,i) for [i,j] in jetCombos2D],
-                           16,0,3.2,16,0,3.2)
-
-        self.h_dR12			= ROOT.TH1F('dR12',           	';#Delta R_{1,2}',                    	35,     0,      7     	)
-        self.h_dR13                     = ROOT.TH1F('dR13',             ';#Delta R_{1,3}',                      35,     0,      7       )
-        self.h_dR14                     = ROOT.TH1F('dR14',             ';#Delta R_{1,4}',                      35,     0,      7       )
-        self.h_dR15                     = ROOT.TH1F('dR15',             ';#Delta R_{1,5}',                      35,     0,      7       )
-        self.h_dR23                     = ROOT.TH1F('dR23',             ';#Delta R_{2,3}',                      35,     0,      7       )
-        self.h_dR24                     = ROOT.TH1F('dR24',             ';#Delta R_{2,4}',                      35,     0,      7       )
-        self.h_dR25                     = ROOT.TH1F('dR25',             ';#Delta R_{2,5}',                      35,     0,      7       )
-        self.h_dR34                     = ROOT.TH1F('dR34',             ';#Delta R_{3,4}',                      35,     0,      7       )
-        self.h_dR35                     = ROOT.TH1F('dR35',             ';#Delta R_{3,5}',                      35,     0,      7       )
-        self.h_dR45                     = ROOT.TH1F('dR45',             ';#Delta R_{4,5}',                      35,     0,      7       )
-
-        self.h_dEtabb                   = ROOT.TH1F('dEtabb',           ';|#Delta#eta_{b_{1},b_{2}}| (loose)',  50,     0,      5       )
-        self.h_dPhibb                   = ROOT.TH1F('dPhibb',           ';|#Delta#phi_{b_{1},b_{2}}| (loose)',  50,     0,      5       )
-        self.h_dRbb                     = ROOT.TH1F('dRbb',             ';#Delta R_{b_{1},b_{2}} (loose)',      35,     0,      7       )
-
-        self.h_dEtaRecoComp             = ROOT.TH1F('dEtaRecoComp',     ';|#Delta#eta_{#tilde{t},#tilde{#chi}^{#pm}}| (compressed)',  50,     0,      5       )
-        self.h_dPhiRecoComp             = ROOT.TH1F('dPhiRecoComp',     ';|#Delta#phi_{#tilde{t},#tilde{#chi}^{#pm}}| (compressed)',  50,     0,      5       )
-        self.h_dRRecoComp               = ROOT.TH1F('dRRecoComp',       ';#Delta R_{#tilde{t},#tilde{#chi}^{#pm}} (compressed)',      35,     0,      7       )
-        self.h_dEtaRecoUncomp           = ROOT.TH1F('dEtaRecoUncomp',   ';|#Delta#eta_{#tilde{t},#tilde{#chi}^{#pm}}| (uncompressed)',50,     0,      5       )
-        self.h_dPhiRecoUncomp           = ROOT.TH1F('dPhiRecoUncomp',   ';|#Delta#phi_{#tilde{t},#tilde{#chi}^{#pm}}| (uncompressed)',50,     0,      5       )
-        self.h_dRRecoUncomp             = ROOT.TH1F('dRRecoUncomp',     ';#Delta R_{#tilde{t},#tilde{#chi}^{#pm}} (uncompressed)',    35,     0,      7       )
-
-        # Fat jets (AK8)
-        self.h_pTFat1                   = ROOT.TH1F('pTFat1',           ';p_{T,FatJet 1} [GeV]',                100,    0,      2000    )
-        self.h_mSoftFat1                = ROOT.TH1F('mSoftFat1',        ';m_{soft,FatJet 1} [GeV]',             100,    0,      2000    )
-
-        # 2D plots
-
-        self.h_m3Vsm4			= ROOT.TH2F('m3Vsm4',		 ';m_{4j} [GeV];m_{3j} [GeV]',150,0,3000,150,0,3000)
-        self.h_m3NoLeadVsm4		= ROOT.TH2F('m3NoLeadVsm4',      ';m_{4j} [GeV];m_{3j} (excl. leading) [GeV]',150,0,3000,150,0,3000)
-        self.h_m3Fracm4Vsm4             = ROOT.TH2F('m3Fracm4Vsm4',      ';m_{4j} [GeV];m_{3j} / m_{4j} [GeV]',150,0,3000,50,0,1)
-        self.h_m3NoLeadFracm4Vsm4       = ROOT.TH2F('m3NoLeadFracm4Vsm4',';m_{4j} [GeV];m_{3j} (excl. leading) / m_{4j} [GeV]',150,0,3000,50,0,1)
-
-        self.h_m3VsPTOther              = ROOT.TH2F('m3VsPTOther',             ';p_{T,j} (excluded jet) [GeV]; m_{3j} [GeV]',75,0,1500,150,0,3000)
-        self.h_m3VsDEtaOther            = ROOT.TH2F('m3VsDEtaOther',           ';#Delta#eta_{3j,other j}; m_{3j} [GeV]',50,0,5,150,0,3000)
-        self.h_m3VsDPhiOther            = ROOT.TH2F('m3VsDPhiOther',           ';#Delta#phi_{3j,other j}; m_{3j} [GeV]',50,0,5,150,0,3000)
-        self.h_m3VsDROther              = ROOT.TH2F('m3VsDROther',             ';#Delta R_{3j,other j}; m_{3j} [GeV]',35,0,7,150,0,3000)
-        self.h_m3NoLeadVsPTOther        = ROOT.TH2F('m3NoLeadVsPTOther',       ';p_{T,j} (excluded jet) [GeV]; m_{3j} (excl. leading) [GeV]',75,0,1500,150,0,3000)
-        self.h_m3NoLeadVsDEtaOther      = ROOT.TH2F('m3NoLeadVsDEtaOther',     ';#Delta#eta_{3j,other j}; m_{3j} (excl. leading) [GeV]',50,0,5,150,0,3000)
-        self.h_m3NoLeadVsDPhiOther      = ROOT.TH2F('m3NoLeadVsDPhiOther',     ';#Delta#phi_{3j,other j}; m_{3j} (excl. leading) [GeV]',50,0,5,150,0,3000)
-        self.h_m3NoLeadVsDROther        = ROOT.TH2F('m3NoLeadVsDROther',       ';#Delta R_{3j,other j}; m_{3j} (excl. leading) [GeV]',35,0,7,150,0,3000)
-
-
-        # Add histograms to analysis object
-        for h in list(vars(self)):
-          if h[0:2] == 'h_':  self.addObject(getattr(self,h))
 
     def analyze(self, event):
 
@@ -263,11 +61,6 @@ class ExampleAnalysis(Module):
         # Get MC weight
         if not self.isData: genWeight = 1 if event.genWeight > 0 else -1
         else: genWeight = 1
-
-        # Fill histograms before selections (but after any pre-selections)
-        self.h_nEventsPostPre.Fill(0,genWeight)
-        try: self.h_HTLHE.Fill(event.LHE_HT,genWeight)
-        except RuntimeError: pass
 
         # Set b tagging WPs
         if   self.MCCampaign == 'UL2016preVFP': 	bTagWPs = [0.0508,0.2598,0.6502]
@@ -310,36 +103,18 @@ class ExampleAnalysis(Module):
 
         # Cuts
         if not self.isSkimmed:
-          self.h_cutflow.Fill(0,genWeight)
           if not (event.HLT_PFHT1050 or event.HLT_AK8PFJet400_TrimMass30): return False
-          self.h_cutflow.Fill(1,genWeight)
           if len(jets) > 0 and not jets[0].pt > 300: return False
-          self.h_cutflow.Fill(2,genWeight)
           if len(jets) < 4 or len(jets) > 6: return False
-          self.h_cutflow.Fill(3,genWeight)
           if len(goodElectrons) != 0 or len(goodMuons) != 0: return False
-          self.h_cutflow.Fill(4,genWeight)
           if not 2 < abs(jets[0].p4().DeltaR(jets[1].p4())) < 4: return False
-          self.h_cutflow.Fill(5,genWeight)
           if not self.isCR0b: 
             if not self.isData and len(looseBs) < 2: return False
             elif self.isData and len(looseBs) != 0: return False
-            self.h_cutflow.Fill(6,genWeight)
             if not self.isData and abs(looseBs[0].p4().DeltaR(looseBs[1].p4())) < 1: return False
-            self.h_cutflow.Fill(7,genWeight)
           elif len(looseBs) != 0: return False
-          self.h_cutflow.Fill(6,genWeight)
-
-        try: 
-          self.h_nQLHE.Fill(event.LHE_Nuds + event.LHE_Nc + event.LHE_Nb,genWeight)
-          self.h_nGLHE.Fill(event.LHE_Nglu,genWeight)
-          self.h_nJLHE.Fill(event.LHE_Njets,genWeight)
-        except RuntimeError: pass
 
         if self.isSignal:
-
-          # Triggers
-          self.h_L1_HTT450er.Fill(event.L1_HTT450er,genWeight)
 
           # Match gens to particle
           stopPlus = True
@@ -370,83 +145,8 @@ class ExampleAnalysis(Module):
             genBStopMinus = genBStop
             genChiMinus = genChi
             genBChiMinus = genBChi
-            genQuarks = [genBStop,genBChi,genD,genS]
           else: print('WARNING: No stop found in event')
-
-          #-----------------------------------------------------------------------
-          # GEN
-          #-----------------------------------------------------------------------
-
-          # Gen kinematics
-          self.h_pTStop.Fill(genStop.pt,genWeight)
-          self.h_pTChi.Fill(genChi.pt,genWeight)
-          self.h_pTBStop.Fill(genBStop.pt,genWeight)
-          self.h_pTBChi.Fill(genBChi.pt,genWeight)
-          if stopPlus:
-            self.h_pTBStopPlus.Fill(genBStopPlus.pt,genWeight)
-            self.h_etaBStopPlus.Fill(genBStopPlus.eta,genWeight)
-            self.h_pTBChiPlus.Fill(genBChiPlus.pt,genWeight)
-            self.h_etaBChiPlus.Fill(genBChiPlus.eta,genWeight)
-            self.h_pTStopPlus.Fill(genStopPlus.pt,genWeight)
-            self.h_etaStopPlus.Fill(genStopPlus.eta,genWeight)
-            self.h_pTChiPlus.Fill(genChiPlus.pt,genWeight)
-            self.h_etaChiPlus.Fill(genChiPlus.eta,genWeight)
-          else:
-            self.h_pTBStopMinus.Fill(genBStopMinus.pt,genWeight)
-            self.h_etaBStopMinus.Fill(genBStopMinus.eta,genWeight)
-            self.h_pTBChiMinus.Fill(genBChiMinus.pt,genWeight)
-            self.h_etaBChiMinus.Fill(genBChiMinus.eta,genWeight)
-            self.h_pTStopMinus.Fill(genStopMinus.pt,genWeight)
-            self.h_etaStopMinus.Fill(genStopMinus.eta,genWeight)
-            self.h_pTChiMinus.Fill(genChiMinus.pt,genWeight)
-            self.h_etaChiMinus.Fill(genChiMinus.eta,genWeight)
-          dEtaBChi = abs(genBStop.eta - genChi.eta)
-          self.h_dEtaBChi.Fill(dEtaBChi,genWeight)
-          self.h_dPhiBChi.Fill(abs(genBStop.p4().DeltaPhi(genChi.p4())),genWeight)
-          self.h_dRBChi.Fill(abs(genBStop.p4().DeltaR(genChi.p4())),genWeight)
-          dRChiMax = max(genBChi.p4().DeltaR(genD.p4()),
-                                   genBChi.p4().DeltaR(genS.p4()),
-                                   genD.p4().DeltaR(genS.p4()))
-          self.h_dRChiMax.Fill(dRChiMax,genWeight)
-          self.h_dRBB.Fill(genBChi.p4().DeltaR(genBStop.p4()),genWeight)
-          self.h_dEtaBB.Fill(abs(genBChi.eta - genBStop.eta),genWeight)
-          self.h_dPhiBB.Fill(abs(genBChi.p4().DeltaPhi(genBStop.p4())),genWeight)
-          self.h_pTBVsChi.Fill(genChi.pt,genBStop.pt,genWeight)
-          self.h_dEtaVsPTStop.Fill(genChi.pt,abs(genChi.eta - genBStop.eta),genWeight)
-          self.h_dEtaVsPTStopRatio.Fill(genChi.pt / (genStop.p4().M() - genChi.p4().M()),abs(genChi.eta - genBStop.eta),genWeight)
-          self.h_passDijet.Fill(1 if (dRChiMax < 1.1 and dEtaBChi < 1.1) else 0,genWeight)
-
-          #pT and eta of the gen AK4 jets
-          for i,j in enumerate(genAK4Jets):
-            if i == 0:
-              self.h_pT1Gen.Fill(j.pt,genWeight)
-              self.h_eta1Gen.Fill(j.eta,genWeight)
-            if i == 1:
-              self.h_pT2Gen.Fill(j.pt,genWeight)
-              self.h_eta2Gen.Fill(j.eta,genWeight)
-            if i == 2:
-              self.h_pT3Gen.Fill(j.pt,genWeight)
-              self.h_eta3Gen.Fill(j.eta,genWeight)
-            if i == 3:
-              self.h_pT4Gen.Fill(j.pt,genWeight)
-              self.h_eta4Gen.Fill(j.eta,genWeight)
-
-          # Wide jets
-          if len(genAK4Jets) >= 2:
-            genJ1 = genAK4Jets[0].p4()
-            genJ2 = genAK4Jets[1].p4()
-            genWJ1 = genJ1
-            genWJ2 = genJ2
-            #passDijet = 1
-            for j in genAK4Jets[2:]:
-              j = j.p4()
-              dR1 = j.DeltaR(genJ1)
-              dR2 = j.DeltaR(genJ2)
-              if dR1 < 1.1 and dR1 < dR2: genWJ1 += j
-              elif dR2 < 1.1 and dR2 < dR1: genWJ2 += j
-            self.h_mWJs.Fill((genWJ1 + genWJ2).M(),genWeight)
-            dEtaWJ = abs(genWJ1.Eta() - genWJ2.Eta())
-            self.h_dEtaWJs.Fill(dEtaWJ,genWeight)
+          genQuarks = [genBStop,genBChi,genD,genS]
 
         #-----------------------------------------------------------------------
         # RECO
@@ -457,29 +157,6 @@ class ExampleAnalysis(Module):
         sumJet3            = ROOT.TLorentzVector()
         sumJet3NoLead      = ROOT.TLorentzVector()
         sumJet3NoLeadOrSub = ROOT.TLorentzVector()
-
-        # n jets
-        self.h_nJets.Fill(len(jets),genWeight)
-        self.h_ntLoose.Fill(len(looseTs),genWeight)
-        self.h_ntMedium.Fill(len(mediumTs),genWeight)
-        self.h_ntTight.Fill(len(tightTs),genWeight)
-        self.h_nWLoose.Fill(len(looseWs),genWeight)
-        self.h_nWMedium.Fill(len(mediumWs),genWeight)
-        self.h_nWTight.Fill(len(tightWs),genWeight)
-        self.h_nbLoose.Fill(len(looseBs),genWeight)
-        self.h_nbMedium.Fill(len(mediumBs),genWeight)
-        self.h_nbTight.Fill(len(tightBs),genWeight)
-        self.h_ntDeepWP1.Fill(len(deepWP1Ts),genWeight)
-        self.h_ntDeepWP2.Fill(len(deepWP2Ts),genWeight)
-        self.h_ntDeepWP3.Fill(len(deepWP3Ts),genWeight)
-        self.h_ntDeepWP4.Fill(len(deepWP4Ts),genWeight)
-        self.h_nWDeepWP1.Fill(len(deepWP1Ws),genWeight)
-        self.h_nWDeepWP2.Fill(len(deepWP2Ws),genWeight)
-        self.h_nWDeepWP3.Fill(len(deepWP3Ws),genWeight)
-        self.h_nWDeepWP4.Fill(len(deepWP4Ws),genWeight)
-
-        # Event characteristics
-        self.h_MET.Fill(MET.Mod(),genWeight)
 
         # Loop over jets
         HT = 0; HT3 = 0; HT3NoLead = 0; nbLoose = 0; nbMedium = 0; nbTight=0
@@ -495,137 +172,39 @@ class ExampleAnalysis(Module):
             sumJet3NoLead += j.p4()
             HT3NoLead += j.pt
           if i > 1 and i < 5: sumJet3NoLeadOrSub += j.p4()
-          if i == 0:
-           self.h_pT1.Fill(j.pt,genWeight)
-           self.h_eta1.Fill(j.eta,genWeight)
-          if i == 1:
-           self.h_pT2.Fill(j.pt,genWeight)
-           self.h_eta2.Fill(j.eta,genWeight)
-          if i == 2:
-           self.h_pT3.Fill(j.pt,genWeight)
-           self.h_eta3.Fill(j.eta,genWeight)
-          if i == 3:
-           self.h_pT4.Fill(j.pt,genWeight)
-           self.h_eta4.Fill(j.eta,genWeight)
 
-        if len(jets) >= 5:
-          self.h_m3NoLeadOrSub.Fill(sumJet3NoLeadOrSub.M(),genWeight)
-          self.h_dEta15.Fill(abs(jets[0].eta - jets[4].eta),genWeight)
-          self.h_dPhi15.Fill(abs(jets[0].p4().DeltaPhi(jets[4].p4())),genWeight)
-          self.h_dR15.Fill(abs(jets[0].p4().DeltaR(jets[4].p4())),genWeight)
-          self.h_dEta25.Fill(abs(jets[1].eta - jets[4].eta),genWeight)
-          self.h_dPhi25.Fill(abs(jets[1].p4().DeltaPhi(jets[4].p4())),genWeight)
-          self.h_dR25.Fill(abs(jets[1].p4().DeltaR(jets[4].p4())),genWeight)
-          self.h_dEta35.Fill(abs(jets[2].eta - jets[4].eta),genWeight)
-          self.h_dPhi35.Fill(abs(jets[2].p4().DeltaPhi(jets[4].p4())),genWeight)
-          self.h_dR35.Fill(abs(jets[2].p4().DeltaR(jets[4].p4())),genWeight)
-          self.h_dEta45.Fill(abs(jets[3].eta - jets[4].eta),genWeight)
-          self.h_dPhi45.Fill(abs(jets[3].p4().DeltaPhi(jets[4].p4())),genWeight)
-          self.h_dR45.Fill(abs(jets[3].p4().DeltaR(jets[4].p4())),genWeight)
-          self.h_pT5Frac.Fill(jets[4].pt / HT,genWeight)
-          self.h_pT5ETFracComp.Fill(jets[4].pt / sumJet3.Et(),genWeight)
-          self.h_pT5ETFracUncomp.Fill(jets[4].pt / sumJet3NoLead.Et(),genWeight)
-          self.h_pT5FracChiComp.Fill(jets[4].pt / HT3,genWeight)
-          self.h_pT5FracChiUncomp.Fill(jets[4].pt / HT3NoLead,genWeight)
-        if len(jets) >= 4:
-          self.h_m4.Fill(sumJet4.M(),genWeight)
-          self.h_m3NoLead.Fill(sumJet3NoLead.M(),genWeight)
-          self.h_m3Vsm4.Fill(sumJet4.M(),sumJet3.M(),genWeight)
-          self.h_m3NoLeadVsm4.Fill(sumJet4.M(),sumJet3NoLead.M(),genWeight)
-          self.h_m3Fracm4Vsm4.Fill(sumJet4.M(),sumJet3.M() / sumJet4.M(),genWeight)
-          self.h_m3NoLeadFracm4Vsm4.Fill(sumJet4.M(),sumJet3NoLead.M() / sumJet4.M(),genWeight)
-          self.h_m3VsPTOther.Fill(jets[3].pt,sumJet3.M(),genWeight)
-          self.h_m3VsDEtaOther.Fill(abs(jets[3].eta - sumJet3.Eta()),sumJet3.M(),genWeight)
-          self.h_m3VsDPhiOther.Fill(abs(jets[3].p4().DeltaPhi(sumJet3)),sumJet3.M(),genWeight)      
-          self.h_m3VsDROther.Fill(abs(jets[3].p4().DeltaR(sumJet3)),sumJet3.M(),genWeight)
-          self.h_m3NoLeadVsPTOther.Fill(jets[0].pt,sumJet3NoLead.M(),genWeight)
-          self.h_m3NoLeadVsDEtaOther.Fill(abs(jets[0].eta - sumJet3NoLead.Eta()),sumJet3NoLead.M(),genWeight)
-          self.h_m3NoLeadVsDPhiOther.Fill(abs(jets[0].p4().DeltaPhi(sumJet3NoLead)),sumJet3NoLead.M(),genWeight)
-          self.h_m3NoLeadVsDROther.Fill(abs(jets[0].p4().DeltaR(sumJet3NoLead)),sumJet3NoLead.M(),genWeight)
-          self.h_dEta14.Fill(abs(jets[0].eta - jets[3].eta),genWeight)
-          self.h_dPhi14.Fill(abs(jets[0].p4().DeltaPhi(jets[3].p4())),genWeight)
-          self.h_dR14.Fill(abs(jets[0].p4().DeltaR(jets[3].p4())),genWeight)
-          self.h_dEta24.Fill(abs(jets[1].eta - jets[3].eta),genWeight)
-          self.h_dPhi24.Fill(abs(jets[1].p4().DeltaPhi(jets[3].p4())),genWeight)
-          self.h_dR24.Fill(abs(jets[1].p4().DeltaR(jets[3].p4())),genWeight)
-          self.h_dEta34.Fill(abs(jets[2].eta - jets[3].eta),genWeight)
-          self.h_dPhi34.Fill(abs(jets[2].p4().DeltaPhi(jets[3].p4())),genWeight)
-          self.h_dR34.Fill(abs(jets[2].p4().DeltaR(jets[3].p4())),genWeight)
-          self.h_pT4Frac.Fill(jets[3].pt / HT,genWeight)
-          self.h_pT4ETFracComp.Fill(jets[3].pt / sumJet3.Et(),genWeight)
-          self.h_pT4ETFracUncomp.Fill(jets[3].pt / sumJet3NoLead.Et(),genWeight)
-          self.h_pT4FracChiComp.Fill(jets[3].pt / HT3,genWeight)
-          self.h_pT4FracChiUncomp.Fill(jets[3].pt / HT3NoLead,genWeight)
-          pTMeanComp   = mean([jets[0].pt,jets[1].pt,jets[2].pt])
-          pTSDComp     = std([jets[0].pt,jets[1].pt,jets[2].pt])
-          pTMeanUncomp = mean([jets[1].pt,jets[2].pt,jets[3].pt])
-          pTSDUncomp   = std([jets[1].pt,jets[2].pt,jets[3].pt])
-          self.h_pTMeanComp.Fill(pTMeanComp,genWeight)
-          self.h_pTSDComp.Fill(pTSDComp,genWeight)
-          self.h_pTSDMeanFracComp.Fill(pTSDComp / pTMeanComp,genWeight)
-          self.h_pTMeanUncomp.Fill(pTMeanUncomp,genWeight)
-          self.h_pTSDUncomp.Fill(pTSDUncomp,genWeight)
-          self.h_pTSDMeanFracUncomp.Fill(pTSDUncomp / pTMeanUncomp,genWeight)
-        if len(jets) >= 3:
-          self.h_m3.Fill(sumJet3.M(),genWeight)
-          self.h_dEta13.Fill(abs(jets[0].eta - jets[2].eta),genWeight)
-          self.h_dPhi13.Fill(abs(jets[0].p4().DeltaPhi(jets[2].p4())),genWeight)
-          self.h_dR13.Fill(abs(jets[0].p4().DeltaR(jets[2].p4())),genWeight)
-          self.h_dEta23.Fill(abs(jets[1].eta - jets[2].eta),genWeight)
-          self.h_dPhi23.Fill(abs(jets[1].p4().DeltaPhi(jets[2].p4())),genWeight)
-          self.h_dR23.Fill(abs(jets[1].p4().DeltaR(jets[2].p4())),genWeight)
-          self.h_pT3Frac.Fill(jets[2].pt / HT,genWeight)
-          self.h_pT3ETFracComp.Fill(jets[2].pt / sumJet3.Et(),genWeight)
-          self.h_pT3ETFracUncomp.Fill(jets[2].pt / sumJet3NoLead.Et(),genWeight)
-          self.h_pT3FracChiComp.Fill(jets[2].pt / HT3,genWeight)
-          self.h_pT3FracChiUncomp.Fill(jets[2].pt / HT3NoLead,genWeight)
-        if len(jets) >= 2:
-          self.h_dEta12.Fill(abs(jets[0].eta - jets[1].eta),genWeight)
-          self.h_dPhi12.Fill(abs(jets[0].p4().DeltaPhi(jets[1].p4())),genWeight)
-          self.h_dR12.Fill(abs(jets[0].p4().DeltaR(jets[1].p4())),genWeight)
-          self.h_pT2Frac.Fill(jets[1].pt / HT,genWeight)
-          self.h_pT2ETFracComp.Fill(jets[1].pt / sumJet3.Et(),genWeight)
-          self.h_pT2ETFracUncomp.Fill(jets[1].pt / sumJet3NoLead.Et(),genWeight)
-          self.h_pT2FracChiComp.Fill(jets[1].pt / HT3,genWeight)
-          self.h_pT2FracChiUncomp.Fill(jets[1].pt / HT3NoLead,genWeight)
-        if len(jets) >= 1:
-          self.h_HT.Fill(HT,genWeight)
-          self.h_mAll.Fill(sumJet.M(),genWeight)
-          self.h_pT1Frac.Fill(jets[0].pt / HT,genWeight)
-          self.h_pT1ETFracComp.Fill(jets[0].pt / sumJet3.Et(),genWeight)
-          self.h_pT1ETFracUncomp.Fill(jets[0].pt / sumJet3NoLead.Et(),genWeight)
-          self.h_pT1FracChiComp.Fill(jets[0].pt / HT3,genWeight)
-          self.h_pT1FracChiUncomp.Fill(jets[0].pt / HT3NoLead,genWeight)
+        matches = jetMatcher(genQuarks,jets)
+        if not len(matches) == 4: return False
+        #for match in matches:
+        #  print('Jet {} matches to pdgId {}, so it comes from {}'.format(match[0],genQuarks[match[1]].pdgId,'stop' if ((genQuarks[match[1]].pdgId == 5 and genD.pdgId < 0) or (genQuarks[match[1]].pdgId == -5 and genD.pdgId > 0)) else 'chargino'))
+ 
+        with open('output/exportJetInfo/jets_1500_900.csv','a') as f:
+          for i,j in enumerate(jets):
+            isMatched = 1 if i in [x[0] for x in matches] else 0
+            matchedQuark = genQuarks[[x[1] for x in matches if x[0] == i][0]] if isMatched else None
+            isStopMatched, isChiMatched, isOther = -1,-1,-1
+            if isMatched and ((matchedQuark.pdgId == 5 and genD.pdgId < 0) or (matchedQuark.pdgId == -5 and genD.pdgId > 0)): isStopMatched, isChiMatched, isOther = 1,0,0
+            elif isMatched and ((genD.pdgId < 0 and matchedQuark.pdgId in [-1,-3,-5]) or (genD.pdgId > 0 and matchedQuark.pdgId in [1,3,5])): isStopMatched, isChiMatched, isOther = 0,1,0
+            else: isStopMatched, isChiMatched, isOther = 0,0,1
+            f.write('{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}\n'.format(
+                     i,j.pt,j.eta,j.phi,j.btagDeepFlavB,
+                     sumJet3NoLead.M(),sumJet3NoLead.Pt(),sumJet3NoLead.Eta(),sumJet3NoLead.Phi(),
+                     sumJet4.M(),sumJet4.Pt(),sumJet4.Eta(),sumJet4.Phi(),
+                     isStopMatched,isChiMatched,isOther
+                    ))
 
-        jetCombos2D = [[''.join(map(str,i)),''.join(map(str,j))] for i,j in combinations(combinations([1,2,3,4],2),2)]
-        self.fill2DHists(['dPhi{}Vs{}'.format(i,j) for [i,j] in jetCombos2D],
-                          [abs(jets[int(i)-1].p4().DeltaPhi(jets[int(j)-1].p4())) for i,j in [x[1] for x in jetCombos2D]],
-                          [abs(jets[int(i)-1].p4().DeltaPhi(jets[int(j)-1].p4())) for i,j in [x[0] for x in jetCombos2D]],
-                          genWeight)
-
-        # b jets
-        for i,b in enumerate(looseBs):
-          if i == 0: self.h_pTb1.Fill(b.pt,genWeight)
-          elif i == 1: self.h_pTb2.Fill(b.pt,genWeight)
-          elif i == 2: self.h_pTb3.Fill(b.pt,genWeight)
-          elif i == 3: self.h_pTb4.Fill(b.pt,genWeight)
-
-        if len(looseBs) >= 2: 
-          self.h_dEtabb.Fill(abs(looseBs[0].eta - looseBs[1].eta),genWeight)
-          self.h_dPhibb.Fill(abs(looseBs[0].p4().DeltaPhi(looseBs[1].p4())),genWeight)
-          self.h_dRbb.Fill(abs(looseBs[0].p4().DeltaR(looseBs[1].p4())),genWeight)
-
-        self.h_dEtaRecoComp.Fill(abs(sumJet3.Eta() - sumJet4.Eta()),genWeight)
-        self.h_dPhiRecoComp.Fill(abs(sumJet3.DeltaPhi(sumJet4)),genWeight)
-        self.h_dRRecoComp.Fill(abs(sumJet3.DeltaR(sumJet4)),genWeight)
-        self.h_dEtaRecoUncomp.Fill(abs(sumJet3NoLead.Eta() - sumJet4.Eta()),genWeight)
-        self.h_dPhiRecoUncomp.Fill(abs(sumJet3NoLead.DeltaPhi(sumJet4)),genWeight)
-        self.h_dRRecoUncomp.Fill(abs(sumJet3NoLead.DeltaR(sumJet4)),genWeight)
-
-        # Fat jets (AK8)
-        if len(fatJets) >= 1: 
-          self.h_pTFat1.Fill(fatJets[0].pt)
-          self.h_mSoftFat1.Fill(fatJets[0].msoftdrop)
+          with open('output/exportJetInfo/baseline.txt','a') as f:
+            for i,j in enumerate(jets):
+              isMatched = 1 if i in [x[0] for x in matches] else 0
+              matchedQuark = genQuarks[[x[1] for x in matches if x[0] == i][0]] if isMatched else None
+              isStopMatched, isChiMatched, isOther = -1,-1,-1
+              if isMatched and ((matchedQuark.pdgId == 5 and genD.pdgId < 0) or (matchedQuark.pdgId == -5 and genD.pdgId > 0)): isStopMatched, isChiMatched, isOther = 1,0,0
+              elif isMatched and ((genD.pdgId < 0 and matchedQuark.pdgId in [-1,-3,-5]) or (genD.pdgId > 0 and matchedQuark.pdgId in [1,3,5])): isStopMatched, isChiMatched, isOther = 0,1,0
+              else: isStopMatched, isChiMatched, isOther = 0,0,1
+              matchIdx = isChiMatched + 2*isOther
+              if i == 0:         f.write('{},0\n'.format(matchIdx))
+              elif i in [1,2,3]: f.write('{},1\n'.format(matchIdx))
+              else:              f.write('{},2\n'.format(matchIdx))
 
         return True
 
@@ -637,6 +216,11 @@ parser.add_argument('--points',type=str,default='all',help='Signal point(s) to r
 parser.add_argument('--useskim',action='store_true',default=False,help='Flag to use NANOAODs skimmed with the nominal selections')
 parser.add_argument('--CR0b',action='store_true',default=False,help='Flag to use the 0b CR selection')
 args = parser.parse_args()
+
+with open('output/exportJetInfo/jets_1500_900.csv','w') as f:
+  f.write('jetOrdinality,jetPT,jetEta,jetPhi,jetBScore,m3M,m3PT,m3Eta,m3Phi,m4M,m4PT,m4Eta,m4Phi,isStopMatched,isChiMatched,isOther\n')
+
+os.remove('output/exportJetInfo/baseline.txt')
 
 outputPath = 'output/{}'.format(args.tag)
 if not os.path.exists(outputPath):
