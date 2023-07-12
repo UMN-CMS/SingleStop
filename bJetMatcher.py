@@ -22,5 +22,5 @@ def bJetMatcher(genJets, recoJets, dR_match = 0.4, pT_match = 3):
 				used_idxs.add(smallest)
 				matched.append((i, smallest))
 				reverse_matched[smallest] = i
-		else: matched.append((None, None))
+		#else: matched.append((None, None))
 	return matched

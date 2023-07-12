@@ -303,6 +303,7 @@ class ExampleAnalysis(Module):
 			self.h_phiGenBQCD		= ROOT.TH1F('phiGenBQCD', 		';#phi_{b}^{gen, QCD}', 	50, 	0, 	5	)
 			self.h_genBMatchingRate		= ROOT.TH1F('genBMatchingRate',		';genBTrueMatch',		2, 	0, 	2	)
 			self.h_nGluonsVsnBs		= ROOT.TH2F('nGluonsVsnBs', 		';n_{Bs} [medium];n_{Gluons} [Gen]', 6, 0, 6, 10, 0, 50	)
+			self.h_nGenJets			= ROOT.TH1F('nGenJets',		';nGenJets',	10,		0,	10)
 
 			# Add histograms to analysis object
 			for h in list(vars(self)):
@@ -352,7 +353,7 @@ class ExampleAnalysis(Module):
 
 			if not self.isData:
 				genParts       = list(Collection(event,"GenPart"))
-				genAK4Jets     = list(Collection(event,"GenJet"))
+				genAK4Jets     = filter(lambda x: x.pt > 30 and abs(x.eta) < 2.4, list(Collection(event,"GenJet")))
 			if self.isSignal:
 				# Get only outgoing particles of the hardest subprocess
 				gens = filter(lambda x: (((x.statusFlags >> 13) & 1) and ((x.statusFlags >> 8) & 1)) and not (((abs(x.pdgId) == 1) or (abs(x.pdgId) == 5)) and ((x.statusFlags >> 11) & 1)), genParts)
@@ -367,23 +368,30 @@ class ExampleAnalysis(Module):
 			# Cuts
 			if not self.isSkimmed:
 				self.h_cutflow.Fill(0,genWeight)
+
 				if not (event.HLT_PFHT1050 or event.HLT_AK8PFJet400_TrimMass30): return False
 				self.h_cutflow.Fill(1,genWeight)
+
 				if len(jets) > 0 and jets[0].pt < 300: return False
 				self.h_cutflow.Fill(2,genWeight)
+
 				if len(jets) < 4 or len(jets) > 6: return False
 				self.h_cutflow.Fill(3,genWeight)
+
 				if len(goodElectrons) != 0 or len(goodMuons) != 0: return False
 				self.h_cutflow.Fill(4,genWeight)
+
 				if not 2 < abs(jets[0].p4().DeltaR(jets[1].p4())) < 4: return False
 				self.h_cutflow.Fill(5,genWeight)
+
 				if not self.isCR0b: 
-					if not self.isData and self.bAlgo == 'loose' and len(looseBs) < 2: return False
-					elif not self.isData and self.bAlgo == 'medium' and len(mediumBs) < 3: return False
+					if not self.isData and self.bAlgo == 'loose' and len(looseBs) < 3: return False
+					elif not self.isData and self.bAlgo == 'medium' and len(tightBs) < 3: return False
 					elif self.isData and len(looseBs) != 0: return False
 					self.h_cutflow.Fill(6,genWeight)
+
 					if not self.isData and self.bAlgo == 'loose' and len(looseBs) > 1 and abs(looseBs[0].p4().DeltaR(looseBs[1].p4())) < 1: return False
-					elif not self.isData and self.bAlgo == 'medium' and len(mediumBs) > 1 and abs(mediumBs[0].p4().DeltaR(mediumBs[1].p4())) < 1: return False
+					elif not self.isData and self.bAlgo == 'medium' and len(tightBs) > 1 and abs(tightBs[0].p4().DeltaR(tightBs[1].p4())) < 1: return False
 					self.h_cutflow.Fill(7,genWeight)
 				elif len(looseBs) != 0: 
 					return False
@@ -393,7 +401,7 @@ class ExampleAnalysis(Module):
 				self.h_nGLHE.Fill(event.LHE_Nglu,genWeight)
 				self.h_nJLHE.Fill(event.LHE_Njets,genWeight)
 			except RuntimeError: pass
-
+			print(len(genAK4Jets), len(jets))
 			if self.isSignal:
 
 				# Triggers
@@ -795,6 +803,7 @@ class ExampleAnalysis(Module):
 						 genWeight)
 			if self.isQCD:
 				self.h_nPartons.Fill(len(gens), genWeight)
+				self.h_nGenJets.Fill(len(genAK4Jets), genWeight)
 				genQCDBs = filter(lambda x: abs(x.pdgId) == 5, gens)
 				genNonBs = filter(lambda x: abs(x.partonFlavour) != 5, genAK4Jets)
 				genQCDGluons = filter(lambda x: x.pdgId == 21, gens)
@@ -802,33 +811,25 @@ class ExampleAnalysis(Module):
 					self.h_QCDGenpdgId.Fill(abs(g.pdgId), genWeight)
 					self.h_nBsPerQCDEvent.Fill(len(filter(lambda x: abs(x.pdgId) == 5, gens)), genWeight)
 				for g in genQCDBs:
-					self.h_pTGenBQCD.Fill(g.pt, genWeight)
 					self.h_etaGenBQCD.Fill(g.eta, genWeight)
 					self.h_phiGenBQCD.Fill(g.phi, genWeight)	
 				for b in genBJets:
 					self.h_pTGenB.Fill(b.pt, genWeight)	
-				matches = [(numBJet, genAK4Jets[numGenJet].partonFlavour) for (numBJet, numGenJet) in bJetMatcher(genAK4Jets, mediumBs)]
-				genMatches = [(numGenB, numRecoB) for (numGenB, numRecoB) in bJetMatcher(genBJets, mediumBs)]	
-				mismatches = [(numNonB, numRecoB) for (numNonB, numRecoB) in bJetMatcher(genNonBs, mediumBs)]
+				matches = [(numRecoB, numGenJet) for (numRecoB, numGenJet) in bJetMatcher(genAK4Jets, tightBs) if genAK4Jets[numGenJet].partonFlavour == 5]	
+				genMatches = [(numRecoB, numGenB) for (numRecoB, numGenB) in bJetMatcher(genBJets, tightBs)]	
+				mismatches = [(numNonB, numRecoB) for (numNonB, numRecoB) in bJetMatcher(genNonBs, tightBs)]
 				for i in range(len(genMatches)): self.h_genBMatchingRate.Fill(1, genWeight)			
 				for i in range(len(genQCDBs) - len(genMatches)): self.h_genBMatchingRate.Fill(0, genWeight)
-				for (numB, genJetParton) in matches:
-					self.h_matchedPartonFlavour.Fill(abs(genJetParton), genWeight)
-					if abs(genJetParton) == 5:
-						self.h_bJetMatchingEff.Fill(1, genWeight)
-						self.h_pTRecoBMatchSuccess.Fill(mediumBs[numB].pt, genWeight)
-					else:
-						self.h_bJetMatchingEff.Fill(0, genWeight)
-				for i, genBJet in enumerate(genBJets):
-					if i in dict(genMatches).keys():
-						self.h_pTGenBMatchSuccess.Fill(genBJet.pt, genWeight)			
+				for (numRecoB, numGenJet) in matches:
+					self.h_pTRecoBMatchSuccess.Fill(tightBs[numRecoB].pt, genWeight)
+				for (numRecoB, numGenB) in genMatches:
+					self.h_pTGenBMatchSuccess.Fill(genBJets[numGenB].pt, genWeight)
 				for i, genNonB in enumerate(genNonBs):
 					if i in dict(mismatches).keys():
 						self.h_pTGenNonBMatchSuccess.Fill(genNonB.pt, genWeight)
 					self.h_pTGenNonB.Fill(genNonB.pt)			
-				for bJet in mediumBs:
+				for bJet in tightBs:
 					self.h_pTRecoB.Fill(bJet.pt, genWeight)
-				self.h_nGluonsVsnBs.Fill(len(mediumBs), len(genQCDGluons), genWeight)
 
 			self.h_dEtaRecoComp.Fill(abs(sumJet3.Eta() - sumJet4.Eta()),genWeight)
 			self.h_dPhiRecoComp.Fill(abs(sumJet3.DeltaPhi(sumJet4)),genWeight)

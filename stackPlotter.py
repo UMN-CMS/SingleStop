@@ -1,3 +1,4 @@
+from collections import OrderedDict
 import ROOT, argparse, os, math
 ROOT.gROOT.SetBatch(True)
 
@@ -23,22 +24,30 @@ DataFile = 'Data2018.root'
 
 if not os.path.exists('plots/QCDOverlaid/{}/312'.format(bTags)): os.makedirs('plots/QCDOverlaid/{}/312'.format(bTags))
 
-ROOT.gStyle.SetPalette(ROOT.kRainBow)
+ROOT.gStyle.SetPalette(ROOT.kPastel)
 
-files = {}
-#files = {fname: ROOT.TFile.Open('{}/{}'.format(signalPath, fname), "READ") for fname in signalFiles}
+files = OrderedDict()
+files = {fname: ROOT.TFile.Open('{}/{}'.format(signalPath, fname), "READ") for fname in signalFiles}
 #files.update( { QCDFile: ROOT.TFile.Open('{}/{}'.format(QCDPath, QCDFile), "READ") } )
 #files.update( { TTFile: ROOT.TFile.Open('{}/{}'.format(TTPath, TTFile), "READ") } )
 files.update( { 'QCDInclusive2018.root': ROOT.TFile.Open('QCD2018Inc_{}/output/QCDInclusive2018.root'.format(bTags), "READ") } )
-files.update( { 'Data2018.root': ROOT.TFile.Open('Data2018_{}/output/Data2018.root'.format(bTags), "READ") } )
+#files.update( { 'Data2018.root': ROOT.TFile.Open('Data2018_{}/output/Data2018.root'.format(bTags), "READ") } )
 
+HTBins = [50, 100, 200, 300, 500, 700, 1000, 1500, 2000]
+for HT in HTBins:
+	files.update( { 'QCDInclusive2018-HT{}.root'.format(HT): ROOT.TFile.Open('QCD2018Inc_{}/output/QCDInclusive2018-HT{}.root'.format(bTags, HT), "READ") } )
 param_list = [key.GetName() for key in files['QCDInclusive2018.root'].GetListOfKeys()]
+param_list = ['HT']
+bTagTitles = {'0B': '0 bs', '1B': '1 b', '020': '2 medium bs', '003': '3 tight bs'}
+
 bb2DHists = []
 '''
 for param in param_list:
-	h_stack = ROOT.THStack(param, "{};{};Events".format(param, files['QCDInclusive2018.root'].Get(param).GetXaxis().GetTitle()))
+	h_stack = ROOT.THStack(param, "{} ({});{};Events".format(param, bTagTitles[bTags], files['QCDInclusive2018.root'].Get(param).GetXaxis().GetTitle()))
 	legend = ROOT.TLegend(0.68, 0.89, 0.89, 0.65)
+	c1 = ROOT.TCanvas()
 	for i, f in enumerate(files):
+		if f == 'QCDInclusive2018.root': continue
 		newfile = files[f]
 		h_new = newfile.Get(param)
 		if 'pTRecoB' in param or 'pTGenB' in param:
@@ -48,16 +57,16 @@ for param in param_list:
 		if 'bb' not in param and h_new != None and h_new.InheritsFrom('TH2D'): bb2DHists.append(param)
 		if h_new == None or not (h_new.InheritsFrom('TH1F') or h_new.InheritsFrom('TH1D')): continue
 		if param == 'cutflow': 
-			print(f, h_new.GetBinContent(6), h_new.GetBinContent(7), 1 - h_new.GetBinContent(7) / h_new.GetBinContent(6))				
+			print(f, h_new.GetBinContent(6), h_new.GetBinContent(7), 1 - h_new.GetBinContent(7) / h_new.GetBinContent(6))
 			h_new.Scale(1 / h_new.GetMaximum())
 		#elif param != 'cutflow' and h_new.Integral() != 0: h_new.Scale(1 / h_new.Integral())
-		h_new.SetLineWidth(3)
+		h_new.SetLineWidth(2)
 		h_stack.Add(h_new)
 		legend.AddEntry(h_new, f[:-5])
-	if h_new == None or h_new.InheritsFrom('TH2D') or h_new.GetEntries() == 0: continue
+	#if h_stack.GetHists() == 0 or h_new.InheritsFrom('TH2D') or h_new.GetEntries() == 0: continue
 	if args.TH1:		
-		c1 = ROOT.TCanvas()
-		h_stack.Draw('HIST E NOSTACK PLC')
+		h_stack.Draw('HIST PFC E')
+		h_stack.Draw('SAME E')
 		if param == 'cutflow':
 			h_stack.SetMinimum(0)
 			h_stack.SetMaximum(1)
@@ -66,27 +75,24 @@ for param in param_list:
 			ROOT.gPad.SetLogy()
 			h_stack.SetMaximum(10**7)
 			h_stack.SetMinimum(10**0)
-		c1.SaveAs('plots/QCDOverlaid/{}/312/{}.png'.format(bTags, param))
+		c1.SaveAs('plots/QCDOverlaid/{}/313/{}.png'.format(bTags, param))
 '''
 
-'''
 for param in ['m3', 'm4', 'm3NoLead']:
 	for f in signalFiles:
 		legend = ROOT.TLegend(0.68, 0.89, 0.89, 0.75)
 		h_signal = files[f].Get(param)
 		h_background = files['QCDInclusive2018.root'].Get(param)
 		for i in range(h_background.GetNcells()):
-			if h_background.GetBinContent(i) != 0: h_signal.SetBinContent(i, h_signal.GetBinContent(i) / h_background.GetBinContent(i))
+			if h_background.GetBinContent(i) != 0: h_signal.SetBinContent(i, h_signal.GetBinContent(i) / math.sqrt(h_background.GetBinContent(i)))
 			else: h_signal.SetBinContent(i, 0)
 		c1 = ROOT.TCanvas()
-		h_signal.SetYTitle('s / b')
+		h_signal.SetYTitle('s / sqrt(b)')
 		h_signal.SetStats(0)
-		legend.AddEntry(h_new, f)
 		h_signal.Draw('HIST')
 		h_signal.Rebin(4)
 		legend.Draw()
 		c1.SaveAs('plots/QCDOverlaid/{}/312/{}Significance_{}.png'.format(bTags, param, f[7:-5]))	
-'''
 
 '''
 for param in ['HT', 'pTFat1', 'mSoftFat1']:
@@ -101,10 +107,10 @@ for param in ['HT', 'pTFat1', 'mSoftFat1']:
 	h_data.SetStats(0)
 	h_data.SetLineWidth(2)
 	h_data.Draw('HIST E')
-	c1.SaveAs('plots/QCDOverlaid/{}/312/{}_DataOverMCRatio.png'.format(bTags, param))	
+	c1.SaveAs('plots/QCDOverlaid/{}/313/{}_DataOverMCRatio.png'.format(bTags, param))	
 '''
 
-
+'''
 for param in param_list:
 	legend = ROOT.TLegend(0.68, 0.89, 0.89, 0.65)
 
@@ -141,8 +147,8 @@ for param in param_list:
 		h_stack.GetXaxis().SetBinLabel(5, "2 < dR12 < 4")
 		h_stack.GetXaxis().SetBinLabel(6, "0 loose bs".format(bTags))
 		h_stack.GetXaxis().SetBinLabel(7, "dRbb12 < 1")
-	c1.SaveAs('plots/QCDOverlaid/{}/312/{}_DataVsMC.png'.format(bTags, param))
-
+	c1.SaveAs('plots/QCDOverlaid/{}/313/{}_DataVsMC.png'.format(bTags, param))
+'''
 
 '''
 c1 = ROOT.TCanvas()
