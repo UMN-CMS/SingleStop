@@ -13,7 +13,7 @@ from math import sqrt,fabs,copysign
 from numpy import mean,std
 from itertools import combinations
 sys.path.append('~/nobackup/SingleStop/CMSSW_10_6_19_patch2/src/PhysicsTools/NanoAODTools/python/postprocessing/SingleStop/')
-from bJetMatcher import bJetMatcher
+from jetMatching import jetMatcher, checker, dR, pT
 ROOT.PyConfig.IgnoreCommandLineOptions = True
 
 class ExampleAnalysis(Module):
@@ -288,22 +288,17 @@ class ExampleAnalysis(Module):
 			# QCD gen matching plots
 			self.h_QCDGenpdgId		= ROOT.TH1F('QCDGenpdgId', 		';pdgId',			100, 	-50, 	50	)	
 			self.h_nPartons			= ROOT.TH1F('nPartons', 		';nPartons', 			10, 	0, 	10	)
-			self.h_bJetMatchingEff 		= ROOT.TH1F('bJetMatchingEff',		';bJetTrueMatch', 		2, 	0, 	2	)
 			self.h_nBsPerQCDEvent		= ROOT.TH1F('nBsPerQCDEvent', 		';nBs [gen Particles]',		10, 	0, 	10	)
 			self.h_matchedPartonFlavour	= ROOT.TH1F('matchedPartonFlavour', 	';pdgId [matched jets]', 	25, 	0, 	25	)		
 			bins = array.array( 'f', [0.0, 100.0, 200.0, 300.0, 400.0, 500.0, 700.0, 1000.0, 1500.0] )
-			self.h_pTRecoBMatchSuccess 	= ROOT.TH1F('pTRecoBMatchSuccess', 	';pT [GeV]',	8, 	bins	)
-			self.h_pTRecoB 			= ROOT.TH1F('pTRecoB', 			';pT [GeV]',	8, 	bins	)
-			self.h_pTGenBMatchSuccess 	= ROOT.TH1F('pTGenBMatchSuccess', 	';pT [GeV]',	8, 	bins	)
-			self.h_pTGenB								= ROOT.TH1F('pTGenB',			';pT [GeV]',	8,	bins)
-			self.h_pTGenBQCD		= ROOT.TH1F('pTGenBQCD', 		';p_{T}^{b, gen, QCD} [GeV]', 	8, 	bins	)		
-			self.h_pTGenNonBMatchSuccess 	= ROOT.TH1F('pTGenNonBMatchSuccess', 	';pT [GeV]',	8, 	bins	)
-			self.h_pTGenNonB 		= ROOT.TH1F('pTGenNonB', 		';pT [GeV]',	8, 	bins	)
 			self.h_etaGenBQCD		= ROOT.TH1F('etaGenBQCD', 		';#eta_{b}^{gen, QCD}', 	50, 	0, 	5	)	
 			self.h_phiGenBQCD		= ROOT.TH1F('phiGenBQCD', 		';#phi_{b}^{gen, QCD}', 	50, 	0, 	5	)
-			self.h_genBMatchingRate		= ROOT.TH1F('genBMatchingRate',		';genBTrueMatch',		2, 	0, 	2	)
-			self.h_nGluonsVsnBs		= ROOT.TH2F('nGluonsVsnBs', 		';n_{Bs} [medium];n_{Gluons} [Gen]', 6, 0, 6, 10, 0, 50	)
 			self.h_nGenJets			= ROOT.TH1F('nGenJets',		';nGenJets',	10,		0,	10)
+
+			self.h_recoJetIsGenB = ROOT.TH1F('recoJetIsGenB',		';is gen b',	2,	0,	2	)
+			self.h_recoJetIsTagged = ROOT.TH1F('recoJetIsTagged',		'; is b-tagged',	2,	0,	2	)	
+			self.h_genMatchingTruthTable = ROOT.TH2F('truthTable',	'; is gen b; is b-tagged',	2,	0,	2,	2,	0,	2	) 
+			self.h_multipleMatches = ROOT.TH1F('multipleMatches',		'; multiple Matches',		2,	0,	2	)
 
 			# Add histograms to analysis object
 			for h in list(vars(self)):
@@ -391,7 +386,7 @@ class ExampleAnalysis(Module):
 					self.h_cutflow.Fill(6,genWeight)
 
 					if not self.isData and self.bAlgo == 'loose' and len(looseBs) > 1 and abs(looseBs[0].p4().DeltaR(looseBs[1].p4())) < 1: return False
-					elif not self.isData and self.bAlgo == 'medium' and len(tightBs) > 1 and abs(tightBs[0].p4().DeltaR(tightBs[1].p4())) < 1: return False
+					elif not self.isData and self.bAlgo == 'medium' and len(mediumBs) > 1 and abs(mediumBs[0].p4().DeltaR(mediumBs[1].p4())) < 1: return False
 					self.h_cutflow.Fill(7,genWeight)
 				elif len(looseBs) != 0: 
 					return False
@@ -401,7 +396,6 @@ class ExampleAnalysis(Module):
 				self.h_nGLHE.Fill(event.LHE_Nglu,genWeight)
 				self.h_nJLHE.Fill(event.LHE_Njets,genWeight)
 			except RuntimeError: pass
-			print(len(genAK4Jets), len(jets))
 			if self.isSignal:
 
 				# Triggers
@@ -805,7 +799,6 @@ class ExampleAnalysis(Module):
 				self.h_nPartons.Fill(len(gens), genWeight)
 				self.h_nGenJets.Fill(len(genAK4Jets), genWeight)
 				genQCDBs = filter(lambda x: abs(x.pdgId) == 5, gens)
-				genNonBs = filter(lambda x: abs(x.partonFlavour) != 5, genAK4Jets)
 				genQCDGluons = filter(lambda x: x.pdgId == 21, gens)
 				for g in gens:
 					self.h_QCDGenpdgId.Fill(abs(g.pdgId), genWeight)
@@ -813,23 +806,20 @@ class ExampleAnalysis(Module):
 				for g in genQCDBs:
 					self.h_etaGenBQCD.Fill(g.eta, genWeight)
 					self.h_phiGenBQCD.Fill(g.phi, genWeight)	
-				for b in genBJets:
-					self.h_pTGenB.Fill(b.pt, genWeight)	
-				matches = [(numRecoB, numGenJet) for (numRecoB, numGenJet) in bJetMatcher(genAK4Jets, tightBs) if genAK4Jets[numGenJet].partonFlavour == 5]	
-				genMatches = [(numRecoB, numGenB) for (numRecoB, numGenB) in bJetMatcher(genBJets, tightBs)]	
-				mismatches = [(numNonB, numRecoB) for (numNonB, numRecoB) in bJetMatcher(genNonBs, tightBs)]
-				for i in range(len(genMatches)): self.h_genBMatchingRate.Fill(1, genWeight)			
-				for i in range(len(genQCDBs) - len(genMatches)): self.h_genBMatchingRate.Fill(0, genWeight)
-				for (numRecoB, numGenJet) in matches:
-					self.h_pTRecoBMatchSuccess.Fill(tightBs[numRecoB].pt, genWeight)
-				for (numRecoB, numGenB) in genMatches:
-					self.h_pTGenBMatchSuccess.Fill(genBJets[numGenB].pt, genWeight)
-				for i, genNonB in enumerate(genNonBs):
-					if i in dict(mismatches).keys():
-						self.h_pTGenNonBMatchSuccess.Fill(genNonB.pt, genWeight)
-					self.h_pTGenNonB.Fill(genNonB.pt)			
-				for bJet in tightBs:
-					self.h_pTRecoB.Fill(bJet.pt, genWeight)
+				matched = jetMatcher(genAK4Jets, jets)
+				matches = [(numGenJet, numRecoJet) for (numGenJet, numRecoJet) in list(matched[0].items())]
+				for i in range(len(matched[0]) - matched[1]):
+					self.h_multipleMatches.Fill(0, genWeight)
+				for i in range(matched[1]):
+					self.h_multipleMatches.Fill(1, genWeight)
+				print(matches)
+				for (numGen, numReco) in matches:
+					if abs(genAK4Jets[numGen].partonFlavour) == 5: 
+						if jets[numReco] in tightBs: self.h_genMatchingTruthTable.Fill(1, 1, genWeight)
+						else: self.h_genMatchingTruthTable.Fill(1, 0, genWeight)
+					else:
+						if jets[numReco] in tightBs: self.h_genMatchingTruthTable.Fill(0, 1, genWeight)
+						else: self.h_genMatchingTruthTable.Fill(0, 0, genWeight)						
 
 			self.h_dEtaRecoComp.Fill(abs(sumJet3.Eta() - sumJet4.Eta()),genWeight)
 			self.h_dPhiRecoComp.Fill(abs(sumJet3.DeltaPhi(sumJet4)),genWeight)
