@@ -1,0 +1,46 @@
+000 (32358499.123.000) 2023-06-22 15:06:02 Job submitted from host: <131.225.204.62:9618?addrs=131.225.204.62-9618+[2620-6a-0-8420-f0-0-204-62]-9618&alias=lpcschedd5.fnal.gov&noUDP&sock=schedd_2770_916d>
+...
+040 (32358499.123.000) 2023-06-22 15:10:37 Started transferring input files
+	Transferring to host: <131.225.189.155:9618?addrs=[2620-6a-0-8421-f0-0-189-155]-9618+131.225.189.155-9618&alias=cmswn2112.fnal.gov&noUDP&sock=slot1_30_2121_2faf_53763>
+...
+040 (32358499.123.000) 2023-06-22 15:10:37 Finished transferring input files
+...
+001 (32358499.123.000) 2023-06-22 15:10:37 Job executing on host: <131.225.189.155:9618?addrs=[2620-6a-0-8421-f0-0-189-155]-9618+131.225.189.155-9618&alias=cmswn2112.fnal.gov&noUDP&sock=startd_2024_dfc6>
+...
+006 (32358499.123.000) 2023-06-22 15:11:48 Image size of job updated: 146
+	146  -  MemoryUsage of job (MB)
+	150248  -  ResidentSetSize of job (KB)
+...
+006 (32358499.123.000) 2023-06-22 15:12:48 Image size of job updated: 146
+	146  -  MemoryUsage of job (MB)
+	150260  -  ResidentSetSize of job (KB)
+...
+006 (32358499.123.000) 2023-06-22 15:14:49 Image size of job updated: 146
+	146  -  MemoryUsage of job (MB)
+	150308  -  ResidentSetSize of job (KB)
+...
+006 (32358499.123.000) 2023-06-22 15:15:49 Image size of job updated: 146
+	146  -  MemoryUsage of job (MB)
+	150396  -  ResidentSetSize of job (KB)
+...
+040 (32358499.123.000) 2023-06-22 15:16:36 Started transferring output files
+...
+040 (32358499.123.000) 2023-06-22 15:16:36 Finished transferring output files
+...
+005 (32358499.123.000) 2023-06-22 15:16:38 Job terminated.
+	(1) Normal termination (return value 0)
+		Usr 0 00:04:26, Sys 0 00:00:12  -  Run Remote Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Run Local Usage
+		Usr 0 00:04:26, Sys 0 00:00:12  -  Total Remote Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Total Local Usage
+	147420  -  Run Bytes Sent By Job
+	224295  -  Run Bytes Received By Job
+	147420  -  Total Bytes Sent By Job
+	224295  -  Total Bytes Received By Job
+	Partitionable Resources :    Usage  Request Allocated 
+	   Cpus                 :     0.00        1         1 
+	   Disk (KB)            :   908         225   3454594 
+	   Memory (MB)          :   146        2048      2048 
+
+	Job terminated of its own accord at 2023-06-22T20:16:36Z with exit-code 0.
+...

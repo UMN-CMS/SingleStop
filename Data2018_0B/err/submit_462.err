@@ -1,0 +1,11 @@
+WARNING: In non-interactive mode release checks e.g. deprecated releases, production architectures are disabled.
+Unable to load sec.protocol plugin libXrdSecztn.so
+Unable to load sec.protocol plugin libXrdSecztn.so
+Error in <TNetXNGFile::Open>: [ERROR] Server responded with an error: [3014] Unable to open file  /store/data/Run2018D/JetHT/NANOAOD/UL2018_MiniAODv2_NanoAODv9-v2/2430000/C9E1610F-815D-D043-AEF8-1EC55D211052.root; Network is unreachable
+
+Traceback (most recent call last):
+  File "singleStopAnalyzer.py", line 901, in <module>
+    p.run()
+  File "/storage/local/data1/condor/execute/dir_24388/framework/postprocessor.py", line 163, in run
+    inTree = inFile.Get("Events")
+ReferenceError: attempt to access a null-pointer

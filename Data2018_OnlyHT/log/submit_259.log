@@ -1,0 +1,86 @@
+000 (32358581.258.000) 2023-06-22 15:12:16 Job submitted from host: <131.225.204.62:9618?addrs=131.225.204.62-9618+[2620-6a-0-8420-f0-0-204-62]-9618&alias=lpcschedd5.fnal.gov&noUDP&sock=schedd_2770_916d>
+...
+040 (32358581.258.000) 2023-06-22 15:20:57 Entered queue to transfer input files
+	Transferring to host: <131.225.188.84:9618?addrs=[2620-6a-0-8421-f0-0-188-84]-9618+131.225.188.84-9618&alias=cmswn2041.fnal.gov&noUDP&sock=slot1_60_2021_ba2b_81405>
+...
+040 (32358581.258.000) 2023-06-22 15:21:16 Started transferring input files
+	Seconds spent in queue: 19
+...
+040 (32358581.258.000) 2023-06-22 15:21:16 Finished transferring input files
+...
+001 (32358581.258.000) 2023-06-22 15:21:16 Job executing on host: <131.225.188.84:9618?addrs=[2620-6a-0-8421-f0-0-188-84]-9618+131.225.188.84-9618&alias=cmswn2041.fnal.gov&noUDP&sock=startd_1927_5717>
+...
+006 (32358581.258.000) 2023-06-22 15:22:26 Image size of job updated: 149
+	149  -  MemoryUsage of job (MB)
+	153484  -  ResidentSetSize of job (KB)
+...
+006 (32358581.258.000) 2023-06-22 15:25:29 Image size of job updated: 150
+	150  -  MemoryUsage of job (MB)
+	154212  -  ResidentSetSize of job (KB)
+...
+006 (32358581.258.000) 2023-06-22 15:26:30 Image size of job updated: 150
+	150  -  MemoryUsage of job (MB)
+	154284  -  ResidentSetSize of job (KB)
+...
+006 (32358581.258.000) 2023-06-22 15:27:30 Image size of job updated: 150
+	150  -  MemoryUsage of job (MB)
+	154340  -  ResidentSetSize of job (KB)
+...
+006 (32358581.258.000) 2023-06-22 15:28:31 Image size of job updated: 150
+	150  -  MemoryUsage of job (MB)
+	154388  -  ResidentSetSize of job (KB)
+...
+006 (32358581.258.000) 2023-06-22 15:29:32 Image size of job updated: 150
+	150  -  MemoryUsage of job (MB)
+	154432  -  ResidentSetSize of job (KB)
+...
+006 (32358581.258.000) 2023-06-22 15:30:32 Image size of job updated: 150
+	150  -  MemoryUsage of job (MB)
+	154464  -  ResidentSetSize of job (KB)
+...
+006 (32358581.258.000) 2023-06-22 15:31:32 Image size of job updated: 150
+	150  -  MemoryUsage of job (MB)
+	154476  -  ResidentSetSize of job (KB)
+...
+006 (32358581.258.000) 2023-06-22 15:33:32 Image size of job updated: 150
+	150  -  MemoryUsage of job (MB)
+	154480  -  ResidentSetSize of job (KB)
+...
+006 (32358581.258.000) 2023-06-22 15:36:34 Image size of job updated: 150
+	150  -  MemoryUsage of job (MB)
+	154484  -  ResidentSetSize of job (KB)
+...
+006 (32358581.258.000) 2023-06-22 15:56:43 Image size of job updated: 150
+	150  -  MemoryUsage of job (MB)
+	154488  -  ResidentSetSize of job (KB)
+...
+006 (32358581.258.000) 2023-06-22 15:58:45 Image size of job updated: 150
+	150  -  MemoryUsage of job (MB)
+	154492  -  ResidentSetSize of job (KB)
+...
+006 (32358581.258.000) 2023-06-22 16:02:46 Image size of job updated: 150
+	150  -  MemoryUsage of job (MB)
+	154496  -  ResidentSetSize of job (KB)
+...
+040 (32358581.258.000) 2023-06-22 16:03:47 Started transferring output files
+	Seconds spent in queue: 2570
+...
+040 (32358581.258.000) 2023-06-22 16:03:47 Finished transferring output files
+...
+005 (32358581.258.000) 2023-06-22 16:03:48 Job terminated.
+	(1) Normal termination (return value 0)
+		Usr 0 00:13:46, Sys 0 00:26:23  -  Run Remote Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Run Local Usage
+		Usr 0 00:13:46, Sys 0 00:26:23  -  Total Remote Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Total Local Usage
+	143565  -  Run Bytes Sent By Job
+	224267  -  Run Bytes Received By Job
+	143565  -  Total Bytes Sent By Job
+	224267  -  Total Bytes Received By Job
+	Partitionable Resources :    Usage  Request Allocated 
+	   Cpus                 :     0.00        1         1 
+	   Disk (KB)            :   909         225   1645388 
+	   Memory (MB)          :   150        2048      2048 
+
+	Job terminated of its own accord at 2023-06-22T21:03:47Z with exit-code 0.
+...

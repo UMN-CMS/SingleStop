@@ -1,0 +1,41 @@
+000 (32231638.196.000) 2023-06-05 10:45:08 Job submitted from host: <131.225.204.62:9618?addrs=131.225.204.62-9618+[2620-6a-0-8420-f0-0-204-62]-9618&alias=lpcschedd5.fnal.gov&noUDP&sock=schedd_3532_3c98>
+...
+040 (32231638.196.000) 2023-06-05 11:06:02 Started transferring input files
+	Transferring to host: <131.225.188.149:9618?addrs=[2620-6a-0-8421-f0-0-188-149]-9618+131.225.188.149-9618&alias=cmswn2052.fnal.gov&noUDP&sock=slot1_18_2015_7feb_30337>
+...
+040 (32231638.196.000) 2023-06-05 11:06:02 Finished transferring input files
+...
+001 (32231638.196.000) 2023-06-05 11:06:02 Job executing on host: <131.225.188.149:9618?addrs=[2620-6a-0-8421-f0-0-188-149]-9618+131.225.188.149-9618&alias=cmswn2052.fnal.gov&noUDP&sock=startd_1925_f7e6>
+...
+006 (32231638.196.000) 2023-06-05 11:06:11 Image size of job updated: 6
+	6  -  MemoryUsage of job (MB)
+	6952  -  ResidentSetSize of job (KB)
+...
+006 (32231638.196.000) 2023-06-05 11:06:36 Image size of job updated: 132
+	132  -  MemoryUsage of job (MB)
+	135356  -  ResidentSetSize of job (KB)
+...
+040 (32231638.196.000) 2023-06-05 11:06:36 Started transferring output files
+...
+040 (32231638.196.000) 2023-06-05 11:06:36 Finished transferring output files
+...
+005 (32231638.196.000) 2023-06-05 11:06:37 Job terminated.
+	(1) Normal termination (return value 0)
+		Usr 0 00:00:12, Sys 0 00:00:03  -  Run Remote Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Run Local Usage
+		Usr 0 00:00:12, Sys 0 00:00:03  -  Total Remote Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Total Local Usage
+	91796  -  Run Bytes Sent By Job
+	223772  -  Run Bytes Received By Job
+	91796  -  Total Bytes Sent By Job
+	223772  -  Total Bytes Received By Job
+	Partitionable Resources :    Usage  Request Allocated 
+	   Cpus                 :        0        1         1 
+	   Disk (KB)            :      854      225   1636817 
+	   Memory (MB)          :      132     2048      2048 
+
+	Job terminated of its own accord at 2023-06-05T16:06:36Z with exit-code 0.
+...
+009 (1968573.196.000) 2023-06-05 18:30:12 Job was aborted.
+	via condor_rm (by user shardulr)
+...

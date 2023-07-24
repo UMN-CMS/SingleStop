@@ -300,6 +300,10 @@ class ExampleAnalysis(Module):
 			self.h_genMatchingTruthTable = ROOT.TH2F('truthTable',	'; is gen b; is b-tagged',	2,	0,	2,	2,	0,	2	) 
 			self.h_multipleMatches = ROOT.TH1F('multipleMatches',		'; multiple Matches',		2,	0,	2	)
 
+			self.h_pTMatched = ROOT.TH1F('pTMatched', ';pT [GeV]', 8, bins	)
+			self.h_pTEfficiencyDenom = ROOT.TH1F('pTEfficiencyDenom',	';pT [GeV]', 8, bins	)
+			self.h_pTPurityDenom = ROOT.TH1F('pTPurityDenom', ';pT [GeV]', 8, bins	)
+
 			# Add histograms to analysis object
 			for h in list(vars(self)):
 				if h[0:2] == 'h_':  self.addObject(getattr(self,h))
@@ -380,13 +384,13 @@ class ExampleAnalysis(Module):
 				self.h_cutflow.Fill(5,genWeight)
 
 				if not self.isCR0b: 
-					if not self.isData and self.bAlgo == 'loose' and len(looseBs) < 3: return False
-					elif not self.isData and self.bAlgo == 'medium' and len(tightBs) < 3: return False
+					if not self.isData and self.bAlgo == 'tight' and len(tightBs) < 3: return False
+					elif not self.isData and self.bAlgo == 'medium' and (len(mediumBs) < 2 or len(tightBs) < 1): return False
 					elif self.isData and len(looseBs) != 0: return False
 					self.h_cutflow.Fill(6,genWeight)
 
-					if not self.isData and self.bAlgo == 'loose' and len(looseBs) > 1 and abs(looseBs[0].p4().DeltaR(looseBs[1].p4())) < 1: return False
-					elif not self.isData and self.bAlgo == 'medium' and len(mediumBs) > 1 and abs(mediumBs[0].p4().DeltaR(mediumBs[1].p4())) < 1: return False
+					#if not self.isData and self.bAlgo == 'tight' and len(tightBs) > 1 and abs(tightBs[0].p4().DeltaR(tightBs[1].p4())) < 1: return False
+					#elif not self.isData and self.bAlgo == 'medium' and len(mediumBs) > 1 and abs(mediumBs[0].p4().DeltaR(mediumBs[1].p4())) < 1: return False
 					self.h_cutflow.Fill(7,genWeight)
 				elif len(looseBs) != 0: 
 					return False
@@ -678,14 +682,14 @@ class ExampleAnalysis(Module):
 						self.h_dPhiBChiUncomp.Fill(abs(sumJet3NoLead.DeltaPhi(mediumBs[0].p4())), genWeight)
 						self.h_dRBChiComp.Fill(abs(sumJet3.DeltaR(mediumBs[0].p4())), genWeight)
 						self.h_dRBChiUncomp.Fill(abs(sumJet3NoLead.DeltaR(mediumBs[0].p4())), genWeight)
-				elif self.bAlgo == 'loose':
-					if len(looseBs) > 0:
-						self.h_dEtaBChiComp.Fill(abs(sumJet3.Eta() - looseBs[0].eta), genWeight)
-						self.h_dEtaBChiUncomp.Fill(abs(looseBs[0].eta - sumJet3NoLead.Eta()), genWeight)
-						self.h_dPhiBChiComp.Fill(abs(sumJet3.DeltaPhi(looseBs[0].p4())), genWeight)
-						self.h_dPhiBChiUncomp.Fill(abs(sumJet3NoLead.DeltaPhi(looseBs[0].p4())), genWeight)
-						self.h_dRBChiComp.Fill(abs(sumJet3.DeltaR(looseBs[0].p4())), genWeight)
-						self.h_dRBChiUncomp.Fill(abs(sumJet3NoLead.DeltaR(looseBs[0].p4())), genWeight)
+				elif self.bAlgo == 'tight':
+					if len(tightBs) > 0:
+						self.h_dEtaBChiComp.Fill(abs(sumJet3.Eta() - tightBs[0].eta), genWeight)
+						self.h_dEtaBChiUncomp.Fill(abs(tightBs[0].eta - sumJet3NoLead.Eta()), genWeight)
+						self.h_dPhiBChiComp.Fill(abs(sumJet3.DeltaPhi(tightBs[0].p4())), genWeight)
+						self.h_dPhiBChiUncomp.Fill(abs(sumJet3NoLead.DeltaPhi(tightBs[0].p4())), genWeight)
+						self.h_dRBChiComp.Fill(abs(sumJet3.DeltaR(tightBs[0].p4())), genWeight)
+						self.h_dRBChiUncomp.Fill(abs(sumJet3NoLead.DeltaR(tightBs[0].p4())), genWeight)
 		
 			if len(jets) >= 3:
 				self.h_m3.Fill(sumJet3.M(),genWeight)
@@ -761,39 +765,39 @@ class ExampleAnalysis(Module):
 						 [abs(mediumBs[int(i) - 1].p4().DeltaR(mediumBs[int(j) - 1].p4())) for i, j in [x[0] for x in bJetCombos2D]],
 						 genWeight)
 			else:
-				for i,b in enumerate(looseBs):
+				for i,b in enumerate(tightBs):
 					self.h_pTbAll.Fill(b.pt, genWeight)
 					if i == 0: self.h_pTb1.Fill(b.pt,genWeight)
 					elif i == 1: self.h_pTb2.Fill(b.pt,genWeight)
 					elif i == 2: self.h_pTb3.Fill(b.pt,genWeight)
 					elif i == 3: self.h_pTb4.Fill(b.pt,genWeight)
 
-				if len(looseBs) >= 3: 
-					self.h_dEtabb12.Fill(abs(looseBs[0].eta - looseBs[1].eta),genWeight)
-					self.h_dEtabb13.Fill(abs(looseBs[0].eta - looseBs[2].eta),genWeight)
-					self.h_dEtabb23.Fill(abs(looseBs[1].eta - looseBs[2].eta),genWeight)	
-					self.h_dEtabb23.Fill(abs(looseBs[1].eta - looseBs[2].eta),genWeight)	
-					self.h_dPhibb12.Fill(abs(looseBs[0].p4().DeltaPhi(looseBs[1].p4())),genWeight)
-					self.h_dPhibb12.Fill(abs(looseBs[0].p4().DeltaPhi(looseBs[1].p4())),genWeight)
-					self.h_dPhibb13.Fill(abs(looseBs[0].p4().DeltaPhi(looseBs[2].p4())),genWeight)
-					self.h_dPhibb23.Fill(abs(looseBs[1].p4().DeltaPhi(looseBs[2].p4())),genWeight)
-					self.h_dRbb12.Fill(abs(looseBs[0].p4().DeltaR(looseBs[1].p4())),genWeight)
-					self.h_dRbb13.Fill(abs(looseBs[0].p4().DeltaR(looseBs[2].p4())),genWeight)
-					self.h_dRbb23.Fill(abs(looseBs[1].p4().DeltaR(looseBs[2].p4())),genWeight)
+				if len(tightBs) >= 3: 
+					self.h_dEtabb12.Fill(abs(tightBs[0].eta - tightBs[1].eta),genWeight)
+					self.h_dEtabb13.Fill(abs(tightBs[0].eta - tightBs[2].eta),genWeight)
+					self.h_dEtabb23.Fill(abs(tightBs[1].eta - tightBs[2].eta),genWeight)	
+					self.h_dEtabb23.Fill(abs(tightBs[1].eta - tightBs[2].eta),genWeight)	
+					self.h_dPhibb12.Fill(abs(tightBs[0].p4().DeltaPhi(tightBs[1].p4())),genWeight)
+					self.h_dPhibb12.Fill(abs(tightBs[0].p4().DeltaPhi(tightBs[1].p4())),genWeight)
+					self.h_dPhibb13.Fill(abs(tightBs[0].p4().DeltaPhi(tightBs[2].p4())),genWeight)
+					self.h_dPhibb23.Fill(abs(tightBs[1].p4().DeltaPhi(tightBs[2].p4())),genWeight)
+					self.h_dRbb12.Fill(abs(tightBs[0].p4().DeltaR(tightBs[1].p4())),genWeight)
+					self.h_dRbb13.Fill(abs(tightBs[0].p4().DeltaR(tightBs[2].p4())),genWeight)
+					self.h_dRbb23.Fill(abs(tightBs[1].p4().DeltaR(tightBs[2].p4())),genWeight)
 	
 					bJetCombos2D = [[''.join(map(str, i)), ''.join(map(str, j))] for i, j in combinations(combinations([1, 2, 3], 2), 2)]
 
 					self.fill2DHists(['dEtabb{}Vs{}'.format(i, j) for [i, j] in bJetCombos2D],
-						 [abs(looseBs[int(i) - 1].eta - looseBs[int(j) - 1].eta) for i, j in [x[1] for x in bJetCombos2D]],
-						 [abs(looseBs[int(i) - 1].eta - looseBs[int(j) - 1].eta) for i, j in [x[0] for x in bJetCombos2D]],
+						 [abs(tightBs[int(i) - 1].eta - tightBs[int(j) - 1].eta) for i, j in [x[1] for x in bJetCombos2D]],
+						 [abs(tightBs[int(i) - 1].eta - tightBs[int(j) - 1].eta) for i, j in [x[0] for x in bJetCombos2D]],
 						 genWeight)
 					self.fill2DHists(['dPhibb{}Vs{}'.format(i, j) for [i, j] in bJetCombos2D],
-						 [abs(looseBs[int(i) - 1].p4().DeltaPhi(looseBs[int(j) - 1].p4())) for i, j in [x[1] for x in bJetCombos2D]],
-						 [abs(looseBs[int(i) - 1].p4().DeltaPhi(looseBs[int(j) - 1].p4())) for i, j in [x[0] for x in bJetCombos2D]],
+						 [abs(tightBs[int(i) - 1].p4().DeltaPhi(tightBs[int(j) - 1].p4())) for i, j in [x[1] for x in bJetCombos2D]],
+						 [abs(tightBs[int(i) - 1].p4().DeltaPhi(tightBs[int(j) - 1].p4())) for i, j in [x[0] for x in bJetCombos2D]],
 						 genWeight)
 					self.fill2DHists(['dRbb{}Vs{}'.format(i, j) for [i, j] in bJetCombos2D],
-						 [abs(looseBs[int(i) - 1].p4().DeltaR(looseBs[int(j) - 1].p4())) for i, j in [x[1] for x in bJetCombos2D]],
-						 [abs(looseBs[int(i) - 1].p4().DeltaR(looseBs[int(j) - 1].p4())) for i, j in [x[0] for x in bJetCombos2D]],
+						 [abs(tightBs[int(i) - 1].p4().DeltaR(tightBs[int(j) - 1].p4())) for i, j in [x[1] for x in bJetCombos2D]],
+						 [abs(tightBs[int(i) - 1].p4().DeltaR(tightBs[int(j) - 1].p4())) for i, j in [x[0] for x in bJetCombos2D]],
 						 genWeight)
 			if self.isQCD:
 				self.h_nPartons.Fill(len(gens), genWeight)
@@ -814,12 +818,17 @@ class ExampleAnalysis(Module):
 					self.h_multipleMatches.Fill(1, genWeight)
 				print(matches)
 				for (numGen, numReco) in matches:
-					if abs(genAK4Jets[numGen].partonFlavour) == 5: 
-						if jets[numReco] in tightBs: self.h_genMatchingTruthTable.Fill(1, 1, genWeight)
+					if abs(genAK4Jets[numGen].partonFlavour) == 5:
+						self.h_pTEfficiencyDenom.Fill(jets[numReco].pt, genWeight) 
+						if jets[numReco] in tightBs: 
+							self.h_genMatchingTruthTable.Fill(1, 1, genWeight)
+							self.h_pTMatched.Fill(jets[numReco].pt, genWeight)
 						else: self.h_genMatchingTruthTable.Fill(1, 0, genWeight)
 					else:
 						if jets[numReco] in tightBs: self.h_genMatchingTruthTable.Fill(0, 1, genWeight)
-						else: self.h_genMatchingTruthTable.Fill(0, 0, genWeight)						
+						else: self.h_genMatchingTruthTable.Fill(0, 0, genWeight)
+				for tightB in tightBs:
+					self.h_pTPurityDenom.Fill(tightB.pt, genWeight)						
 
 			self.h_dEtaRecoComp.Fill(abs(sumJet3.Eta() - sumJet4.Eta()),genWeight)
 			self.h_dPhiRecoComp.Fill(abs(sumJet3.DeltaPhi(sumJet4)),genWeight)
@@ -842,7 +851,7 @@ parser.add_argument('-n',type=int,default=1,help='Sample index to run over for b
 parser.add_argument('--points',type=str,default='all',help='Signal point(s) to run over, comma separated in MSTOP_MCHI format; "all" to run over all available points')
 parser.add_argument('--useskim',action='store_true',default=False,help='Flag to use NANOAODs skimmed with the nominal selections')
 parser.add_argument('--coupling', type = str, default = '313', choices = ['312', '313'])
-parser.add_argument('--bAlgo', type = str, default = 'medium', choices = ['loose', 'medium'])
+parser.add_argument('--bAlgo', type = str, default = 'medium', choices = ['tight', 'medium'])
 parser.add_argument('--CR0b',action='store_true',default=False,help='Flag to use the 0b CR selection')
 args = parser.parse_args()
 outputPath = 'output/{}'.format(args.tag)
@@ -893,7 +902,7 @@ if args.sample == 'Data2018':
 
 elif args.sample == 'signal':
 
-  allPoints = ['1200_400', '1500_900', '2000_1900'] if args.coupling == '312' else ['1000_400', '1500_900', '2000_1900']
+  allPoints = ['1200_400', '1200_1100', '1500_600', '1500_900', '1500_1400', '2000_1900'] if args.coupling == '312' else ['1000_400', '1000_900', '1500_600', '1500_900', '1500_1400', '2000_1900']
 							 #,'1000_600','1000_900',
                #'1200_400','1200_600','1200_1100',
                #'1300_400','1300_600','1300_1200',

@@ -1,0 +1,92 @@
+[FERMIHTC-APPTAINER]: INFO -- No Apptainer image specified
+[FERMIHTC-APPTAINER]: INFO -- Running job on the host machine
+
+[FERMIHTC-APPTAINER]: INFO -- Running ./condor_exec.exe
+Starting job on  Tue Jun 27 18:28:08 UTC 2023
+Running on: Linux shardulr-2169568-168-cmswn2059.fnal.gov 3.10.0-1160.90.1.el7.x86_64 #1 SMP Thu Apr 27 13:14:20 CDT 2023 x86_64 x86_64 x86_64 GNU/Linux
+System software: Scientific Linux release 7.9 (Nitrogen)
+Running ls -alrth:
+total 156K
+-rw-r--r--  1 shardulr fnalgrid 5.0K Jun 27 18:28 .job.ad
+-rw-r--r--  1 shardulr fnalgrid  12K Jun 27 18:28 .machine.ad
+-rwx------  1 shardulr fnalgrid   49 Jun 27 18:28 .chirp.config
+-rw-------  1 shardulr fnalgrid  11K Jun 27 18:28 x509up
+drwxr-xr-x  2 shardulr fnalgrid 4.0K Jun 27 18:28 samples
+-rw-r--r--  1 shardulr fnalgrid  62K Jun 27 18:28 singleStopAnalyzer.py
+drwxr-xr-x  2 shardulr fnalgrid 4.0K Jun 27 18:28 framework
+-rwxr-xr-x  1 shardulr fnalgrid  698 Jun 27 18:28 condor_exec.exe
+-rw-r--r--  1 shardulr fnalgrid  951 Jun 27 18:28 bJetMatcher.py
+-rw-r--r--  1 shardulr fnalgrid    0 Jun 27 18:28 docker_stderror
+drwxrwxrwt  3 shardulr fnalgrid 4.0K Jun 27 18:28 var
+drwxrwxrwt  2 shardulr fnalgrid 4.0K Jun 27 18:28 tmp
+-rw-r--r--  1 shardulr fnalgrid  12K Jun 27 18:28 .update.ad
+drwxr-xr-x  3 root     root     4.0K Jun 27 18:28 ..
+srwxr-xr-x  1 shardulr fnalgrid    0 Jun 27 18:28 .docker_sock
+-rw-r--r--  1 shardulr fnalgrid  113 Jun 27 18:28 _condor_stderr
+drwx------  7 shardulr fnalgrid 4.0K Jun 27 18:28 .
+drwxr-xr-x 17 shardulr fnalgrid 4.0K Jun 27 18:28 CMSSW_10_6_19_patch2
+-rw-r--r--  1 shardulr fnalgrid  453 Jun 27 18:28 _condor_stdout
+/storage/local/data1/condor/execute/dir_43617/CMSSW_10_6_19_patch2 is the CMSSW we created on the local worker node
+Running over Data2018 files
+Blinding data, only using CR cuts (0 loose b's)
+Using UL 2018 campaign working points
+Pre-select 323728 entries out of 2285743 (14.16%)
+Processed    10000/  323728 entries,  3.09% (elapsed time    32.5s, curr speed    0.308 kHz, avg speed    0.308 kHz), accepted     1118/   10001 events (11.18%)
+Processed    20000/  323728 entries,  6.18% (elapsed time    63.6s, curr speed    0.321 kHz, avg speed    0.314 kHz), accepted     2469/   20001 events (12.34%)
+Processed    30000/  323728 entries,  9.27% (elapsed time    95.4s, curr speed    0.315 kHz, avg speed    0.314 kHz), accepted     3724/   30001 events (12.41%)
+Processed    40000/  323728 entries, 12.36% (elapsed time   129.7s, curr speed    0.291 kHz, avg speed    0.308 kHz), accepted     5085/   40001 events (12.71%)
+Processed    50000/  323728 entries, 15.45% (elapsed time   162.6s, curr speed    0.304 kHz, avg speed    0.307 kHz), accepted     6160/   50001 events (12.32%)
+Processed    60000/  323728 entries, 18.53% (elapsed time   194.0s, curr speed    0.319 kHz, avg speed    0.309 kHz), accepted     7315/   60001 events (12.19%)
+Processed    70000/  323728 entries, 21.62% (elapsed time   227.4s, curr speed    0.299 kHz, avg speed    0.308 kHz), accepted     8519/   70001 events (12.17%)
+Processed    80000/  323728 entries, 24.71% (elapsed time   260.4s, curr speed    0.303 kHz, avg speed    0.307 kHz), accepted     9788/   80001 events (12.23%)
+Processed    90000/  323728 entries, 27.80% (elapsed time   294.3s, curr speed    0.295 kHz, avg speed    0.306 kHz), accepted    11162/   90001 events (12.40%)
+Processed   100000/  323728 entries, 30.89% (elapsed time   327.7s, curr speed    0.300 kHz, avg speed    0.305 kHz), accepted    12594/  100001 events (12.59%)
+Processed   110000/  323728 entries, 33.98% (elapsed time   361.0s, curr speed    0.300 kHz, avg speed    0.305 kHz), accepted    14003/  110001 events (12.73%)
+Processed   120000/  323728 entries, 37.07% (elapsed time   394.0s, curr speed    0.304 kHz, avg speed    0.305 kHz), accepted    15408/  120001 events (12.84%)
+Processed   130000/  323728 entries, 40.16% (elapsed time   426.0s, curr speed    0.312 kHz, avg speed    0.305 kHz), accepted    16827/  130001 events (12.94%)
+Processed   140000/  323728 entries, 43.25% (elapsed time   458.4s, curr speed    0.309 kHz, avg speed    0.305 kHz), accepted    18149/  140001 events (12.96%)
+Processed   150000/  323728 entries, 46.34% (elapsed time   491.6s, curr speed    0.301 kHz, avg speed    0.305 kHz), accepted    19518/  150001 events (13.01%)
+Processed   160000/  323728 entries, 49.42% (elapsed time   524.7s, curr speed    0.302 kHz, avg speed    0.305 kHz), accepted    20996/  160001 events (13.12%)
+Processed   170000/  323728 entries, 52.51% (elapsed time   558.4s, curr speed    0.297 kHz, avg speed    0.304 kHz), accepted    22546/  170001 events (13.26%)
+Processed   180000/  323728 entries, 55.60% (elapsed time   591.8s, curr speed    0.300 kHz, avg speed    0.304 kHz), accepted    24042/  180001 events (13.36%)
+Processed   190000/  323728 entries, 58.69% (elapsed time   626.0s, curr speed    0.292 kHz, avg speed    0.304 kHz), accepted    25561/  190001 events (13.45%)
+Processed   200000/  323728 entries, 61.78% (elapsed time   659.5s, curr speed    0.299 kHz, avg speed    0.303 kHz), accepted    27008/  200001 events (13.50%)
+Processed   210000/  323728 entries, 64.87% (elapsed time   693.5s, curr speed    0.294 kHz, avg speed    0.303 kHz), accepted    28434/  210001 events (13.54%)
+Processed   220000/  323728 entries, 67.96% (elapsed time   727.5s, curr speed    0.294 kHz, avg speed    0.302 kHz), accepted    29513/  220001 events (13.41%)
+Processed   230000/  323728 entries, 71.05% (elapsed time   760.3s, curr speed    0.304 kHz, avg speed    0.302 kHz), accepted    30587/  230001 events (13.30%)
+Processed   240000/  323728 entries, 74.14% (elapsed time   793.8s, curr speed    0.299 kHz, avg speed    0.302 kHz), accepted    31717/  240001 events (13.22%)
+Processed   250000/  323728 entries, 77.23% (elapsed time   828.7s, curr speed    0.287 kHz, avg speed    0.302 kHz), accepted    32997/  250001 events (13.20%)
+Processed   260000/  323728 entries, 80.31% (elapsed time   863.5s, curr speed    0.288 kHz, avg speed    0.301 kHz), accepted    34457/  260001 events (13.25%)
+Processed   270000/  323728 entries, 83.40% (elapsed time   897.6s, curr speed    0.293 kHz, avg speed    0.301 kHz), accepted    35832/  270001 events (13.27%)
+Processed   280000/  323728 entries, 86.49% (elapsed time   932.4s, curr speed    0.287 kHz, avg speed    0.300 kHz), accepted    37270/  280001 events (13.31%)
+Processed   290000/  323728 entries, 89.58% (elapsed time   967.2s, curr speed    0.288 kHz, avg speed    0.300 kHz), accepted    38608/  290001 events (13.31%)
+Processed   300000/  323728 entries, 92.67% (elapsed time   999.7s, curr speed    0.307 kHz, avg speed    0.300 kHz), accepted    39731/  300001 events (13.24%)
+Processed   310000/  323728 entries, 95.76% (elapsed time  1033.5s, curr speed    0.296 kHz, avg speed    0.300 kHz), accepted    40945/  310001 events (13.21%)
+Processed   320000/  323728 entries, 98.85% (elapsed time  1067.2s, curr speed    0.296 kHz, avg speed    0.300 kHz), accepted    42110/  320001 events (13.16%)
+Processed 323728 preselected entries from root://cmsxrootd.fnal.gov//store/data/Run2018B/JetHT/NANOAOD/UL2018_MiniAODv2_NanoAODv9-v1/120000/620745A2-DAD8-DB4B-8B2A-8BB394706AD2.root (2285743 entries). Finally selected 42523 entries
+Total time 1169.1 sec. to process 2285743 events. Rate = 1955.1 Hz.
+Running pwd:
+/storage/local/data1/condor/execute/dir_43617
+Running ls -alrth:
+total 172K
+-rw-r--r--  1 shardulr fnalgrid 5.0K Jun 27 18:28 .job.ad
+-rw-r--r--  1 shardulr fnalgrid  12K Jun 27 18:28 .machine.ad
+-rwx------  1 shardulr fnalgrid   49 Jun 27 18:28 .chirp.config
+-rw-------  1 shardulr fnalgrid  11K Jun 27 18:28 x509up
+drwxr-xr-x  2 shardulr fnalgrid 4.0K Jun 27 18:28 samples
+-rw-r--r--  1 shardulr fnalgrid  62K Jun 27 18:28 singleStopAnalyzer.py
+-rwxr-xr-x  1 shardulr fnalgrid  698 Jun 27 18:28 condor_exec.exe
+-rw-r--r--  1 shardulr fnalgrid  951 Jun 27 18:28 bJetMatcher.py
+-rw-r--r--  1 shardulr fnalgrid    0 Jun 27 18:28 docker_stderror
+drwxrwxrwt  3 shardulr fnalgrid 4.0K Jun 27 18:28 var
+drwxrwxrwt  2 shardulr fnalgrid 4.0K Jun 27 18:28 tmp
+drwxr-xr-x  3 root     root     4.0K Jun 27 18:28 ..
+srwxr-xr-x  1 shardulr fnalgrid    0 Jun 27 18:28 .docker_sock
+-rw-r--r--  1 shardulr fnalgrid  113 Jun 27 18:28 _condor_stderr
+drwxr-xr-x 17 shardulr fnalgrid 4.0K Jun 27 18:28 CMSSW_10_6_19_patch2
+drwxr-xr-x  2 shardulr fnalgrid 4.0K Jun 27 18:28 framework
+-rw-r--r--  1 shardulr fnalgrid 1.7K Jun 27 18:28 bJetMatcher.pyc
+drwxr-xr-x  3 shardulr fnalgrid 4.0K Jun 27 18:28 output
+-rw-r--r--  1 shardulr fnalgrid  13K Jun 27 18:47 .update.ad
+drwx------  8 shardulr fnalgrid 4.0K Jun 27 18:47 .
+-rw-r--r--  1 shardulr fnalgrid 7.3K Jun 27 18:47 _condor_stdout

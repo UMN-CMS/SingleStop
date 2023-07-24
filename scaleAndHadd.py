@@ -164,7 +164,7 @@ if sample == 'QCDInclusive2018':
   
     for key,value in SFs.items():
       if key[0] == 3: SFs[key] *= lumiTarget / lumiSample
-  
+  skipFiles = []	 
   with open('samples/{}'.format(sampleFile)) as f:
     for i,line in enumerate(f):
       period = -1 
@@ -189,6 +189,7 @@ if sample == 'QCDInclusive2018':
   
       if period == -1 or HT == -1: sys.exit()
       else: SF = SFs[(period,HT)]
+      if HT in [50, 100, 200, 300]: skipFiles.append(i)
   
       fTemp = ROOT.TFile.Open('{}/{}-{}-temp.root'.format(outputDir,sample,i + 1),'RECREATE')
       f = ROOT.TFile.Open('{}/{}-{}.root'.format(inputDir,sample,i + 1))
@@ -204,7 +205,7 @@ if sample == 'QCDInclusive2018':
   
   fileList = []
   for j in range(i + 1):
-    if j in range(356, 404): continue
+    if (j + 1) in skipFiles: continue
     fileList.append('{}/{}-{}-temp.root'.format(outputDir,sample,j + 1))
   os.system('hadd -f {}/{}.root {}'.format(outputDir,sample,' '.join(fileList)))
   os.system('rm {}/*temp.root'.format(outputDir))
@@ -244,10 +245,10 @@ if sample == 'signal' or sample == 'signal313':
 
   lumiTarget = 137.62
   NEventsGen = 10000
-  lambdapp = 0.4
+  lambdapp = 0.1
 
   if sample == 'signal':
-    points = ['1200_400', '1400_600', '1500_900', '2000_1900']#,'1000_600','1000_900',
+    points = ['1200_400', '1200_1100', '1500_600', '1500_900', '1500_1400', '2000_1900']#, '1400_600', '1500_900', '2000_1900']#,'1000_600','1000_900',
               #'1200_400','1200_600','1200_1100',
               #'1300_400','1300_600','1300_1200',
               #'1400_400','1400_600','1400_1300',
@@ -263,9 +264,9 @@ if sample == 'signal' or sample == 'signal313':
       2000:lumiTarget * 1600  * lambdapp**2 / NEventsGen,
     }
   elif sample == 'signal313':
-    points = ['1000_400','1000_600','1000_900',
-              '1500_400','1500_600','1500_900','1500_1400',
-              '2000_400','2000_600','2000_900','2000_1400','2000_1900']
+    points = ['1000_400', '1000_900', '1500_600', '1500_900', '1500_1400', '2000_1900'] #,'1000_600','1000_900',
+              #'1500_400','1500_600','1500_900','1500_1400',
+              #'2000_400','2000_600','2000_900','2000_1400','2000_1900']
 
     SFs = {
       1000:lumiTarget * 27000 * lambdapp**2 / NEventsGen,

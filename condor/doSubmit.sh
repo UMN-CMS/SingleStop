@@ -2,7 +2,7 @@
 
 if [ -z "$1" ]
   then
-    echo "ERROR: No sample argument supplied. Usage: ./doSubmit.sh [SAMPLE] [COUPLING] [loose/medium]"
+    echo "ERROR: No sample argument supplied. Usage: ./doSubmit.sh [SAMPLE] [COUPLING] [medium/tight]"
     exit 1
 fi
 
@@ -29,7 +29,7 @@ rm -rf job out err log samples output
 mkdir -p job out err log samples
 
 cp ../samples/"$sampleFile" samples
-cp ../bJetMatcher.py .
+cp ../jetMatching.py .
 cp ../singleStopAnalyzer.py .
 
 sed -i "2,4s/PhysicsTools.NanoAODTools.postprocessing.//g" singleStopAnalyzer.py
@@ -71,7 +71,7 @@ Executable	= job/submit_\$(ijobname).sh
 Output		= out/submit_\$(ijobname).out
 Error		= err/submit_\$(ijobname).err
 Log		= log/submit_\$(ijobname).log
-transfer_input_files = samples,framework,singleStopAnalyzer.py,bJetMatcher.py
+transfer_input_files = samples,framework,singleStopAnalyzer.py,jetMatching.py
 transfer_output_files = output
 should_transfer_files = YES
 when_to_transfer_output = ON_EXIT

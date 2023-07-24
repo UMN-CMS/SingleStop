@@ -1,0 +1,46 @@
+000 (32358581.462.000) 2023-06-22 15:12:17 Job submitted from host: <131.225.204.62:9618?addrs=131.225.204.62-9618+[2620-6a-0-8420-f0-0-204-62]-9618&alias=lpcschedd5.fnal.gov&noUDP&sock=schedd_2770_916d>
+...
+040 (32358581.462.000) 2023-06-22 15:23:27 Started transferring input files
+	Transferring to host: <131.225.189.36:9618?addrs=[2620-6a-0-8421-f0-0-189-36]-9618+131.225.189.36-9618&alias=cmswn2089.fnal.gov&noUDP&sock=slot1_33_2130_8710_41610>
+...
+040 (32358581.462.000) 2023-06-22 15:23:27 Finished transferring input files
+...
+001 (32358581.462.000) 2023-06-22 15:23:27 Job executing on host: <131.225.189.36:9618?addrs=[2620-6a-0-8421-f0-0-189-36]-9618+131.225.189.36-9618&alias=cmswn2089.fnal.gov&noUDP&sock=startd_2027_ee8f>
+...
+006 (32358581.462.000) 2023-06-22 15:23:36 Image size of job updated: 41
+	41  -  MemoryUsage of job (MB)
+	42484  -  ResidentSetSize of job (KB)
+...
+006 (32358581.462.000) 2023-06-22 15:24:36 Image size of job updated: 160
+	160  -  MemoryUsage of job (MB)
+	164112  -  ResidentSetSize of job (KB)
+...
+006 (32358581.462.000) 2023-06-22 15:25:37 Image size of job updated: 160
+	160  -  MemoryUsage of job (MB)
+	164268  -  ResidentSetSize of job (KB)
+...
+006 (32358581.462.000) 2023-06-22 15:29:41 Image size of job updated: 160
+	160  -  MemoryUsage of job (MB)
+	164272  -  ResidentSetSize of job (KB)
+...
+040 (32358581.462.000) 2023-06-22 15:31:16 Started transferring output files
+...
+040 (32358581.462.000) 2023-06-22 15:31:16 Finished transferring output files
+...
+005 (32358581.462.000) 2023-06-22 15:31:20 Job terminated.
+	(1) Normal termination (return value 0)
+		Usr 0 00:04:24, Sys 0 00:00:12  -  Run Remote Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Run Local Usage
+		Usr 0 00:04:24, Sys 0 00:00:12  -  Total Remote Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Total Local Usage
+	147075  -  Run Bytes Sent By Job
+	224267  -  Run Bytes Received By Job
+	147075  -  Total Bytes Sent By Job
+	224267  -  Total Bytes Received By Job
+	Partitionable Resources :    Usage  Request Allocated 
+	   Cpus                 :     0.00        1         1 
+	   Disk (KB)            :   912         225   1630299 
+	   Memory (MB)          :   160        2048      2048 
+
+	Job terminated of its own accord at 2023-06-22T20:31:16Z with exit-code 0.
+...

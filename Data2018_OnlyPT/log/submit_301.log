@@ -1,0 +1,42 @@
+000 (32358499.300.000) 2023-06-22 15:06:02 Job submitted from host: <131.225.204.62:9618?addrs=131.225.204.62-9618+[2620-6a-0-8420-f0-0-204-62]-9618&alias=lpcschedd5.fnal.gov&noUDP&sock=schedd_2770_916d>
+...
+040 (32358499.300.000) 2023-06-22 15:14:38 Started transferring input files
+	Transferring to host: <131.225.189.27:9618?addrs=[2620-6a-0-8421-f0-0-189-27]-9618+131.225.189.27-9618&alias=cmswn2084.fnal.gov&noUDP&sock=slot1_43_2245_8e34_66515>
+...
+040 (32358499.300.000) 2023-06-22 15:14:38 Finished transferring input files
+...
+001 (32358499.300.000) 2023-06-22 15:14:39 Job executing on host: <131.225.189.27:9618?addrs=[2620-6a-0-8421-f0-0-189-27]-9618+131.225.189.27-9618&alias=cmswn2084.fnal.gov&noUDP&sock=startd_1939_9239>
+...
+006 (32358499.300.000) 2023-06-22 15:15:49 Image size of job updated: 140
+	140  -  MemoryUsage of job (MB)
+	144340  -  ResidentSetSize of job (KB)
+...
+006 (32358499.300.000) 2023-06-22 15:16:50 Image size of job updated: 140
+	140  -  MemoryUsage of job (MB)
+	144348  -  ResidentSetSize of job (KB)
+...
+006 (32358499.300.000) 2023-06-22 15:18:43 Image size of job updated: 140
+	140  -  MemoryUsage of job (MB)
+	144368  -  ResidentSetSize of job (KB)
+...
+040 (32358499.300.000) 2023-06-22 15:18:43 Started transferring output files
+...
+040 (32358499.300.000) 2023-06-22 15:18:43 Finished transferring output files
+...
+005 (32358499.300.000) 2023-06-22 15:18:47 Job terminated.
+	(1) Normal termination (return value 0)
+		Usr 0 00:02:28, Sys 0 00:00:07  -  Run Remote Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Run Local Usage
+		Usr 0 00:02:28, Sys 0 00:00:07  -  Total Remote Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Total Local Usage
+	142061  -  Run Bytes Sent By Job
+	224295  -  Run Bytes Received By Job
+	142061  -  Total Bytes Sent By Job
+	224295  -  Total Bytes Received By Job
+	Partitionable Resources :    Usage  Request Allocated 
+	   Cpus                 :     0.00        1         1 
+	   Disk (KB)            :   909         225   1637039 
+	   Memory (MB)          :   140        2048      2048 
+
+	Job terminated of its own accord at 2023-06-22T20:18:43Z with exit-code 0.
+...

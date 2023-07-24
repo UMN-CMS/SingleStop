@@ -1,0 +1,46 @@
+000 (32358581.138.000) 2023-06-22 15:12:16 Job submitted from host: <131.225.204.62:9618?addrs=131.225.204.62-9618+[2620-6a-0-8420-f0-0-204-62]-9618&alias=lpcschedd5.fnal.gov&noUDP&sock=schedd_2770_916d>
+...
+040 (32358581.138.000) 2023-06-22 15:20:27 Entered queue to transfer input files
+	Transferring to host: <131.225.188.86:9618?addrs=[2620-6a-0-8421-f0-0-188-86]-9618+131.225.188.86-9618&alias=cmswn2042.fnal.gov&noUDP&sock=slot1_25_2091_0c6e_41017>
+...
+040 (32358581.138.000) 2023-06-22 15:20:30 Started transferring input files
+	Seconds spent in queue: 3
+...
+040 (32358581.138.000) 2023-06-22 15:20:30 Finished transferring input files
+...
+001 (32358581.138.000) 2023-06-22 15:20:30 Job executing on host: <131.225.188.86:9618?addrs=[2620-6a-0-8421-f0-0-188-86]-9618+131.225.188.86-9618&alias=cmswn2042.fnal.gov&noUDP&sock=startd_2015_b36c>
+...
+006 (32358581.138.000) 2023-06-22 15:20:39 Image size of job updated: 15
+	15  -  MemoryUsage of job (MB)
+	16064  -  ResidentSetSize of job (KB)
+...
+006 (32358581.138.000) 2023-06-22 15:21:40 Image size of job updated: 147
+	147  -  MemoryUsage of job (MB)
+	151248  -  ResidentSetSize of job (KB)
+...
+006 (32358581.138.000) 2023-06-22 15:22:41 Image size of job updated: 147
+	147  -  MemoryUsage of job (MB)
+	151324  -  ResidentSetSize of job (KB)
+...
+040 (32358581.138.000) 2023-06-22 15:23:45 Started transferring output files
+	Seconds spent in queue: 198
+...
+040 (32358581.138.000) 2023-06-22 15:23:45 Finished transferring output files
+...
+005 (32358581.138.000) 2023-06-22 15:23:46 Job terminated.
+	(1) Normal termination (return value 0)
+		Usr 0 00:02:14, Sys 0 00:00:07  -  Run Remote Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Run Local Usage
+		Usr 0 00:02:14, Sys 0 00:00:07  -  Total Remote Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Total Local Usage
+	137176  -  Run Bytes Sent By Job
+	224267  -  Run Bytes Received By Job
+	137176  -  Total Bytes Sent By Job
+	224267  -  Total Bytes Received By Job
+	Partitionable Resources :    Usage  Request Allocated 
+	   Cpus                 :        0        1         1 
+	   Disk (KB)            :      900      225   1634539 
+	   Memory (MB)          :      147     2048      2048 
+
+	Job terminated of its own accord at 2023-06-22T20:23:45Z with exit-code 0.
+...

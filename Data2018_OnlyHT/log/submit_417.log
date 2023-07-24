@@ -1,0 +1,54 @@
+000 (32358581.416.000) 2023-06-22 15:12:17 Job submitted from host: <131.225.204.62:9618?addrs=131.225.204.62-9618+[2620-6a-0-8420-f0-0-204-62]-9618&alias=lpcschedd5.fnal.gov&noUDP&sock=schedd_2770_916d>
+...
+040 (32358581.416.000) 2023-06-22 15:22:59 Entered queue to transfer input files
+	Transferring to host: <131.225.188.86:9618?addrs=[2620-6a-0-8421-f0-0-188-86]-9618+131.225.188.86-9618&alias=cmswn2042.fnal.gov&noUDP&sock=slot1_14_2091_0c6e_41026>
+...
+040 (32358581.416.000) 2023-06-22 15:23:03 Started transferring input files
+	Seconds spent in queue: 4
+...
+040 (32358581.416.000) 2023-06-22 15:23:03 Finished transferring input files
+...
+001 (32358581.416.000) 2023-06-22 15:23:03 Job executing on host: <131.225.188.86:9618?addrs=[2620-6a-0-8421-f0-0-188-86]-9618+131.225.188.86-9618&alias=cmswn2042.fnal.gov&noUDP&sock=startd_2015_b36c>
+...
+006 (32358581.416.000) 2023-06-22 15:23:12 Image size of job updated: 6
+	6  -  MemoryUsage of job (MB)
+	7004  -  ResidentSetSize of job (KB)
+...
+006 (32358581.416.000) 2023-06-22 15:24:13 Image size of job updated: 162
+	162  -  MemoryUsage of job (MB)
+	166300  -  ResidentSetSize of job (KB)
+...
+006 (32358581.416.000) 2023-06-22 15:25:13 Image size of job updated: 162
+	162  -  MemoryUsage of job (MB)
+	166312  -  ResidentSetSize of job (KB)
+...
+006 (32358581.416.000) 2023-06-22 15:27:15 Image size of job updated: 162
+	162  -  MemoryUsage of job (MB)
+	166316  -  ResidentSetSize of job (KB)
+...
+006 (32358581.416.000) 2023-06-22 15:27:52 Image size of job updated: 162
+	162  -  MemoryUsage of job (MB)
+	166324  -  ResidentSetSize of job (KB)
+...
+040 (32358581.416.000) 2023-06-22 15:27:52 Started transferring output files
+	Seconds spent in queue: 293
+...
+040 (32358581.416.000) 2023-06-22 15:27:52 Finished transferring output files
+...
+005 (32358581.416.000) 2023-06-22 15:27:53 Job terminated.
+	(1) Normal termination (return value 0)
+		Usr 0 00:04:16, Sys 0 00:00:12  -  Run Remote Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Run Local Usage
+		Usr 0 00:04:16, Sys 0 00:00:12  -  Total Remote Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Total Local Usage
+	145006  -  Run Bytes Sent By Job
+	224267  -  Run Bytes Received By Job
+	145006  -  Total Bytes Sent By Job
+	224267  -  Total Bytes Received By Job
+	Partitionable Resources :    Usage  Request Allocated 
+	   Cpus                 :        0        1         1 
+	   Disk (KB)            :      908      225   1634539 
+	   Memory (MB)          :      162     2048      2048 
+
+	Job terminated of its own accord at 2023-06-22T20:27:52Z with exit-code 0.
+...

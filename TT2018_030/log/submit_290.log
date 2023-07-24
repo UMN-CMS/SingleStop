@@ -1,0 +1,45 @@
+000 (32231638.289.000) 2023-06-05 10:45:09 Job submitted from host: <131.225.204.62:9618?addrs=131.225.204.62-9618+[2620-6a-0-8420-f0-0-204-62]-9618&alias=lpcschedd5.fnal.gov&noUDP&sock=schedd_3532_3c98>
+...
+040 (32231638.289.000) 2023-06-05 11:08:47 Started transferring input files
+	Transferring to host: <131.225.188.14:9618?addrs=[2620-6a-0-8421-f0-0-188-14]-9618+131.225.188.14-9618&alias=cmswn2019.fnal.gov&noUDP&sock=slot1_10_2024_d74b_31967>
+...
+040 (32231638.289.000) 2023-06-05 11:08:47 Finished transferring input files
+...
+001 (32231638.289.000) 2023-06-05 11:08:47 Job executing on host: <131.225.188.14:9618?addrs=[2620-6a-0-8421-f0-0-188-14]-9618+131.225.188.14-9618&alias=cmswn2019.fnal.gov&noUDP&sock=startd_1918_2abc>
+...
+006 (32231638.289.000) 2023-06-05 11:08:56 Image size of job updated: 38
+	38  -  MemoryUsage of job (MB)
+	39356  -  ResidentSetSize of job (KB)
+...
+006 (32231638.289.000) 2023-06-05 11:09:57 Image size of job updated: 136
+	136  -  MemoryUsage of job (MB)
+	139828  -  ResidentSetSize of job (KB)
+...
+006 (32231638.289.000) 2023-06-05 11:10:52 Image size of job updated: 136
+	136  -  MemoryUsage of job (MB)
+	139956  -  ResidentSetSize of job (KB)
+...
+040 (32231638.289.000) 2023-06-05 11:10:52 Started transferring output files
+...
+040 (32231638.289.000) 2023-06-05 11:10:52 Finished transferring output files
+...
+005 (32231638.289.000) 2023-06-05 11:10:54 Job terminated.
+	(1) Normal termination (return value 0)
+		Usr 0 00:00:27, Sys 0 00:00:02  -  Run Remote Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Run Local Usage
+		Usr 0 00:00:27, Sys 0 00:00:02  -  Total Remote Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Total Local Usage
+	111467  -  Run Bytes Sent By Job
+	223772  -  Run Bytes Received By Job
+	111467  -  Total Bytes Sent By Job
+	223772  -  Total Bytes Received By Job
+	Partitionable Resources :    Usage  Request Allocated 
+	   Cpus                 :     0.07        1         1 
+	   Disk (KB)            :   873         225   1636260 
+	   Memory (MB)          :   136        2048      2048 
+
+	Job terminated of its own accord at 2023-06-05T16:10:52Z with exit-code 0.
+...
+009 (1968573.289.000) 2023-06-05 18:30:13 Job was aborted.
+	via condor_rm (by user shardulr)
+...

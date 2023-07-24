@@ -1,0 +1,59 @@
+[FERMIHTC-APPTAINER]: INFO -- No Apptainer image specified
+[FERMIHTC-APPTAINER]: INFO -- Running job on the host machine
+
+[FERMIHTC-APPTAINER]: INFO -- Running ./condor_exec.exe
+Starting job on  Mon Jun 5 16:03:46 UTC 2023
+Running on: Linux shardulr-32231638-122-cmswn2052.fnal.gov 3.10.0-1160.90.1.el7.x86_64 #1 SMP Thu Apr 27 13:14:20 CDT 2023 x86_64 x86_64 x86_64 GNU/Linux
+System software: Scientific Linux release 7.9 (Nitrogen)
+Running ls -alrth:
+total 148K
+-rw-r--r--  1 shardulr fnalgrid  11K Jun  5 16:03 .machine.ad
+-rw-r--r--  1 shardulr fnalgrid 5.0K Jun  5 16:03 .job.ad
+-rwx------  1 shardulr fnalgrid   49 Jun  5 16:03 .chirp.config
+-rw-------  1 shardulr fnalgrid  11K Jun  5 16:03 x509up
+drwxr-xr-x  2 shardulr fnalgrid 4.0K Jun  5 16:03 samples
+drwxr-xr-x  2 shardulr fnalgrid 4.0K Jun  5 16:03 framework
+-rw-r--r--  1 shardulr fnalgrid  56K Jun  5 16:03 singleStopAnalyzer.py
+-rwxr-xr-x  1 shardulr fnalgrid  682 Jun  5 16:03 condor_exec.exe
+-rw-r--r--  1 shardulr fnalgrid  935 Jun  5 16:03 bJetMatcher.py
+-rw-r--r--  1 shardulr fnalgrid    0 Jun  5 16:03 docker_stderror
+drwxrwxrwt  3 shardulr fnalgrid 4.0K Jun  5 16:03 var
+drwxrwxrwt  2 shardulr fnalgrid 4.0K Jun  5 16:03 tmp
+-rw-r--r--  1 shardulr fnalgrid  11K Jun  5 16:03 .update.ad
+drwxr-xr-x  3 root     root     4.0K Jun  5 16:03 ..
+srwxr-xr-x  1 shardulr fnalgrid    0 Jun  5 16:03 .docker_sock
+-rw-r--r--  1 shardulr fnalgrid  113 Jun  5 16:03 _condor_stderr
+drwx------  7 shardulr fnalgrid 4.0K Jun  5 16:03 .
+drwxr-xr-x 17 shardulr fnalgrid 4.0K Jun  5 16:03 CMSSW_10_6_19_patch2
+-rw-r--r--  1 shardulr fnalgrid  453 Jun  5 16:03 _condor_stdout
+/storage/local/data1/condor/execute/dir_49088/CMSSW_10_6_19_patch2 is the CMSSW we created on the local worker node
+Running over file index 123 for sample TT2018
+Pre-select 12483 entries out of 726000 (1.72%)
+Processed    10000/   12483 entries, 80.11% (elapsed time   203.7s, curr speed    0.049 kHz, avg speed    0.049 kHz), accepted      368/   10001 events ( 3.68%)
+Processed 12483 preselected entries from root://cmsxrootd.fnal.gov//store/mc/RunIISummer20UL18NanoAODv9/TTToHadronic_TuneCP5_13TeV-powheg-pythia8/NANOAODSIM/106X_upgrade2018_realistic_v16_L1v1-v1/70000/7492F8EC-87BE-3B42-AE77-66AA58311EE3.root (726000 entries). Finally selected 466 entries
+Total time 289.6 sec. to process 726000 events. Rate = 2506.5 Hz.
+Running pwd:
+/storage/local/data1/condor/execute/dir_49088
+Running ls -alrth:
+total 156K
+-rw-r--r--  1 shardulr fnalgrid  11K Jun  5 16:03 .machine.ad
+-rw-r--r--  1 shardulr fnalgrid 5.0K Jun  5 16:03 .job.ad
+-rwx------  1 shardulr fnalgrid   49 Jun  5 16:03 .chirp.config
+-rw-------  1 shardulr fnalgrid  11K Jun  5 16:03 x509up
+drwxr-xr-x  2 shardulr fnalgrid 4.0K Jun  5 16:03 samples
+-rw-r--r--  1 shardulr fnalgrid  56K Jun  5 16:03 singleStopAnalyzer.py
+-rwxr-xr-x  1 shardulr fnalgrid  682 Jun  5 16:03 condor_exec.exe
+-rw-r--r--  1 shardulr fnalgrid  935 Jun  5 16:03 bJetMatcher.py
+-rw-r--r--  1 shardulr fnalgrid    0 Jun  5 16:03 docker_stderror
+drwxrwxrwt  3 shardulr fnalgrid 4.0K Jun  5 16:03 var
+drwxrwxrwt  2 shardulr fnalgrid 4.0K Jun  5 16:03 tmp
+drwxr-xr-x  3 root     root     4.0K Jun  5 16:03 ..
+srwxr-xr-x  1 shardulr fnalgrid    0 Jun  5 16:03 .docker_sock
+-rw-r--r--  1 shardulr fnalgrid  113 Jun  5 16:03 _condor_stderr
+drwxr-xr-x 17 shardulr fnalgrid 4.0K Jun  5 16:03 CMSSW_10_6_19_patch2
+drwxr-xr-x  2 shardulr fnalgrid 4.0K Jun  5 16:03 framework
+-rw-r--r--  1 shardulr fnalgrid 1.7K Jun  5 16:03 bJetMatcher.pyc
+drwxr-xr-x  3 shardulr fnalgrid 4.0K Jun  5 16:03 output
+-rw-r--r--  1 shardulr fnalgrid  11K Jun  5 16:07 .update.ad
+drwx------  8 shardulr fnalgrid 4.0K Jun  5 16:07 .
+-rw-r--r--  1 shardulr fnalgrid 2.4K Jun  5 16:08 _condor_stdout

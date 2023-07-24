@@ -1,0 +1,58 @@
+000 (2169568.150.000) 2023-06-27 13:09:11 Job submitted from host: <131.225.189.251:9618?addrs=131.225.189.251-9618+[2620-6a-0-8421--e8]-9618&alias=lpcschedd4.fnal.gov&noUDP&sock=schedd_2018_c235>
+...
+040 (2169568.150.000) 2023-06-27 13:26:49 Started transferring input files
+	Transferring to host: <131.225.189.154:9618?addrs=[2620-6a-0-8421-f0-0-189-154]-9618+131.225.189.154-9618&alias=cmswn2111.fnal.gov&noUDP&sock=slot1_53_2116_a9cf_39740>
+...
+040 (2169568.150.000) 2023-06-27 13:26:49 Finished transferring input files
+...
+001 (2169568.150.000) 2023-06-27 13:26:49 Job executing on host: <131.225.189.154:9618?addrs=[2620-6a-0-8421-f0-0-189-154]-9618+131.225.189.154-9618&alias=cmswn2111.fnal.gov&noUDP&sock=startd_2023_302e>
+...
+006 (2169568.150.000) 2023-06-27 13:26:57 Image size of job updated: 8
+	8  -  MemoryUsage of job (MB)
+	8596  -  ResidentSetSize of job (KB)
+...
+006 (2169568.150.000) 2023-06-27 13:27:58 Image size of job updated: 151
+	151  -  MemoryUsage of job (MB)
+	155348  -  ResidentSetSize of job (KB)
+...
+006 (2169568.150.000) 2023-06-27 13:28:59 Image size of job updated: 151
+	151  -  MemoryUsage of job (MB)
+	155552  -  ResidentSetSize of job (KB)
+...
+006 (2169568.150.000) 2023-06-27 13:30:00 Image size of job updated: 151
+	151  -  MemoryUsage of job (MB)
+	155556  -  ResidentSetSize of job (KB)
+...
+006 (2169568.150.000) 2023-06-27 13:31:01 Image size of job updated: 151
+	151  -  MemoryUsage of job (MB)
+	155576  -  ResidentSetSize of job (KB)
+...
+006 (2169568.150.000) 2023-06-27 13:32:01 Image size of job updated: 151
+	151  -  MemoryUsage of job (MB)
+	155584  -  ResidentSetSize of job (KB)
+...
+006 (2169568.150.000) 2023-06-27 13:33:01 Image size of job updated: 151
+	151  -  MemoryUsage of job (MB)
+	155588  -  ResidentSetSize of job (KB)
+...
+040 (2169568.150.000) 2023-06-27 13:36:10 Started transferring output files
+...
+040 (2169568.150.000) 2023-06-27 13:36:10 Finished transferring output files
+...
+005 (2169568.150.000) 2023-06-27 13:36:12 Job terminated.
+	(1) Normal termination (return value 0)
+		Usr 0 00:07:31, Sys 0 00:00:22  -  Run Remote Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Run Local Usage
+		Usr 0 00:07:31, Sys 0 00:00:22  -  Total Remote Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Total Local Usage
+	155895  -  Run Bytes Sent By Job
+	224545  -  Run Bytes Received By Job
+	155895  -  Total Bytes Sent By Job
+	224545  -  Total Bytes Received By Job
+	Partitionable Resources :    Usage  Request Allocated 
+	   Cpus                 :     0.00        1         1 
+	   Disk (KB)            :   922         225   3463171 
+	   Memory (MB)          :   151        2048      2048 
+
+	Job terminated of its own accord at 2023-06-27T18:36:10Z with exit-code 0.
+...
