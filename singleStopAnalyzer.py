@@ -300,7 +300,7 @@ class ExampleAnalysis(Module):
         if not self.isSkimmed:
           if not self.makeSkim: self.h_cutflow.Fill(0,genWeight)
 
-          if not (event.HLT_PFHT1050 or event.HLT_AK8PFJet360_TrimMass30): return False
+          if not (event.HLT_PFHT1050 or event.HLT_AK8PFJet400_TrimMass30): return False
           if not self.makeSkim: self.h_cutflow.Fill(1,genWeight)
 
           if len(jets) > 0 and not jets[0].pt > 300: return False
@@ -315,11 +315,14 @@ class ExampleAnalysis(Module):
           if not 2 < abs(jets[0].p4().DeltaR(jets[1].p4())) < 4: return False
           if not self.makeSkim: self.h_cutflow.Fill(5,genWeight)
 
-          if not self.isData and len(looseBs) < 2: return False
-          elif self.isData and len(looseBs) != 0: return False
+          if not self.isData and len(mediumBs) < 2: return False
+          elif self.isData and len(mediumBs) != 0: return False
+
+          if not self.isData and len(tightBs) < 1: return False
+          elif self.isData and len(tightBs) != 0: return False
 
           if not self.makeSkim: self.h_cutflow.Fill(6,genWeight)
-          if not self.isData and abs(looseBs[0].p4().DeltaR(looseBs[1].p4())) < 1: return False
+          if not self.isData and abs(mediumBs[0].p4().DeltaR(mediumBs[1].p4())) < 1: return False
 
           if not self.makeSkim: self.h_cutflow.Fill(7,genWeight)
 
@@ -640,7 +643,7 @@ elif args.sample != 'signal': print('ERROR: Unexpected sample argument')
 preselection = (
 		'(Jet_pt[3] > 30) && '
 		'(Jet_pt[0] > 300) && '
-		'(HLT_PFHT1050 || HLT_AK8PFJet360_TrimMass30)'
+		'(HLT_PFHT1050 || HLT_AK8PFJet400_TrimMass30)'
                )
 
 

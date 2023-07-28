@@ -276,7 +276,9 @@ def getZQQ(fname):
     return SFs[(period, HT)]
 
 def zNuNuMatcher(x):
-    m = re.search(r'(RunIISummer.+NanoAODv9)/(.+\d+to(?:\d+|Inf))', x)
+    print(x)
+    m = re.search(r'(RunIISummer.+NanoAODv9)/(.+HT-\d+To(?:\d+|Inf))', x)
+    print(m)
     return "{}_{}".format(m.group(1), m.group(2))
 
 def getZNuNu(fname):
@@ -445,7 +447,6 @@ funcs = {
     "QCDInclusive2018": (qcdMatcher, getQCDXSec),
     "TT2018": (ttMatcher, getTTXSec),
     "ZQQ2018": (zqqMatcher, getZQQ),
-    "WQQ2018": (wqqMatcher, getWQQ),
     "WQQ2018": (wqqMatcher, getWQQ),
     #"ZJetsToQQ2018": scaleZQQ,
     #"WQQ2018": scaleWQQ,
