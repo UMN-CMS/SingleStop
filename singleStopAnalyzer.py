@@ -312,17 +312,20 @@ class ExampleAnalysis(Module):
           if len(goodElectrons) != 0 or len(goodMuons) != 0: return False
           if not self.makeSkim: self.h_cutflow.Fill(4,genWeight)
 
-          if not 2 < abs(jets[0].p4().DeltaR(jets[1].p4())) < 4: return False
-          if not self.makeSkim: self.h_cutflow.Fill(5,genWeight)
+          #if not 2 < abs(jets[0].p4().DeltaR(jets[1].p4())) < 4: return False
+          #if not self.makeSkim: self.h_cutflow.Fill(5,genWeight)
 
-          if not self.isData and len(mediumBs) < 2: return False
-          elif self.isData and len(mediumBs) != 0: return False
+          if not self.isData and len(looseBs) !=0: return False
+          elif self.isData and len(looseBs) != 0: return False
 
-          if not self.isData and len(tightBs) < 1: return False
-          elif self.isData and len(tightBs) != 0: return False
+          #if not self.isData and len(mediumBs) < 2: return False
+          #elif self.isData and len(mediumBs) != 0: return False
 
-          if not self.makeSkim: self.h_cutflow.Fill(6,genWeight)
-          if not self.isData and abs(mediumBs[0].p4().DeltaR(mediumBs[1].p4())) < 1: return False
+          #if not self.isData and len(tightBs) < 1: return False
+          #elif self.isData and len(tightBs) != 0: return False
+
+          #if not self.makeSkim: self.h_cutflow.Fill(6,genWeight)
+          #if not self.isData and abs(mediumBs[0].p4().DeltaR(mediumBs[1].p4())) < 1: return False
 
           if not self.makeSkim: self.h_cutflow.Fill(7,genWeight)
 

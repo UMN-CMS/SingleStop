@@ -78,7 +78,7 @@ Log		= log/submit_\$(ijobname).log
 transfer_input_files = samples,framework,singleStopAnalyzer.py,keep_and_drop.txt,keep_and_drop_input.txt,keep_and_drop_output.txt
 transfer_output_files = skims
 should_transfer_files = YES
-when_to_transfer_output = ON_EXIT
+when_to_transfer_output = ON_EXIT_OR_EVICT
 universe	= vanilla
 queue ijobname from (
 EOT

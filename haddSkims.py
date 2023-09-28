@@ -47,8 +47,7 @@ def addBranchToTree(tree, name, val):
         b.Fill()
     b.ResetAddress()
 
-
-def haddNano(ofname, files):
+def haddNano(ofname, files, max_events=None):
     fileHandles = []
     goFast = True
     for fn in files:
@@ -64,7 +63,8 @@ def haddNano(ofname, files):
     if goFast:
         of.SetCompressionSettings(fileHandles[0][1].GetCompressionSettings())
     of.cd()
-
+    
+    n_events = 0
     for e in fileHandles[0][1].GetListOfKeys():
         print(e)
         scalevar = None
@@ -138,23 +138,38 @@ def haddNano(ofname, files):
             print("Cannot handle " + str(obj.IsA().GetName()))
 
 
-def associateFiles(sample_file, input_dir):
+
+def chunks(lst, n):
+    for i in range(0, len(lst), n):
+        yield lst[i:i + n]
+
+def associateFiles(sample_file, input_dir, split_num=None):
     fnames = []
     with open(sample_file, "r") as f:
         fnames = [line.strip() for line in f]
+
+
     g = glob.glob("{}/*.root".format(input_dir))
-    fmap = {
+    if split_num:
+        ch = chunks(g, split_num)
+    else:
+        ch = [list(g)]
+    def g(rootfile):
+        return next(f for f in fnames if os.path.split(rootfile)[1].split("_")[0] in f)
+    fmap = [{
         rootfile: (
-            next(f for f in fnames if os.path.split(rootfile)[1].split("_")[0] in f)
+            g(rootfile)
         )
-        for rootfile in g
-    }
+        for rootfile in gr
+    } for gr in ch]
     return fmap
 
 
 def qcdMatcher(x):
     m = re.search(r'(RunIISummer.+NanoAODv9).+(QCD_HT\d+to(?:\d+|Inf))', x)
     return "{}_{}".format(m.group(1), m.group(2))
+
+
 
 def makeGroups(fmap, matcher, xsec_getter):
     pairs = list(fmap.items())
@@ -521,12 +536,15 @@ if __name__ == "__main__":
             p = os.path.split(f)[-1].split('-')[1]
             #haddNano(os.path.join(output, "signal_{}".format(p)), [f], sf_func)
     else:
-        afiles = associateFiles(sample_file, input_dir)
+        files_dir = 
+        afiles = associateFiles(sample_file, input_dir, 20)
         #print(afiles)
-        raw_files = [f for f in afiles]
-        matcher, xsec = funcs[sample]
-        groups = makeGroups(afiles, matcher, xsec)
-        print(list(groups))
-        haddGroups(output, {x:y[1] for x,y in groups.items()})
+        for i,g in enumerate(afiles):
+            raw_files = [f for f in g]
+            matcher, xsec = funcs[sample]
+            groups = makeGroups(g, matcher, xsec)
+            o = output + "_" + str(i) + ".root"
+            print(list(g))
+            haddGroups(output, {x:y[1] for x,y in groups.items()})
 
         #haddNano(output, raw_files, sf_func)
