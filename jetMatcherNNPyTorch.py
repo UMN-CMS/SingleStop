@@ -1,3 +1,4 @@
+import os
 import uproot
 import numpy as np
 import pandas as pd
@@ -15,6 +16,8 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
 
 import matplotlib.pyplot as plt
+import matplotlib as mpl
+mpl.use('Agg')
 
 from sklearn.metrics import roc_curve, auc
 from sklearn.metrics import RocCurveDisplay
@@ -23,6 +26,13 @@ from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 
 seed = 7
 np.random.seed(seed)
+
+outputTag = '24-07-26'
+
+outputNNDir =    'output/jetMatcherNNPyTorch/{}'.format(outputTag)
+outputPlotsDir = 'plots/jetMatcherNNPyTorch/{}'.format(outputTag)
+if not os.path.exists(outputNNDir): os.makedirs(outputNNDir)
+if not os.path.exists(outputPlotsDir): os.makedirs(outputPlotsDir)
 
 ##############################
 # LOAD & PREPARE DATA
@@ -40,7 +50,7 @@ X_train, X_test, Y_train, Y_test = train_test_split(inputs,targets,test_size=0.1
 X_train, X_val, Y_train, Y_val   = train_test_split(X_train,Y_train,test_size=0.111,random_state=seed)
 
 scaler = StandardScaler().fit(X_train)
-with open('output/jetMatcherNNPyTorch/scaler.pkl','wb') as f: pkl.dump(scaler,f)
+with open('{}/scaler.pkl'.format(outputNNDir),'wb') as f: pkl.dump(scaler,f)
 
 X_train = scaler.transform(X_train)
 X_test = scaler.transform(X_test)
@@ -176,7 +186,7 @@ loss,acc,outputs,targets = evaluate(loaderVal)
 #print(testCounter)
 #print(lossesTest)
 
-torch.save(network,'output/jetMatcherNNPyTorch/jetMatcherNN.pt')
+torch.save(network,'{}/jetMatcherNN.pt'.format(outputNNDir))
 
 plt.figure(figsize=(15,10))
 
@@ -210,4 +220,4 @@ ax.legend(loc='lower right')
 ax.set_xlabel('Epoch')
 ax.set_ylabel('Accuracy')
 
-plt.savefig('plots/jetMatcherNNPyTorch/performance.pdf')
+plt.savefig('{}/performance.pdf'.format(outputPlotsDir))
