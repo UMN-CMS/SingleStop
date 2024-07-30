@@ -27,7 +27,7 @@ from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 seed = 7
 np.random.seed(seed)
 
-outputTag = '24-07-26'
+outputTag = '24-07-30_moreepochs'
 
 outputNNDir =    'output/jetMatcherNNPyTorch/{}'.format(outputTag)
 outputPlotsDir = 'plots/jetMatcherNNPyTorch/{}'.format(outputTag)
@@ -97,7 +97,7 @@ summary(network)
 # DEFINE TRAIN & TEST
 ##############################
 
-nEpochs = 50
+nEpochs = 100
 
 #trainLosses = []
 #trainCounter = []
