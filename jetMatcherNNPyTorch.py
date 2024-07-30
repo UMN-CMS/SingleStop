@@ -40,7 +40,8 @@ if not os.path.exists(outputPlotsDir): os.makedirs(outputPlotsDir)
 
 batch_size = 50
 
-df = pd.read_csv('output/exportJetInfo/jets_1500_900.csv')
+print("reading datafile")
+df = pd.read_csv('output/exportJetInfo/jets_uncompressed_le0p75mStop_24-07-29.csv')
 
 inputs = df.values[:,0:-3]
 nInputs = inputs.shape[1]
@@ -76,7 +77,7 @@ loaderVal = DataLoader(datasetVal,batch_size=100)
 ##############################
 
 learningRate = 0.001
-
+print("defining net")
 class Net(nn.Module):
   def __init__(self):
     super(Net,self).__init__()
@@ -105,6 +106,7 @@ nEpochs = 50
 
 lossFunction = nn.CrossEntropyLoss()
 
+print("defining train, test, evaluate")
 def train(epoch,loaderTrain):
   network.train()
   for iBatch,(data,target) in enumerate(loaderTrain):
@@ -166,7 +168,7 @@ def evaluate(loaderVal):
 ##############################
 # TRAIN
 ##############################
-
+print("training")
 lossesTrain = []
 accTrain = []
 lossesTest = []
