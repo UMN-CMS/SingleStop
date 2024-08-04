@@ -27,7 +27,7 @@ from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 seed = 7
 np.random.seed(seed)
 
-outputTag = '24-07-26'
+outputTag = '24-07-31'
 
 outputNNDir =    'output/jetMatcherNNPyTorch/{}'.format(outputTag)
 outputPlotsDir = 'plots/jetMatcherNNPyTorch/{}'.format(outputTag)
@@ -40,14 +40,20 @@ if not os.path.exists(outputPlotsDir): os.makedirs(outputPlotsDir)
 
 batch_size = 50
 
-df = pd.read_csv('output/exportJetInfo/jets_1500_900.csv')
+print("reading datafile")
+df = pd.read_csv('output/exportJetInfo/jets_uncompressed_le0p75mStop_24-07-30.csv')
 
-inputs = df.values[:,0:-3]
+masses = df.values[:,0:2]
+inputs = df.values[:,2:-3]
 nInputs = inputs.shape[1]
 targets = df.values[:,-3:]
 
-X_train, X_test, Y_train, Y_test = train_test_split(inputs,targets,test_size=0.1,random_state=seed)
-X_train, X_val, Y_train, Y_val   = train_test_split(X_train,Y_train,test_size=0.111,random_state=seed)
+cutoff = masses[:, 1]/masses[:, 0] < 0.5
+inputs = inputs[cutoff]
+targets = targets[cutoff]
+
+X_train, X_test, Y_train, Y_test = train_test_split(inputs,targets,test_size=0.1,random_state=seed, stratify=targets)
+X_train, X_val, Y_train, Y_val   = train_test_split(X_train,Y_train,test_size=0.111,random_state=seed, stratify=Y_train)
 
 scaler = StandardScaler().fit(X_train)
 with open('{}/scaler.pkl'.format(outputNNDir),'wb') as f: pkl.dump(scaler,f)
@@ -76,7 +82,7 @@ loaderVal = DataLoader(datasetVal,batch_size=100)
 ##############################
 
 learningRate = 0.001
-
+print("defining net")
 class Net(nn.Module):
   def __init__(self):
     super(Net,self).__init__()
@@ -96,7 +102,7 @@ summary(network)
 # DEFINE TRAIN & TEST
 ##############################
 
-nEpochs = 50
+nEpochs = 100
 
 #trainLosses = []
 #trainCounter = []
@@ -105,6 +111,7 @@ nEpochs = 50
 
 lossFunction = nn.CrossEntropyLoss()
 
+print("defining train, test, evaluate")
 def train(epoch,loaderTrain):
   network.train()
   for iBatch,(data,target) in enumerate(loaderTrain):
@@ -166,7 +173,7 @@ def evaluate(loaderVal):
 ##############################
 # TRAIN
 ##############################
-
+print("training")
 lossesTrain = []
 accTrain = []
 lossesTest = []
