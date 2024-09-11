@@ -44,7 +44,6 @@ if not os.path.exists(args.input):
 
 # Output
 if not args.test:
-  if args.tag == 'test': print('INFO: \"test\" will be used as the output tag')
   outputDir = 'output/jetMatcherNNPyTorch/{}_{}'.format(args.tag,timeTag)
   if not os.path.exists(outputDir): os.makedirs(outputDir)
 
@@ -56,7 +55,8 @@ batch_size = 50
 
 df = pd.read_csv(args.input)
 
-inputs = df.drop(['mStop','mChargino','isStopMatched','isChiMatched','isOther','jetBScore'],axis=1).values
+#inputs = df.drop(['mStop','mChargino','isStopMatched','isChiMatched','isOther'],axis=1).values
+inputs = df[['jetOrdinality','jetPT','jetEta','jetPhi','jetBScore','m3M','m3PT','m3Eta','m3Phi','m4M','m4PT','m4Eta','m4Phi']].values
 #inputs = df.values[:,2:-3] # 0-1: masses, last 3: truth
 nInputs = inputs.shape[1]
 #targets = df.values[:,-3:]
@@ -105,7 +105,7 @@ loaderVal = DataLoader(datasetVal,batch_size=100)
 # DEFINE MODEL
 ##############################
 
-learningRate = 0.001
+learningRate = 0.001 # 0.00005 Lower rate
 
 class Net(nn.Module):
   def __init__(self):
@@ -127,7 +127,7 @@ summary(network)
 # DEFINE TRAIN & TEST
 ##############################
 
-nEpochs = 50
+nEpochs = 50 # 150
 
 lossFunction = nn.CrossEntropyLoss(reduction='none')
 
