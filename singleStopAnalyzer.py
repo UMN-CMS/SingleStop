@@ -43,13 +43,14 @@ def jetMatcher(genJets, recoJets, dR_match = 0.4, pT_match = 3):
 
 class ExampleAnalysis(Module):
 
-    def __init__(self,isData,isSignal,MCCampaign,isSkimmed,isCR0b):
+    def __init__(self,isData,isSignal,MCCampaign,isSkimmed,isCR0b,masses):
         self.writeHistFile = True
         self.isSignal = isSignal
         self.MCCampaign = MCCampaign
         self.isSkimmed = isSkimmed
         self.isData = isData
         self.isCR0b = isCR0b
+        self.masses = masses
 
     def beginJob(self, histFile=None, histDirName=None):
         Module.beginJob(self, histFile, histDirName)
@@ -107,11 +108,11 @@ class ExampleAnalysis(Module):
           if len(jets) > 0 and not jets[0].pt > 300: return False
           if len(jets) < 4 or len(jets) > 6: return False
           if len(goodElectrons) != 0 or len(goodMuons) != 0: return False
-          if not 2 < abs(jets[0].p4().DeltaR(jets[1].p4())) < 4: return False
+          #if not 2 < abs(jets[0].p4().DeltaR(jets[1].p4())) < 4: return False
           if not self.isCR0b: 
-            if not self.isData and len(looseBs) < 2: return False
+            if not self.isData and (len(mediumBs) < 2 or len(tightBs) < 1): return False
             elif self.isData and len(looseBs) != 0: return False
-            if not self.isData and abs(looseBs[0].p4().DeltaR(looseBs[1].p4())) < 1: return False
+            if not self.isData and abs(mediumBs[0].p4().DeltaR(mediumBs[1].p4())) < 1: return False
           elif len(looseBs) != 0: return False
 
         if self.isSignal:
@@ -157,6 +158,8 @@ class ExampleAnalysis(Module):
         sumJet3            = ROOT.TLorentzVector()
         sumJet3NoLead      = ROOT.TLorentzVector()
         sumJet3NoLeadOrSub = ROOT.TLorentzVector()
+        sumJet134          = ROOT.TLorentzVector()
+        sumJet56           = ROOT.TLorentzVector()
 
         # Loop over jets
         HT = 0; HT3 = 0; HT3NoLead = 0; nbLoose = 0; nbMedium = 0; nbTight=0
@@ -172,13 +175,16 @@ class ExampleAnalysis(Module):
             sumJet3NoLead += j.p4()
             HT3NoLead += j.pt
           if i > 1 and i < 5: sumJet3NoLeadOrSub += j.p4()
+          if i in [0,2,3]: sumJet134 += j.p4()
+          if i in [4,5]: sumJet56 += j.p4()
 
         matches = jetMatcher(genQuarks,jets)
         if not len(matches) == 4: return False
         #for match in matches:
         #  print('Jet {} matches to pdgId {}, so it comes from {}'.format(match[0],genQuarks[match[1]].pdgId,'stop' if ((genQuarks[match[1]].pdgId == 5 and genD.pdgId < 0) or (genQuarks[match[1]].pdgId == -5 and genD.pdgId > 0)) else 'chargino'))
  
-        with open('output/exportJetInfo/jets_1500_900.csv','a') as f:
+        with open('output/exportJetInfo/jets_{}.csv'.format(args.tag),'a') as f:
+          mStop, mChargino = self.masses.split('_')
           for i,j in enumerate(jets):
             isMatched = 1 if i in [x[0] for x in matches] else 0
             matchedQuark = genQuarks[[x[1] for x in matches if x[0] == i][0]] if isMatched else None
@@ -186,25 +192,30 @@ class ExampleAnalysis(Module):
             if isMatched and ((matchedQuark.pdgId == 5 and genD.pdgId < 0) or (matchedQuark.pdgId == -5 and genD.pdgId > 0)): isStopMatched, isChiMatched, isOther = 1,0,0
             elif isMatched and ((genD.pdgId < 0 and matchedQuark.pdgId in [-1,-3,-5]) or (genD.pdgId > 0 and matchedQuark.pdgId in [1,3,5])): isStopMatched, isChiMatched, isOther = 0,1,0
             else: isStopMatched, isChiMatched, isOther = 0,0,1
-            f.write('{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}\n'.format(
+            f.write('{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}\n'.format(
+                     mStop,mChargino,
                      i,j.pt,j.eta,j.phi,j.btagDeepFlavB,
                      sumJet3NoLead.M(),sumJet3NoLead.Pt(),sumJet3NoLead.Eta(),sumJet3NoLead.Phi(),
                      sumJet4.M(),sumJet4.Pt(),sumJet4.Eta(),sumJet4.Phi(),
+                     sumJet134.M(),sumJet134.Pt(),sumJet134.Eta(),sumJet134.Phi(),
+                     sumJet56.M(),sumJet56.Pt(),sumJet56.Eta(),sumJet56.Phi(),
+                     sumJet.M(),sumJet.Pt(),sumJet.Eta(),sumJet.Phi(),
+                     len(jets),
                      isStopMatched,isChiMatched,isOther
                     ))
 
-          with open('output/exportJetInfo/baseline.txt','a') as f:
-            for i,j in enumerate(jets):
-              isMatched = 1 if i in [x[0] for x in matches] else 0
-              matchedQuark = genQuarks[[x[1] for x in matches if x[0] == i][0]] if isMatched else None
-              isStopMatched, isChiMatched, isOther = -1,-1,-1
-              if isMatched and ((matchedQuark.pdgId == 5 and genD.pdgId < 0) or (matchedQuark.pdgId == -5 and genD.pdgId > 0)): isStopMatched, isChiMatched, isOther = 1,0,0
-              elif isMatched and ((genD.pdgId < 0 and matchedQuark.pdgId in [-1,-3,-5]) or (genD.pdgId > 0 and matchedQuark.pdgId in [1,3,5])): isStopMatched, isChiMatched, isOther = 0,1,0
-              else: isStopMatched, isChiMatched, isOther = 0,0,1
-              matchIdx = isChiMatched + 2*isOther
-              if i == 0:         f.write('{},0\n'.format(matchIdx))
-              elif i in [1,2,3]: f.write('{},1\n'.format(matchIdx))
-              else:              f.write('{},2\n'.format(matchIdx))
+          #with open('output/exportJetInfo/baseline.txt','a') as f:
+          #  for i,j in enumerate(jets):
+          #    isMatched = 1 if i in [x[0] for x in matches] else 0
+          #    matchedQuark = genQuarks[[x[1] for x in matches if x[0] == i][0]] if isMatched else None
+          #    isStopMatched, isChiMatched, isOther = -1,-1,-1
+          #    if isMatched and ((matchedQuark.pdgId == 5 and genD.pdgId < 0) or (matchedQuark.pdgId == -5 and genD.pdgId > 0)): isStopMatched, isChiMatched, isOther = 1,0,0
+          #    elif isMatched and ((genD.pdgId < 0 and matchedQuark.pdgId in [-1,-3,-5]) or (genD.pdgId > 0 and matchedQuark.pdgId in [1,3,5])): isStopMatched, isChiMatched, isOther = 0,1,0
+          #    else: isStopMatched, isChiMatched, isOther = 0,0,1
+          #    matchIdx = isChiMatched + 2*isOther
+          #    if i == 0:         f.write('{},0\n'.format(matchIdx))
+          #    elif i in [1,2,3]: f.write('{},1\n'.format(matchIdx))
+          #    else:              f.write('{},2\n'.format(matchIdx))
 
         return True
 
@@ -217,10 +228,10 @@ parser.add_argument('--useskim',action='store_true',default=False,help='Flag to 
 parser.add_argument('--CR0b',action='store_true',default=False,help='Flag to use the 0b CR selection')
 args = parser.parse_args()
 
-with open('output/exportJetInfo/jets_1500_900.csv','w') as f:
-  f.write('jetOrdinality,jetPT,jetEta,jetPhi,jetBScore,m3M,m3PT,m3Eta,m3Phi,m4M,m4PT,m4Eta,m4Phi,isStopMatched,isChiMatched,isOther\n')
+with open('output/exportJetInfo/jets_{}.csv'.format(args.tag),'w') as f:
+  f.write('mStop,mChargino,jetOrdinality,jetPT,jetEta,jetPhi,jetBScore,m3M,m3PT,m3Eta,m3Phi,m4M,m4PT,m4Eta,m4Phi,m134M,m134PT,m134Eta,m134Phi,m56M,m56PT,m56Eta,m56Phi,mAllM,mAllPT,mAllEta,mAllPhi,nJets,isStopMatched,isChiMatched,isOther\n')
 
-os.remove('output/exportJetInfo/baseline.txt')
+#os.remove('output/exportJetInfo/baseline.txt')
 
 outputPath = 'output/{}'.format(args.tag)
 if not os.path.exists(outputPath):
@@ -275,11 +286,11 @@ if args.sample == 'Data2018':
 elif args.sample == 'signal':
 
   allPoints = ['1000_400','1000_600','1000_900',
-               '1200_400','1200_600','1200_1100',
+               '1200_400','1200_600','1200_700','1200_800','1200_900','1200_1100',
                '1300_400','1300_600','1300_1200',
                '1400_400','1400_600','1400_1300',
-               '1500_400','1500_600','1500_900','1500_1400',
-               '2000_400','2000_600','2000_900','2000_1400','2000_1900']
+               '1500_400','1500_600','1500_900','1500_1000','1500_1100','1500_1400',
+               '2000_400','2000_600','2000_900','2000_1200','2000_1300','2000_1400','2000_1500','2000_1900']
   if args.points == 'all': 
     print('Running over all available signal points...')
     points = allPoints
@@ -294,7 +305,8 @@ elif args.sample == 'signal':
   for masses in points:
     files = glob.glob('/eos/uscms/store/user/dmahon/condor/RPVSingleStopMC/NANOAOD-ALL/NANOAOD-{}.root'.format(masses))
     #files = glob.glob('/eos/uscms/store/user/dmahon/condor/RPVSingleStopMC/NANOAOD/NANOAOD-{}-*.root'.format(masses))
-    files = ['root://cmsxrootd.fnal.gov/' + x.replace('/eos/uscms','') for x in files]
+    #files = ['root://cmsxrootd.fnal.gov/' + x.replace('/eos/uscms','') for x in files]
+    files = ['root://cmseos.fnal.gov/' + x.replace('/eos/uscms','') for x in files]
     #files = ['file:/uscms_data/d3/dmahon/RPVSingleStopRun3Patched/NANOAOD/CMSSW_12_4_5/test_2000_100-1.root']
     #files = ['/uscms_data/d3/dmahon/RPVSingleStopRun3Patched/NANOAOD/files/NANOAOD-{}.root'.format(masses)]
     p = PostProcessor(".", files, cut=preselection, branchsel=None,
@@ -302,7 +314,8 @@ elif args.sample == 'signal':
                                                isSignal=1,
                                                MCCampaign='UL2018',
                                                isSkimmed=False,
-                                               isCR0b=args.CR0b)],
+                                               isCR0b=args.CR0b,
+                                               masses=masses,)],
                       noOut=True, histFileName='{}/{}_{}.root'.format(outputPath,args.sample,masses), histDirName="plots",
                       maxEntries=None)
     p.run()
@@ -319,7 +332,8 @@ elif args.useskim:
                                              isSignal=0,
                                              MCCampaign='UL2018',
                                              isSkimmed=True,
-                                             isCR0b=args.CR0b)],
+                                             isCR0b=args.CR0b,
+                                             masses='',)],
                     noOut=True, histFileName='{}/{}-ALL.root'.format(outputPath,args.sample), histDirName="plots",
                     maxEntries=None)
   p.run()
@@ -344,7 +358,8 @@ else:
                                              isSignal=0,
                                              MCCampaign=MCCampaign,
                                              isSkimmed=False,
-                                             isCR0b=args.CR0b)], 
+                                             isCR0b=args.CR0b, 
+                                             masses='',)],
                     noOut=True, histFileName='{}/{}-{}.root'.format(outputPath,args.sample,args.n), histDirName="plots",
                     maxEntries=None)
   p.run() 
