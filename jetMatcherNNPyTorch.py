@@ -55,15 +55,24 @@ batch_size = 50
 
 df = pd.read_csv(args.input)
 
+# Select training points
+print('{} total jets for filtering'.format(len(df.index)))
+df = df[(df['mChargino'] / df['mStop']) > (2/3)]
+print('{} total jets after filtering'.format(len(df.index)))
+
+# Inputs
 #inputs = df.drop(['mStop','mChargino','isStopMatched','isChiMatched','isOther'],axis=1).values
-inputs = df[['jetOrdinality','jetPT','jetEta','jetPhi','jetBScore','m3M','m3PT','m3Eta','m3Phi','m4M','m4PT','m4Eta','m4Phi']].values
-#inputs = df.values[:,2:-3] # 0-1: masses, last 3: truth
+inputs = df[['jetOrdinality','jetPT','jetEta','jetPhi','jetBScore','m3M','m3PT','m3Eta','m3Phi','m4M','m4PT','m4Eta','m4Phi','nJets']].values
+#inputs = df[['jetOrdinality','jetPT','jetEta','jetPhi','jetBScore','nJets']].values
 nInputs = inputs.shape[1]
-#targets = df.values[:,-3:]
-targets = df[['isStopMatched','isChiMatched','isOther']].values
+
+# Outputs
+#targets = df[['isStopMatched','isChiMatched','isOther']].values
+targets = df['isChiMatched']
+nOutputs = 1
 
 # Number of nodes in hidden layer = average of input and output nodes
-nNodesHidden = np.floor((nInputs+3)/2).astype(int)
+nNodesHidden = np.floor((nInputs + nOutputs)/2).astype(int)
 
 # Set weights to balance different signal points
 df['mStop'] = df['mStop'].astype(str)
@@ -84,19 +93,19 @@ X_test = scaler.transform(X_test)
 X_val = scaler.transform(X_val)
 
 tXTrain = torch.Tensor(X_train)
-tYTrain = torch.Tensor(Y_train)#.type(torch.LongTensor)
+tYTrain = torch.Tensor(Y_train.to_numpy())
 tWTrain = torch.Tensor(W_train.to_numpy())
 datasetTrain = TensorDataset(tXTrain,tYTrain,tWTrain)
 loaderTrain = DataLoader(datasetTrain,batch_size=batch_size)
 
 tXTest = torch.Tensor(X_test)
-tYTest = torch.Tensor(Y_test)#.type(torch.LongTensor)
+tYTest = torch.Tensor(Y_test.to_numpy())
 tWTest = torch.Tensor(W_test.to_numpy())
 datasetTest = TensorDataset(tXTest,tYTest,tWTest)
 loaderTest = DataLoader(datasetTest,batch_size=100)
 
 tXVal = torch.Tensor(X_val)
-tYVal = torch.Tensor(Y_val)#.type(torch.LongTensor)
+tYVal = torch.Tensor(Y_val.to_numpy())
 tWVal = torch.Tensor(W_val.to_numpy())
 datasetVal = TensorDataset(tXVal,tYVal,tWVal)
 loaderVal = DataLoader(datasetVal,batch_size=100)
@@ -111,10 +120,10 @@ class Net(nn.Module):
   def __init__(self):
     super(Net,self).__init__()
     self.fc1 = nn.Linear(nInputs,nNodesHidden)
-    self.fc2 = nn.Linear(nNodesHidden,3)
+    self.fc2 = nn.Linear(nNodesHidden,1)
   def forward(self,x):
     x = F.relu(self.fc1(x))
-    x = F.softmax(self.fc2(x),dim=1)
+    x = F.sigmoid(self.fc2(x)) #F.softmax(self.fc2(x),dim=1)
     return x
 
 torch.manual_seed(seed)
@@ -129,7 +138,8 @@ summary(network)
 
 nEpochs = 50 # 150
 
-lossFunction = nn.CrossEntropyLoss(reduction='none')
+#lossFunction = nn.CrossEntropyLoss(reduction='none')
+lossFunction = nn.BCELoss(reduction='none')
 
 def weightedLoss(output,target,weight):
   weight = 1
@@ -141,12 +151,12 @@ def train(epoch,loaderTrain):
   nCorrect = 0
   for iBatch,(data,target,weights) in enumerate(loaderTrain):
     optimizer.zero_grad()
-    output = network(data)
+    output = torch.squeeze(network(data))
     #loss = lossFunction(output,target)
     loss = weightedLoss(output,target,weights)
     lossSum += loss
-    pred = output.data.max(1,keepdim=True)[1]
-    target = target.data.max(1,keepdim=True)[1]
+    pred = torch.round(output) #output.data.max(1,keepdim=True)[1]
+    target = target #target.data.max(1,keepdim=True)[1]
     nCorrect += pred.eq(target.data.view_as(pred)).sum()
     loss.backward()
     optimizer.step()
@@ -162,12 +172,12 @@ def test(loaderTest):
   nCorrect = 0
   with torch.no_grad():
     for (data,target,weights) in loaderTest:
-      output = network(data)
+      output = torch.squeeze(network(data))
       #lossFunctionTest = nn.CrossEntropyLoss(reduction='sum')
       #loss += lossFunctionTest(output,target).item()
       loss += weightedLoss(output,target,weights)
-      pred = output.data.max(1,keepdim=True)[1]
-      target = target.data.max(1,keepdim=True)[1]
+      pred = torch.round(output) #output.data.max(1,keepdim=True)[1]
+      target = target #target.data.max(1,keepdim=True)[1]
       nCorrect += pred.eq(target.data.view_as(pred)).sum()
   loss /= len(loaderTest)
   acc = nCorrect / len(loaderTest.dataset)
@@ -182,12 +192,12 @@ def evaluate(loaderVal):
   with torch.no_grad():
     for (data,target,weights) in loaderTest:
       targets.extend(target.data.tolist())
-      output = network(data)
+      output = torch.squeeze(network(data))
       #lossFunctionTest = nn.CrossEntropyLoss(reduction='sum')
       #lossTest += lossFunctionTest(output,target).item()
       lossTest += weightedLoss(output,target,weights)
-      pred = output.data.max(1,keepdim=True)[1]
-      target = target.data.max(1,keepdim=True)[1]
+      pred = torch.round(output) #output.data.max(1,keepdim=True)[1]
+      target = target #target.data.max(1,keepdim=True)[1]
       nCorrect += pred.eq(target.data.view_as(pred)).sum()
       outputs.extend(output.data.tolist())
   lossTest /= len(loaderTest)
@@ -224,8 +234,10 @@ if not args.test:
 plt.figure(figsize=(15,10))
 
 rocLabels = ['Stop vs. Rest','Chargino vs. Rest','Other vs. Rest']
-for i in [0,1,2]:
-  fpr, tpr, thresholds = roc_curve(np.array(targets)[:,i],np.array(outputs)[:,i])
+isBinary = isinstance(targets[0],float)
+for i in [1]: #[0,1,2]:
+  fpr, tpr, thresholds = roc_curve( np.array(targets)[:,i] if not isBinary else np.array(targets),
+                                    np.array(outputs)[:,i] if not isBinary else np.array(outputs))
   roc_auc = auc(fpr, tpr)
   print('{} AUC = {}'.format(rocLabels[i],roc_auc))
   rocDisplay = RocCurveDisplay(fpr=fpr,tpr=tpr,roc_auc=roc_auc,estimator_name=rocLabels[i])
@@ -236,9 +248,10 @@ ax.plot([0,1],[0,1],'k--',label='chance (AUC = 0.5)')
 ax.set(xlabel='False Positive Rate',ylabel='True Positive Rate')
 ax.legend()
 
-confusionMatrix = confusion_matrix(np.argmax(targets,1),np.argmax(outputs,1))
-cmPlot = ConfusionMatrixDisplay(confusion_matrix=confusionMatrix,display_labels=['stop','chargino','other'])
-cmPlot.plot(ax=plt.subplot(2,2,4))
+if not isBinary:
+  confusionMatrix = confusion_matrix(np.argmax(targets,1),np.argmax(outputs,1))
+  cmPlot = ConfusionMatrixDisplay(confusion_matrix=confusionMatrix,display_labels=['stop','chargino','other'])
+  cmPlot.plot(ax=plt.subplot(2,2,4))
 
 ax = plt.subplot(2,2,1)
 ax.plot(np.linspace(1,nEpochs,nEpochs),lossesTrain,label='Training Loss')
