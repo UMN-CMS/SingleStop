@@ -57,7 +57,8 @@ df = pd.read_csv(args.input)
 
 # Select training points
 print('{} total jets for filtering'.format(len(df.index)))
-df = df[(df['mChargino'] / df['mStop']) > (2/3)]
+#df = df[(df['mChargino'] / df['mStop']) <= (2/3)] # Uncompressed
+df = df[(df['mChargino'] / df['mStop']) > (2/3)] # Compressed
 print('{} total jets after filtering'.format(len(df.index)))
 
 # Inputs
@@ -228,8 +229,12 @@ print('Training complete. Running validation...')
 loss,acc,outputs,targets = evaluate(loaderVal)
 
 if not args.test: 
-  print('Saving model to {}'.format(outputDir))
-  torch.save(network,'{}/jetMatcherNN.pt'.format(outputDir))
+  print('Saving traced model to {}'.format(outputDir))
+  #torch.save(network,'{}/jetMatcherNN.pt'.format(outputDir))
+  network.eval()
+  example_input = torch.randn(1,14)
+  traced_network = torch.jit.trace(network,example_input)
+  torch.jit.save(traced_network,'{}/jetMatcherNNTraced.pt'.format(outputDir))
 
 plt.figure(figsize=(15,10))
 
